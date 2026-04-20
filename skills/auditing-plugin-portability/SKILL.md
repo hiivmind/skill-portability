@@ -48,14 +48,23 @@ If `GEMINI.md` exists, verify it has an `@` include line for each skill's SKILL.
 
 If `AGENTS.md` exists, verify it references each skill by path. Report any skills missing from the reference list.
 
-- [ ] **Step 7: Check hooks**
+- [ ] **Step 7: Check `npx skills` frontmatter compatibility**
+
+For each directory in `skills/`, read `skills/<name>/SKILL.md` and verify:
+- YAML frontmatter block (`---` delimiters) exists at the top of the file
+- `name:` field is present and non-empty
+- `description:` field is present and non-empty
+
+Report COMPATIBLE or MISSING FRONTMATTER for each skill. Skills missing either field cannot be installed via `npx skills add`.
+
+- [ ] **Step 8: Check hooks**
 
 If `hooks/hooks.json` exists and is non-empty:
 - Verify `hooks/hooks-cursor.json` exists
 - Verify `hooks/run-hook.cmd` exists
 - Report any missing files
 
-- [ ] **Step 8: Print report**
+- [ ] **Step 9: Print report**
 
 ```
 # Portability Audit: <name> v<version>
@@ -72,6 +81,11 @@ skills/my-skill/
   MISSING  references/gemini-tools.md
 ...
 
+## npx skills compatibility
+skills/my-skill/SKILL.md   COMPATIBLE  (name + description present)
+skills/other-skill/SKILL.md  MISSING FRONTMATTER  (description absent)
+...
+
 ## Context file completeness
 ...
 
@@ -80,5 +94,7 @@ skills/my-skill/
 
 ## Summary
 <N> files present, <M> missing.
-Run the uplifting-a-plugin skill to generate all missing files automatically.
+<K> skills npx-compatible, <J> skills missing frontmatter.
+Run the uplifting-a-plugin skill to generate all missing platform files automatically.
+Add missing SKILL.md frontmatter manually before publishing via npx skills.
 ```

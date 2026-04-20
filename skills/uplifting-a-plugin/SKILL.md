@@ -19,6 +19,7 @@ For a source plugin at `<plugin-path>` with only Claude manifests, this skill ad
 | Generic (Codex/Copilot CLI) | `AGENTS.md` |
 | All skills | `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md` |
 | Hook portability | `hooks/hooks-cursor.json`, `hooks/run-hook.cmd` (if hooks exist) |
+| npx skills compat | Validates every `skills/<name>/SKILL.md` has `name` + `description` frontmatter |
 
 ## Prerequisites
 
@@ -160,13 +161,32 @@ The `run-hook.cmd` Windows wrapper is not auto-written in v1. Flag in the report
 
 > `hooks/run-hook.cmd` not written — copy manually from: `~/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/hooks/run-hook.cmd`
 
-- [ ] **Step 12: Seed per-skill tool-mapping sidecars**
+- [ ] **Step 12: Validate `npx skills` frontmatter for every skill**
+
+For each skill directory detected in Step 2, read `skills/<skillname>/SKILL.md` and check:
+- Does the YAML frontmatter block exist (delimited by `---`)?
+- Is `name:` present and non-empty?
+- Is `description:` present and non-empty?
+
+For any skill failing this check, flag it in the "Needs manual review" section of the final report:
+
+> `skills/<skillname>/SKILL.md` is not `npx skills`-compatible: missing frontmatter field(s): `<name|description>`. Add a YAML block at the top of the file:
+> ```yaml
+> ---
+> name: <skillname>
+> description: <what this skill does and when to invoke it>
+> ---
+> ```
+
+Do NOT auto-write these — frontmatter content requires human authorship to be meaningful. Only report.
+
+- [ ] **Step 13: Seed per-skill tool-mapping sidecars**
 
 For each skill name detected in Step 2, check whether `skills/<skillname>/references/` exists and whether each of the three sidecar files is present.
 
 For each missing sidecar, read from this plugin's `assets/templates/skill-references/<platform>-tools.md` and write to `<plugin-path>/skills/<skillname>/references/<platform>-tools.md`. Create `references/` directory if needed.
 
-- [ ] **Step 13: Emit final report**
+- [ ] **Step 14: Emit final report**
 
 Print a summary with three sections:
 
