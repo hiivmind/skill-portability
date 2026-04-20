@@ -1,13 +1,13 @@
 {
-  "name": "portable-plugin-uplift-dev",
-  "description": "Development marketplace for portable-plugin-uplift",
+  "name": "skill-portability-dev",
+  "description": "Development marketplace for skill-portability",
   "owner": {
     "name": "Nathaniel Ramm",
     "email": "nathaniel.ramm@discretedatascience.com"
   },
   "plugins": [
     {
-      "name": "portable-plugin-uplift",
+      "name": "skill-portability",
       "description": "Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support",
       "version": "0.1.0",
       "source": "./",

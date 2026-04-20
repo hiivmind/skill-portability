@@ -1,5 +1,5 @@
 {
-  "name": "portable-plugin-uplift",
+  "name": "skill-portability",
   "description": "Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support",
   "version": "0.1.0",
   "contextFileName": "GEMINI.md"

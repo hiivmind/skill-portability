@@ -1,6 +1,6 @@
 {
-  "name": "portable-plugin-uplift",
+  "name": "skill-portability",
   "version": "0.1.0",
   "type": "module",
-  "main": ".opencode/plugins/portable-plugin-uplift.js"
+  "main": ".opencode/plugins/skill-portability.js"
 }

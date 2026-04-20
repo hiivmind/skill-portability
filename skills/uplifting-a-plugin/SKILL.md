@@ -73,7 +73,7 @@ Also check each `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `
 
 - [ ] **Step 4: Render and write `.cursor-plugin/plugin.json`**
 
-Locate this plugin's install path: use Glob with pattern `~/.claude/plugins/cache/**/portable-plugin-uplift/*/assets/templates/cursor-plugin/plugin.json.tmpl` to find the template. Read it. Substitute all `{{fields}}` with values from Step 1. Write to `<plugin-path>/.cursor-plugin/plugin.json`.
+Locate this plugin's install path: use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/assets/templates/cursor-plugin/plugin.json.tmpl` to find the template. Read it. Substitute all `{{fields}}` with values from Step 1. Write to `<plugin-path>/.cursor-plugin/plugin.json`.
 
 The `"skills"`, `"agents"`, `"commands"` fields should point at directories that exist in the source. Omit `"agents"` if `agents/` doesn't exist; omit `"commands"` if `commands/` doesn't exist.
 
@@ -209,4 +209,4 @@ The skill is idempotent: running it twice produces no diff on the second run.
 
 ## Locating this plugin's assets
 
-Use `Glob` with pattern `~/.claude/plugins/cache/**/portable-plugin-uplift/*/assets/templates/` to find the install root.
+Use `Glob` with pattern `~/.claude/plugins/cache/**/skill-portability/*/assets/templates/` to find the install root.

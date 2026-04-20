@@ -1,4 +1,4 @@
-# Portable Plugin Uplift
+# Skill Portability
 
 A Claude Code plugin that adds multi-platform portability to any Claude-only plugin.
 
@@ -24,7 +24,7 @@ This plugin implements the [superpowers](https://github.com/obra/superpowers) po
 
 ## This repo is itself an example
 
-`portable-plugin-uplift` is structured using the exact pattern it produces. Check the root-level manifests as a reference.
+`skill-portability` is structured using the exact pattern it produces. Check the root-level manifests as a reference.
 
 ## Usage
 

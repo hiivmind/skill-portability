@@ -1,4 +1,4 @@
-# Portable Plugin Uplift
+# Skill Portability
 
 Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support.
 

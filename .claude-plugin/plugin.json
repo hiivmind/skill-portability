@@ -1,13 +1,13 @@
 {
-  "name": "portable-plugin-uplift",
+  "name": "skill-portability",
   "description": "Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support",
   "version": "0.1.0",
   "author": {
     "name": "Nathaniel Ramm",
     "email": "nathaniel.ramm@discretedatascience.com"
   },
-  "homepage": "https://github.com/nathanielramm/portable-plugin-uplift",
-  "repository": "https://github.com/nathanielramm/portable-plugin-uplift",
+  "homepage": "https://github.com/nathanielramm/skill-portability",
+  "repository": "https://github.com/nathanielramm/skill-portability",
   "license": "MIT",
   "keywords": ["skills", "portability", "multi-platform", "plugin-uplift"]
 }
