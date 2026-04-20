@@ -1,11 +1,12 @@
 # Skill Portability
 
-A Claude Code plugin that adds multi-platform portability to any Claude-only plugin.
+A plugin that makes any plugin fully portable across all agent platforms. Works from any starting state: Claude Code, Cursor, Gemini CLI, OpenCode, or a bare directory of SKILL.md files.
 
 ## What it does
 
-Takes a plugin that only has `.claude-plugin/` manifests (Claude Code only) and adds:
+Detects whatever platform manifests are already present, infers plugin metadata, then emits every missing artifact:
 
+- **Claude Code** — `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `CLAUDE.md`
 - **Cursor** — `.cursor-plugin/plugin.json`
 - **Gemini CLI** — `gemini-extension.json` + `GEMINI.md`
 - **OpenCode** — `package.json` + `.opencode/plugins/<name>.js`

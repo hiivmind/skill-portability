@@ -1,6 +1,6 @@
 # Skill Portability
 
-Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support.
+Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gemini, OpenCode, or bare SKILL.md repos as input. Emits every missing platform artifact.
 
 ## Skills
 
