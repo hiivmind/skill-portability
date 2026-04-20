@@ -19,6 +19,10 @@ Detects whatever platform manifests are already present, infers plugin metadata,
 - **`uplifting-a-plugin`** — Write all missing platform manifests for a target plugin
 - **`auditing-plugin-portability`** — Report portability gaps without making changes
 
+## Known ecosystem gaps
+
+Cross-platform portability has real structural limits in today's agent platforms: `npx skills` installs individual skill directories rather than whole plugins (losing shared context files), each platform uses different manifest formats and context file names, tool names differ across platforms, and most platforms lack hook or subagent support. The `uplifting-a-plugin` skill generates everything that *can* be generated. For what cannot be fixed at the plugin layer, see [`docs/ecosystem-friction.md`](docs/ecosystem-friction.md).
+
 ## Pattern source
 
 This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `assets/UPSTREAM.md` for re-seeding instructions).
