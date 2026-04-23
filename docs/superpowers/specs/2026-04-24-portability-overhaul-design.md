@@ -201,9 +201,10 @@ INVENTORY(plugin_path, computed):
   platforms = ["copilot-tools.md", "codex-tools.md", "gemini-tools.md"]
   FOR skill IN computed.skills:
     FOR platform IN platforms:
-      target = "skills/" + skill.name + "/references/" + platform
+      # Use skill.dir (directory basename), not skill.name (frontmatter)
+      target = "skills/" + skill.dir + "/references/" + platform
       status = IF file_exists(target) THEN "PRESENT" ELSE "MISSING"
-      computed.sidecars[target] = { skill: skill.name, file: platform, status: status }
+      computed.sidecars[target] = { skill: skill.dir, file: platform, status: status }
 
   # Hooks (all platform formats)
   computed.hooks = {}
@@ -448,11 +449,12 @@ outputs:
 |-------|-------------|
 | **Phase 1: Detect** | Scan metadata, elect canonical, build model, classify shape |
 | **Phase 2: Inventory** | Discover assets, init tracking, check conflicts |
-| **Phase 3: Generate** | Write missing manifests, context files, sidecars per platform |
-| **Phase 4: Port** | Adapt hooks across platforms |
-| **Phase 5: Document** | Generate install docs per platform in target repo |
-| **Phase 6: Bootstrap** | Opt-in session-start injection |
-| **Phase 7: Report** | Summary of created, skipped, flagged files |
+| **Phase 3: Recommend** | Choose uplift target and Codex packaging path |
+| **Phase 4: Generate** | Write missing manifests, context files, sidecars per platform |
+| **Phase 5: Port** | Adapt hooks across platforms |
+| **Phase 6: Document** | Generate install docs per platform in target repo |
+| **Phase 7: Bootstrap** | Opt-in session-start injection |
+| **Phase 8: Report** | Summary of created, skipped, flagged files |
 
 ### Phase 1: Detect
 
@@ -476,35 +478,61 @@ DETECT(plugin_path):
 ```pseudocode
 INVENTORY(plugin_path, computed):
   computed.skills = Glob(plugin_path + "/skills/*/SKILL.md")
+  # Each skill entry carries both frontmatter name and directory basename:
+  #   skill.name = YAML frontmatter "name:" field (may differ from directory)
+  #   skill.dir  = directory basename (e.g., "foo-bar" from "skills/foo-bar/SKILL.md")
+  #   skill.path = full path to SKILL.md
+  # Use skill.dir for filesystem paths; use skill.name for display and metadata.
+
   computed.commands = Glob(plugin_path + "/commands/*.md")
   computed.agents = Glob(plugin_path + "/agents/*.md")
   computed.existing_hooks = read_json_if_exists(plugin_path + "/hooks/hooks.json")
 
+  # Artifact tracking uses structured records, not plain strings.
+  # Each entry: { path: string, platform: string }
   computed.created = []
   computed.skipped = []
   computed.flagged = []
 
   # Check all potential targets for conflicts
-  targets = [
-    ".claude-plugin/plugin.json",
-    ".claude-plugin/marketplace.json",
-    ".cursor-plugin/plugin.json",
-    ".codex-plugin/plugin.json",
-    "gemini-extension.json",
-    "GEMINI.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "package.json",
-    ".opencode/plugins/" + computed.metadata.name + ".js",
-    ".github/copilot-instructions.md",
-    "hooks/hooks-cursor.json",
+  conflict_checks = [
+    { path: ".claude-plugin/plugin.json",                            platform: "claude-code" },
+    { path: ".claude-plugin/marketplace.json",                       platform: "claude-code" },
+    { path: ".cursor-plugin/plugin.json",                            platform: "cursor"      },
+    { path: ".codex-plugin/plugin.json",                             platform: "codex"       },
+    { path: "gemini-extension.json",                                 platform: "gemini-cli"  },
+    { path: "GEMINI.md",                                             platform: "gemini-cli"  },
+    { path: "AGENTS.md",                                             platform: "cross"       },
+    { path: "CLAUDE.md",                                             platform: "claude-code" },
+    { path: "package.json",                                          platform: "opencode"    },
+    { path: ".opencode/plugins/" + computed.metadata.name + ".js",   platform: "opencode"    },
+    { path: ".github/copilot-instructions.md",                       platform: "copilot-cli" },
+    { path: "hooks/hooks-cursor.json",                               platform: "cursor"      },
   ]
-  FOR target IN targets:
-    IF file_exists(target):
-      computed.skipped.append(target)
+  FOR check IN conflict_checks:
+    IF file_exists(check.path):
+      computed.skipped.append({ path: check.path, platform: check.platform })
 ```
 
-### Phase 3: Generate
+### Phase 3: Recommend
+
+Derive the uplift target and Codex packaging decision before generation. This ensures `computed.codex_rec` is populated for conditional manifest generation in Phase 4.
+
+```pseudocode
+RECOMMEND(computed):
+  # Codex-specific recommendation (drives conditional generation)
+  IF computed.shape == "bare-skill-repo" AND NOT computed.existing_hooks AND len(computed.agents) == 0:
+    computed.codex_rec = "native-skill-discovery"
+  ELIF any(check.path == ".codex-plugin/plugin.json" AND check.status == "PRESENT"
+           FOR check IN computed.skipped):
+    computed.codex_rec = "native-plugin-packaging"
+  ELIF computed.shape == "curated-distribution":
+    computed.codex_rec = "curated-package-note"
+  ELSE:
+    computed.codex_rec = "native-skill-discovery"
+```
+
+### Phase 4: Generate
 
 Table-driven generation. See `lib/patterns/manifest-generation.md` for all schemas.
 
@@ -512,45 +540,46 @@ Table-driven generation. See `lib/patterns/manifest-generation.md` for all schem
 GENERATE_MANIFESTS(computed):
   manifests = [
     # Claude Code
-    { target: ".claude-plugin/plugin.json",          schema: "claude-plugin"          },
-    { target: ".claude-plugin/marketplace.json",     schema: "claude-marketplace"     },
-    { target: "CLAUDE.md",                           schema: "claude-context"         },
+    { target: ".claude-plugin/plugin.json",      platform: "claude-code", schema: "claude-plugin"      },
+    { target: ".claude-plugin/marketplace.json", platform: "claude-code", schema: "claude-marketplace" },
+    { target: "CLAUDE.md",                       platform: "claude-code", schema: "claude-context"     },
     # Cursor
-    { target: ".cursor-plugin/plugin.json",          schema: "cursor-plugin"          },
+    { target: ".cursor-plugin/plugin.json",      platform: "cursor",     schema: "cursor-plugin"      },
     # Gemini CLI
-    { target: "gemini-extension.json",               schema: "gemini-extension"       },
-    { target: "GEMINI.md",                           schema: "gemini-context"         },
+    { target: "gemini-extension.json",           platform: "gemini-cli", schema: "gemini-extension"   },
+    { target: "GEMINI.md",                       platform: "gemini-cli", schema: "gemini-context"     },
     # OpenCode
-    { target: "package.json",                        schema: "opencode-package"       },
-    { target: ".opencode/plugins/{{name}}.js",       schema: "opencode-shim"          },
+    { target: "package.json",                    platform: "opencode",   schema: "opencode-package"   },
+    { target: ".opencode/plugins/{{name}}.js",   platform: "opencode",   schema: "opencode-shim"      },
     # Codex (conditional on codex recommendation)
-    { target: ".codex-plugin/plugin.json",           schema: "codex-plugin",
-      condition: "computed.codex_rec == 'native-plugin-packaging'"                    },
+    { target: ".codex-plugin/plugin.json",       platform: "codex",      schema: "codex-plugin",
+      condition: "computed.codex_rec == 'native-plugin-packaging'"                                    },
     # Cross-platform context
-    { target: "AGENTS.md",                           schema: "agents-context"         },
+    { target: "AGENTS.md",                       platform: "cross",      schema: "agents-context"     },
     # Copilot
-    { target: ".github/copilot-instructions.md",     schema: "copilot-instructions"   },
+    { target: ".github/copilot-instructions.md", platform: "copilot-cli", schema: "copilot-instructions" },
   ]
 
   FOR manifest IN manifests:
     IF manifest.condition AND NOT evaluate(manifest.condition):
       CONTINUE
     resolved = substitute(manifest.target, computed.metadata)
-    IF resolved IN computed.skipped:
+    IF any(s.path == resolved FOR s IN computed.skipped):
       CONTINUE
     content = render_schema(manifest.schema, computed.metadata)
     Write(resolved, content)
-    computed.created.append(resolved)
+    computed.created.append({ path: resolved, platform: manifest.platform })
 
 GENERATE_SIDECARS(computed):
-  platforms = ["copilot-tools.md", "codex-tools.md", "gemini-tools.md"]
+  sidecar_files = ["copilot-tools.md", "codex-tools.md", "gemini-tools.md"]
   FOR skill IN computed.skills:
-    FOR platform IN platforms:
-      target = "skills/" + skill.name + "/references/" + platform
+    FOR sidecar IN sidecar_files:
+      # Use skill.dir (directory basename), not skill.name (frontmatter)
+      target = "skills/" + skill.dir + "/references/" + sidecar
       IF NOT file_exists(target):
-        source = Read("lib/references/" + platform)
+        source = Read("lib/references/" + sidecar)
         Write(target, source)
-        computed.created.append(target)
+        computed.created.append({ path: target, platform: "cross" })
 
 VALIDATE_FRONTMATTER(computed):
   FOR skill IN computed.skills:
@@ -561,7 +590,7 @@ VALIDATE_FRONTMATTER(computed):
       )
 ```
 
-### Phase 4: Port
+### Phase 5: Port
 
 Hook porting across platforms. See `lib/patterns/hook-merging.md`.
 
@@ -569,20 +598,20 @@ Hook porting across platforms. See `lib/patterns/hook-merging.md`.
 PORT_HOOKS(computed):
   # Claude Code → Cursor (existing logic)
   IF computed.existing_hooks:
-    IF "hooks/hooks-cursor.json" NOT IN computed.skipped:
+    IF NOT any(s.path == "hooks/hooks-cursor.json" FOR s IN computed.skipped):
       generate_cursor_hooks(computed.existing_hooks)
-      computed.created.append("hooks/hooks-cursor.json")
+      computed.created.append({ path: "hooks/hooks-cursor.json", platform: "cursor" })
 
   # Claude Code → Copilot (NEW)
   IF computed.existing_hooks:
     IF NOT Glob(".github/hooks/*.json"):
       generate_copilot_hooks(computed.existing_hooks)
       # Separate bash/powershell fields, no matcher, filtering in script
-      computed.created.append(".github/hooks/hooks.json")
+      computed.created.append({ path: ".github/hooks/hooks.json", platform: "copilot-cli" })
 
   # Gemini hook guidance (NEW)
   # Gemini hooks live in user settings.json — cannot write into target repo
-  # Guidance is included in install docs (Phase 5)
+  # Guidance is included in install docs (Phase 6)
   IF computed.existing_hooks:
     computed.gemini_hook_guidance = generate_gemini_hook_config(computed.existing_hooks)
 
@@ -590,41 +619,56 @@ PORT_HOOKS(computed):
   IF NOT file_exists("hooks/run-hook.cmd"):
     source = Read("lib/templates/hooks/run-hook.cmd")
     Write("hooks/run-hook.cmd", source)
-    computed.created.append("hooks/run-hook.cmd")
+    computed.created.append({ path: "hooks/run-hook.cmd", platform: "cross" })
 ```
 
-### Phase 5: Document
+### Phase 6: Document
 
 Generate install documentation. See `lib/templates/install-docs/`.
 
 ```pseudocode
 GENERATE_INSTALL_DOCS(computed):
-  # Determine which platforms have artifacts
-  platforms_with_artifacts = []
-  FOR platform IN platforms:
-    IF any(m.platform == platform FOR m IN computed.created + computed.skipped):
-      platforms_with_artifacts.append(platform)
+  # Determine which platforms have artifacts (from structured records)
+  all_artifacts = computed.created + computed.skipped
+  platforms_with_artifacts = deduplicate([a.platform FOR a IN all_artifacts
+                                         WHERE a.platform != "cross"])
 
-  # Render per-platform install sections
+  # Render and write per-platform install docs
   computed.install_sections = {}
   FOR platform IN platforms_with_artifacts:
     template = Read("lib/templates/install-docs/" + platform + ".md")
     rendered = substitute(template, computed.metadata)
+
+    # Append Gemini hook guidance if applicable
+    IF platform == "gemini-cli" AND computed.gemini_hook_guidance:
+      rendered += "\n" + computed.gemini_hook_guidance
+
     computed.install_sections[platform] = rendered
 
-  # Codex-specific install doc
+  # Codex-specific install doc (standalone file in target repo)
   IF "codex" IN platforms_with_artifacts:
-    codex_template = Read("lib/templates/install-docs/codex.md")
-    rendered = substitute(codex_template, computed.metadata)
-    # Choose skill-discovery or plugin section based on recommendation
-    IF computed.shape == "bare-skill-repo" AND no hooks/agents:
-      rendered = filter_to_skill_discovery_section(rendered)
-    Write(".codex/INSTALL.md", rendered)
-    computed.created.append(".codex/INSTALL.md")
+    codex_rendered = computed.install_sections["codex"]
+    # Filter to chosen Codex path
+    IF computed.codex_rec == "native-skill-discovery":
+      codex_rendered = filter_to_skill_discovery_section(codex_rendered)
+    Write(".codex/INSTALL.md", codex_rendered)
+    computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
 
-  # Gemini hook guidance (if generated in Phase 4)
-  IF computed.gemini_hook_guidance:
-    computed.install_sections["gemini-cli"] += computed.gemini_hook_guidance
+  # Copilot install doc (standalone file in target repo)
+  IF "copilot-cli" IN platforms_with_artifacts:
+    Write(".github/INSTALL.md", computed.install_sections["copilot-cli"])
+    computed.created.append({ path: ".github/INSTALL.md", platform: "copilot-cli" })
+
+  # Composite install doc for remaining platforms
+  # Written to docs/INSTALL.md with all platform sections
+  remaining = [p FOR p IN platforms_with_artifacts
+               WHERE p NOT IN ["codex", "copilot-cli"]]
+  IF len(remaining) > 0:
+    composite = "# Installation Guide\n\n"
+    FOR platform IN remaining:
+      composite += computed.install_sections[platform] + "\n\n---\n\n"
+    Write("docs/INSTALL.md", composite)
+    computed.created.append({ path: "docs/INSTALL.md", platform: "cross" })
 
   # README check
   IF file_exists("README.md"):
@@ -632,8 +676,8 @@ GENERATE_INSTALL_DOCS(computed):
     IF "## Installation" NOT IN readme AND "## Install" NOT IN readme:
       computed.flagged.append(
         "README.md has no Installation section. " +
-        "Per-platform install instructions have been generated — " +
-        "consider adding them to README.md."
+        "Per-platform install instructions have been written to docs/INSTALL.md — " +
+        "consider linking or including them in README.md."
       )
   ELSE:
     computed.flagged.append(
@@ -641,7 +685,7 @@ GENERATE_INSTALL_DOCS(computed):
     )
 ```
 
-### Phase 6: Bootstrap
+### Phase 7: Bootstrap
 
 Opt-in session-start injection. See `lib/patterns/bootstrapping.md`. Unchanged from current design.
 
@@ -666,7 +710,7 @@ BOOTSTRAP(computed):
   computed.bootstrap_status = "configured"
 ```
 
-### Phase 7: Report
+### Phase 8: Report
 
 ```
 # Uplift Report: {computed.metadata.name} v{computed.metadata.version}
@@ -679,13 +723,13 @@ Metadata inferred from: {computed.canonical.path}
 {inference summary}
 
 ## Created
-{FOR path IN computed.created}
-  {path}
+{FOR artifact IN computed.created}
+  [{artifact.platform}]  {artifact.path}
 {/FOR}
 
 ## Skipped (already exists)
-{FOR path IN computed.skipped}
-  {path}
+{FOR artifact IN computed.skipped}
+  [{artifact.platform}]  {artifact.path}
 {/FOR}
 
 ## Needs Manual Review
