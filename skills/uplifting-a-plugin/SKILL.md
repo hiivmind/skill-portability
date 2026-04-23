@@ -579,9 +579,9 @@ These tools are available in Gemini CLI but have no Claude Code equivalent:
 | `enter_plan_mode` / `exit_plan_mode` | Switch to read-only research mode before making changes |
 ```
 
-- [ ] **Step 16: Emit final report**
+- [ ] **Step 25: Emit final report**
 
-Print a summary with four sections:
+Print a summary with five sections:
 
 **Metadata inferred:**
 Repeat the D4 inference summary. List any fields that fell back to hard defaults or were left blank.
@@ -596,6 +596,16 @@ Every file that was present and therefore not overwritten.
 - Any hook command containing `$CLAUDE_PLUGIN_ROOT`
 - Any skill with missing `name` or `description` frontmatter
 - Any metadata field that could not be inferred from any source
+
+**Session-start bootstrapping:**
+If bootstrapping was enabled:
+> "Session-start injection configured. Generated: `using-{{name}}/SKILL.md`, `hooks/session-start`, `hooks/run-hook.cmd`, hook entries in `hooks.json` and `hooks-cursor.json`, OpenCode message transform, GEMINI.md updated."
+
+If bootstrapping was declined:
+> "Session-start injection: not configured (user declined)"
+
+If bootstrapping was skipped (using-{{name}} already existed):
+> "Session-start injection: already configured (using-{{name}} exists)"
 
 - [ ] **Step 17: Prompt for bootstrapping**
 
