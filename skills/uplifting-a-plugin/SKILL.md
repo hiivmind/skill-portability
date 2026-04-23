@@ -23,6 +23,7 @@ For a source plugin at `<plugin-path>`, this skill writes every missing artifact
 | All skills | `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md` |
 | Hook portability | `hooks/hooks-cursor.json` (if hooks exist) |
 | npx skills compat | Validates every `skills/<name>/SKILL.md` has `name` + `description` frontmatter |
+| Session-start bootstrapping | `skills/using-<name>/SKILL.md`, `hooks/session-start`, `hooks/run-hook.cmd` (opt-in) |
 
 ## Minimum starting state
 
