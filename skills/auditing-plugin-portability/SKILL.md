@@ -1,6 +1,6 @@
 ---
 name: auditing-plugin-portability
-description: Use when you want to check a plugin for multi-platform portability gaps without making any changes. Accepts any starting state — Claude, Cursor, Gemini, npx skills repos, or bare SKILL.md files. Detects what metadata is available, infers the canonical plugin identity, then reports PRESENT or MISSING for every platform artifact including Claude Code manifests.
+description: Use when you want to check a plugin for multi-platform portability gaps without making any changes. Accepts any starting state — Claude, Cursor, Gemini, npx skills repos, or bare SKILL.md files. Detects what metadata is available, infers the canonical plugin identity, then reports PRESENT or MISSING for every platform artifact including session-start bootstrapping infrastructure.
 ---
 
 # Auditing Plugin Portability
