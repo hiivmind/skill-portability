@@ -1,200 +1,255 @@
 ---
 name: auditing-plugin-portability
-description: Use when you want to check a plugin for multi-platform portability gaps without making any changes. Accepts any starting state — Claude, Cursor, Gemini, npx skills repos, or bare SKILL.md files. Detects what metadata is available, infers the canonical plugin identity, then reports PRESENT or MISSING for every platform artifact including session-start bootstrapping infrastructure.
+description: >
+  Check a plugin for multi-platform portability gaps without making changes.
+  Accepts any starting state. Reports PRESENT or MISSING for every platform
+  artifact including session-start bootstrapping infrastructure.
+allowed-tools: Read, Glob, Grep
+inputs:
+  - name: plugin_path
+    type: string
+    required: true
+    description: Path to the plugin root directory
+outputs:
+  - name: audit
+    type: object
+    description: Complete portability audit with per-file status
 ---
 
 # Auditing Plugin Portability
 
-This skill inspects a plugin repo and reports portability gaps across all platforms. It makes no changes. No platform is assumed to already be present — Claude Code manifests are checked just like Cursor or Gemini manifests.
+Inspect a plugin repo and report portability gaps across all platforms. Makes no changes.
+No platform is assumed to already be present — Claude Code manifests are checked just like
+Cursor or Gemini manifests.
 
-## Minimum starting state
+> **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
+> **Injection Checks:** `patterns/injection-checks.md`
 
-At least ONE of the following must exist:
-- One or more `skills/*/SKILL.md` files with `name` and `description` YAML frontmatter
-- Any platform manifest: `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json`, or `package.json`
+---
 
-## Detection Algorithm
+## Overview
 
-### Step D1: Scan for metadata sources
+| Phase | Description |
+|-------|-------------|
+| **Phase 1: Detect** | Run shared detection algorithm, infer metadata |
+| **Phase 2: Audit** | Check manifests, sidecars, context files, hooks, injection |
+| **Phase 3: Report** | Print full audit report |
 
-Check which of these exist at `<plugin-path>`:
+**Minimum starting state:** At least one `skills/*/SKILL.md` with `name` + `description`
+frontmatter, or any platform manifest file.
 
-| Source | Fields extractable |
-|---|---|
-| `.claude-plugin/plugin.json` | `name`, `description`, `version`, `author.name`, `author.email`, `homepage`, `repository`, `license`, `keywords` |
-| `.cursor-plugin/plugin.json` | `name`, `displayName`, `description`, `version`, `author.name`, `author.email`, `homepage`, `repository`, `license`, `keywords` |
-| `gemini-extension.json` | `name`, `description`, `version` |
-| `package.json` | `name`, `version`, `description` |
-| `AGENTS.md` | `name` (from H1 heading), `description` (from first non-heading paragraph) |
-| `skills/*/SKILL.md` frontmatter | `name` (YAML `name:` field, or directory name), `description` (YAML `description:` field) |
+---
 
-If **none** of these are found, stop and report:
-> "No recognisable plugin signals found in `<plugin-path>`. Provide at least one platform manifest or one `skills/*/SKILL.md` with `name` and `description` frontmatter."
+## Phase 1: Detect
 
-### Step D2: Score and elect canonical source
+### Step 1.1: Scan and Infer
 
-Count populated fields per source. Highest count = canonical source.
+```pseudocode
+DETECT(plugin_path):
+  # See lib/patterns/detection-algorithm.md
+  computed.sources = scan_metadata_sources(plugin_path)
 
-Tie-breaking (highest priority first): `.claude-plugin/plugin.json` → `.cursor-plugin/plugin.json` → `gemini-extension.json` → `package.json` → `AGENTS.md` → first `skills/*/SKILL.md` alphabetically.
+  IF len(computed.sources) == 0:
+    DISPLAY "No recognisable plugin signals found in {plugin_path}."
+    EXIT
 
-### Step D3: Build canonical metadata model
-
-Fill fields from canonical source first, then from remaining sources in descending score order for any gaps.
-
-| Field | Hard fallback |
-|---|---|
-| `name` | Directory basename of `<plugin-path>` |
-| `description` | `""` — flag as missing |
-| `version` | `"0.1.0"` |
-| `author.name` | `""` — flag as missing |
-| `author.email` | `""` — flag as missing |
-
-### Step D4: Print inference summary
-
-```
-## Metadata inferred
-  canonical source: .cursor-plugin/plugin.json  (10 fields)
-  name:     my-plugin      (from .cursor-plugin/plugin.json)
-  version:  1.0.0          (from .cursor-plugin/plugin.json)
-  author.name: [missing — not found in any source]
+  computed.canonical = elect_canonical(computed.sources)
+  computed.metadata = build_metadata_model(computed.sources)
+  computed.skills = Glob(plugin_path + "/skills/*/SKILL.md")
+  print_inference_summary(computed.metadata, computed.canonical)
 ```
 
-## Checklist
+---
 
-- [ ] **Step 1: Run Detection Algorithm (D1–D4)**
+## Phase 2: Audit
 
-Execute Steps D1–D4 above. If no signals found, stop with the error message.
+### Step 2.1: Check Platform Manifests
 
-- [ ] **Step 2: Check platform manifest files**
+```pseudocode
+AUDIT_MANIFESTS(computed):
+  checks = [
+    ".claude-plugin/plugin.json",
+    ".claude-plugin/marketplace.json",
+    ".cursor-plugin/plugin.json",
+    "gemini-extension.json",
+    "GEMINI.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "package.json",
+    ".opencode/plugins/" + computed.metadata.name + ".js",
+    "hooks/hooks-cursor.json",
+    "hooks/run-hook.cmd"
+  ]
 
-For each file, report PRESENT or MISSING:
+  computed.manifest_results = []
+  FOR path IN checks:
+    status = IF file_exists(path) THEN "PRESENT" ELSE "MISSING"
+    computed.manifest_results.append({ path: path, status: status })
+```
+
+### Step 2.2: Check Per-Skill Sidecars
+
+```pseudocode
+AUDIT_SIDECARS(computed):
+  platforms = ["copilot-tools.md", "codex-tools.md", "gemini-tools.md"]
+  computed.sidecar_results = []
+  FOR skill IN computed.skills:
+    FOR platform IN platforms:
+      target = "skills/" + skill.name + "/references/" + platform
+      status = IF file_exists(target) THEN "PRESENT" ELSE "MISSING"
+      computed.sidecar_results.append({ skill: skill.name, file: platform, status: status })
+```
+
+### Step 2.3: Check Context File Completeness
+
+```pseudocode
+AUDIT_CONTEXT_FILES(computed):
+  computed.context_results = []
+
+  IF file_exists("GEMINI.md"):
+    content = Read("GEMINI.md")
+    FOR skill IN computed.skills:
+      IF "@./skills/" + skill.name + "/SKILL.md" NOT IN content:
+        computed.context_results.append("GEMINI.md missing include for " + skill.name)
+      IF "@./skills/" + skill.name + "/references/gemini-tools.md" NOT IN content:
+        computed.context_results.append("GEMINI.md missing gemini-tools include for " + skill.name)
+  ELSE:
+    computed.context_results.append("GEMINI.md: MISSING — cannot check includes")
+
+  IF file_exists("AGENTS.md"):
+    content = Read("AGENTS.md")
+    FOR skill IN computed.skills:
+      IF "skills/" + skill.name + "/SKILL.md" NOT IN content:
+        computed.context_results.append("AGENTS.md missing reference for " + skill.name)
+  ELSE:
+    computed.context_results.append("AGENTS.md: MISSING — cannot check skill references")
+```
+
+### Step 2.4: Check Frontmatter Compatibility
+
+```pseudocode
+AUDIT_FRONTMATTER(computed):
+  computed.frontmatter_results = []
+  FOR skill IN computed.skills:
+    frontmatter = parse_yaml_frontmatter(skill.content)
+    IF frontmatter.name AND frontmatter.description:
+      status = "COMPATIBLE"
+    ELSE:
+      status = "MISSING FRONTMATTER"
+    computed.frontmatter_results.append({ skill: skill.name, status: status })
+```
+
+### Step 2.5: Check Hooks
+
+```pseudocode
+AUDIT_HOOKS(computed):
+  IF file_exists("hooks/hooks.json"):
+    computed.hook_status = "PRESENT"
+    IF NOT file_exists("hooks/hooks-cursor.json"):
+      computed.hook_issues = ["hooks/hooks-cursor.json: MISSING"]
+    IF NOT file_exists("hooks/run-hook.cmd"):
+      computed.hook_issues = ["hooks/run-hook.cmd: MISSING"]
+  ELSE:
+    computed.hook_status = "MISSING — no hooks to port"
+    computed.hook_issues = []
+```
+
+### Step 2.6: Check Session-Start Injection
+
+See `patterns/injection-checks.md` for the 8-component verification.
+
+```pseudocode
+AUDIT_INJECTION(computed):
+  using_path = "skills/using-" + computed.metadata.name + "/SKILL.md"
+  IF NOT file_exists(using_path):
+    computed.injection_status = "NOT CONFIGURED"
+    RETURN
+
+  computed.injection_results = check_injection_components(computed)
+  computed.injection_summary = compute_injection_summary(computed.injection_results)
+```
+
+---
+
+## Phase 3: Report
+
+### Step 3.1: Print Report
 
 ```
-.claude-plugin/plugin.json        → Claude Code plugin manifest
-.claude-plugin/marketplace.json   → Claude Code marketplace listing
-.cursor-plugin/plugin.json        → Cursor support
-gemini-extension.json             → Gemini CLI extension descriptor
-GEMINI.md                         → Gemini CLI context file
-AGENTS.md                         → Generic harness (Codex, Copilot CLI)
-CLAUDE.md                         → Claude Code context file
-package.json                      → OpenCode support
-.opencode/plugins/<name>.js       → OpenCode skill shim
-hooks/hooks-cursor.json           → Cursor hook support
-hooks/run-hook.cmd                → Windows hook wrapper
-```
-
-- [ ] **Step 3: Check per-skill sidecars**
-
-For each directory in `skills/`, report PRESENT or MISSING for each of:
-- `skills/<name>/references/copilot-tools.md`
-- `skills/<name>/references/codex-tools.md`
-- `skills/<name>/references/gemini-tools.md`
-
-- [ ] **Step 4: Check GEMINI.md completeness** (if present)
-
-If `GEMINI.md` exists, verify it has an `@` include line for each skill's `SKILL.md` and each skill's `gemini-tools.md`. Report any skills missing from the include list.
-
-- [ ] **Step 5: Check AGENTS.md completeness** (if present)
-
-If `AGENTS.md` exists, verify it references each skill by path. Report any skills missing from the reference list.
-
-- [ ] **Step 6: Check `npx skills` frontmatter compatibility**
-
-For each directory in `skills/`, read `skills/<name>/SKILL.md` and verify:
-- YAML frontmatter (`---` delimiters) present at top of file
-- `name:` field present and non-empty
-- `description:` field present and non-empty
-
-Report COMPATIBLE or MISSING FRONTMATTER for each skill.
-
-- [ ] **Step 7: Check hooks**
-
-If `hooks/hooks.json` exists and is non-empty:
-- Verify `hooks/hooks-cursor.json` exists
-- Verify `hooks/run-hook.cmd` exists
-- Report any missing files
-
-- [ ] **Step 8: Check session-start injection** (only if `using-<name>` exists)
-
-If `skills/using-{{name}}/SKILL.md` does not exist, skip this step entirely — bootstrapping is not configured.
-
-If it exists, check all bootstrapping infrastructure:
-
-| Component | Check |
-|-----------|-------|
-| `skills/using-{{name}}/SKILL.md` | File exists |
-| `skills/using-{{name}}/references/gemini-tools.md` | File exists |
-| `hooks/session-start` | File exists and is executable |
-| `hooks/run-hook.cmd` | File exists and is executable |
-| `hooks/hooks.json` | File exists and contains `SessionStart` entry with command containing `session-start` |
-| `hooks/hooks-cursor.json` | File exists and contains `sessionStart` entry with command containing `session-start` |
-| `.opencode/plugins/{{name}}.js` | File exists and contains `experimental.chat.messages.transform` |
-| `GEMINI.md` | File exists and first `@./skills/` include is `using-{{name}}` |
-
-Report status for each:
-- `PRESENT` — component exists and is correctly configured
-- `MISSING` — component does not exist
-- `NO_TRANSFORM` — OpenCode plugin exists but lacks message transform
-- `NOT_FIRST` — GEMINI.md exists but using-{{name}} is not the first skill include
-
-- [ ] **Step 9: Print report**
-
-```
-# Portability Audit: <name> v<version>
-Metadata inferred from: <canonical source>
+# Portability Audit: {computed.metadata.name} v{computed.metadata.version}
+Metadata inferred from: {computed.canonical.path}
 
 ## Platform manifests
-PRESENT  .claude-plugin/plugin.json
-MISSING  .claude-plugin/marketplace.json
-PRESENT  .cursor-plugin/plugin.json
-MISSING  gemini-extension.json
-MISSING  GEMINI.md
-MISSING  AGENTS.md
-MISSING  CLAUDE.md
-MISSING  package.json
-MISSING  .opencode/plugins/<name>.js
-MISSING  hooks/hooks-cursor.json
-MISSING  hooks/run-hook.cmd
+{FOR r IN computed.manifest_results}
+{r.status}  {r.path}
+{/FOR}
 
 ## Skill sidecars
-skills/my-skill/
-  PRESENT  references/copilot-tools.md
-  MISSING  references/codex-tools.md
-  MISSING  references/gemini-tools.md
+{FOR skill_group IN computed.sidecar_results grouped by skill}
+skills/{skill_group.skill}/
+  {FOR r IN skill_group.results}
+  {r.status}  references/{r.file}
+  {/FOR}
+{/FOR}
 
 ## npx skills compatibility
-skills/my-skill/SKILL.md   COMPATIBLE  (name + description present)
-skills/other/SKILL.md      MISSING FRONTMATTER  (description absent)
+{FOR r IN computed.frontmatter_results}
+skills/{r.skill}/SKILL.md   {r.status}
+{/FOR}
 
 ## Context file completeness
-GEMINI.md: MISSING — cannot check includes
-AGENTS.md: MISSING — cannot check skill references
+{FOR issue IN computed.context_results}
+{issue}
+{/FOR}
 
 ## Hooks
-hooks/hooks.json: MISSING — no hooks to port
+hooks/hooks.json: {computed.hook_status}
+{FOR issue IN computed.hook_issues}
+  {issue}
+{/FOR}
 
 ## Session-start injection
-(Only shown if `skills/using-{{name}}/SKILL.md` exists)
-
-using-{{name}}/SKILL.md                    PRESENT
-using-{{name}}/references/gemini-tools.md  PRESENT
-hooks/session-start                        PRESENT
-hooks/run-hook.cmd                         PRESENT
-hooks/hooks.json (SessionStart)            PRESENT
-hooks/hooks-cursor.json (sessionStart)     PRESENT
-.opencode/plugins/{{name}}.js (transform)  NO_TRANSFORM
-GEMINI.md (using-{{name}} first)           NOT_FIRST
-
-Session-start injection: PARTIAL (6 of 8 components)
-
-## Inferred metadata warnings
-  author.name: not found in any source — will be written as empty string if uplifted
-  author.email: not found in any source
+{IF computed.injection_status == "NOT CONFIGURED"}
+Not configured (no using-{name} skill found)
+{ELSE}
+{FOR r IN computed.injection_results}
+{r.component}  {r.status}
+{/FOR}
+Session-start injection: {computed.injection_summary}
+{/IF}
 
 ## Summary
-3 files present, 8 missing.
-1 skill npx-compatible, 1 missing frontmatter.
-Session-start injection: COMPLETE / PARTIAL (N of 8) / NOT CONFIGURED
+{present} files present, {missing} missing.
+{compatible} skills npx-compatible, {incompatible} missing frontmatter.
+Session-start injection: {computed.injection_summary}
 Run the uplifting-a-plugin skill to generate all missing files automatically.
-Add missing SKILL.md frontmatter manually before publishing via npx skills.
 ```
+
+---
+
+## State Flow
+
+```
+Phase 1          Phase 2                      Phase 3
+──────────────────────────────────────────────────────
+computed         computed.manifest_results    Report
+ .sources         .sidecar_results           (displayed)
+ .canonical       .context_results
+ .metadata        .frontmatter_results
+ .skills          .hook_status
+                  .injection_results
+                  .injection_summary
+```
+
+---
+
+## Reference Documentation
+
+- **Detection Algorithm:** `lib/patterns/detection-algorithm.md` (shared)
+- **Injection Checks:** `patterns/injection-checks.md` (local)
+
+---
+
+## Related Skills
+
+- **Uplift plugin:** `skills/uplifting-a-plugin/SKILL.md`
