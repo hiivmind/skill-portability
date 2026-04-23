@@ -754,6 +754,44 @@ exec bash "${SCRIPT_DIR}/${SCRIPT_NAME}" "$@"
 
 Make the file executable: `chmod +x hooks/run-hook.cmd`
 
+- [ ] **Step 22: Merge SessionStart into hooks** (if bootstrapping enabled)
+
+**For `hooks/hooks.json`:**
+
+If file exists, parse it and add/update the SessionStart entry while preserving other hooks. If file doesn't exist, create it.
+
+Target structure:
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "command": "hooks/run-hook.cmd session-start",
+        "matcher": "startup|clear|compact"
+      }
+    ]
+  }
+}
+```
+
+Merge logic: If `hooks.SessionStart` array exists, check if an entry with command containing `session-start` exists. If yes, update it. If no, append to the array. If `hooks.SessionStart` doesn't exist, create it.
+
+**For `hooks/hooks-cursor.json`:**
+
+Same merge logic, but with Cursor's schema:
+```json
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "command": "hooks/run-hook.cmd session-start" }
+    ]
+  }
+}
+```
+
+Note the lowercase `sessionStart` for Cursor.
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
