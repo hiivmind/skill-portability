@@ -597,6 +597,16 @@ Every file that was present and therefore not overwritten.
 - Any skill with missing `name` or `description` frontmatter
 - Any metadata field that could not be inferred from any source
 
+- [ ] **Step 17: Prompt for bootstrapping**
+
+After completing Steps 1-15 but before emitting the final report, ask:
+
+> "Would you like to generate session-start bootstrapping hooks? This creates a `using-{{name}}` skill that gets force-injected at session start on Claude Code, Cursor, Copilot CLI, OpenCode, and Gemini CLI. (y/n)"
+
+If the user declines, skip Steps 18-24 and proceed to Step 25 (final report).
+
+If `skills/using-{{name}}/SKILL.md` already exists, skip the prompt and all bootstrapping steps — the user has already configured bootstrapping (possibly with custom content).
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
