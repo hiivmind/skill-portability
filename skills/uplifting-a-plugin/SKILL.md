@@ -832,6 +832,23 @@ export default {
 
 This replaces the minimal shim from Step 12 with a version that injects the using-{{name}} skill at session start.
 
+- [ ] **Step 24: Update GEMINI.md** (if bootstrapping enabled)
+
+If `GEMINI.md` exists, warn:
+> "Bootstrapping will regenerate `GEMINI.md` with `using-{{name}}` included first. Existing content will be replaced. Continue? (y/n)"
+
+If user confirms (or file doesn't exist), regenerate `GEMINI.md` with the using-{{name}} skill first:
+
+```
+@./skills/using-{{name}}/SKILL.md
+@./skills/using-{{name}}/references/gemini-tools.md
+{{otherSkillIncludes}}
+{{agentIncludes}}
+{{commandIncludes}}
+```
+
+Where `{{otherSkillIncludes}}` contains all skills except `using-{{name}}`, in the same format as Step 9.
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
