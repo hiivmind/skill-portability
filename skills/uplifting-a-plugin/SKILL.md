@@ -792,6 +792,46 @@ Same merge logic, but with Cursor's schema:
 
 Note the lowercase `sessionStart` for Cursor.
 
+- [ ] **Step 23: Enhance OpenCode plugin** (if bootstrapping enabled)
+
+If `.opencode/plugins/{{name}}.js` exists, warn:
+> "Bootstrapping will regenerate `.opencode/plugins/{{name}}.js` with session-start injection. Existing content will be replaced. Continue? (y/n)"
+
+If user confirms (or file doesn't exist), write to `<plugin-path>/.opencode/plugins/{{name}}.js`:
+
+```javascript
+// OpenCode plugin for {{name}} with session-start bootstrapping
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pluginRoot = join(__dirname, '../..');
+const bootstrapContent = readFileSync(
+  join(pluginRoot, 'skills/using-{{name}}/SKILL.md'), 'utf8'
+);
+
+export default {
+  name: "{{name}}",
+  description: "{{description}}",
+  skills: "./skills/",
+  experimental: {
+    chat: {
+      messages: {
+        transform: (messages) => {
+          if (messages.length > 0 && messages[0].role === 'user') {
+            messages[0].content = bootstrapContent + '\n\n' + messages[0].content;
+          }
+          return messages;
+        }
+      }
+    }
+  }
+};
+```
+
+This replaces the minimal shim from Step 12 with a version that injects the using-{{name}} skill at session start.
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
