@@ -173,6 +173,20 @@ AGENTS.md: MISSING — cannot check skill references
 ## Hooks
 hooks/hooks.json: MISSING — no hooks to port
 
+## Session-start injection
+(Only shown if `skills/using-{{name}}/SKILL.md` exists)
+
+using-{{name}}/SKILL.md                    PRESENT
+using-{{name}}/references/gemini-tools.md  PRESENT
+hooks/session-start                        PRESENT
+hooks/run-hook.cmd                         PRESENT
+hooks/hooks.json (SessionStart)            PRESENT
+hooks/hooks-cursor.json (sessionStart)     PRESENT
+.opencode/plugins/{{name}}.js (transform)  NO_TRANSFORM
+GEMINI.md (using-{{name}} first)           NOT_FIRST
+
+Session-start injection: PARTIAL (6 of 8 components)
+
 ## Inferred metadata warnings
   author.name: not found in any source — will be written as empty string if uplifted
   author.email: not found in any source
@@ -180,6 +194,7 @@ hooks/hooks.json: MISSING — no hooks to port
 ## Summary
 3 files present, 8 missing.
 1 skill npx-compatible, 1 missing frontmatter.
+Session-start injection: COMPLETE / PARTIAL (N of 8) / NOT CONFIGURED
 Run the uplifting-a-plugin skill to generate all missing files automatically.
 Add missing SKILL.md frontmatter manually before publishing via npx skills.
 ```
