@@ -1,147 +1,187 @@
 # Cross-Platform Skill Portability: Ecosystem Friction Points
 
-This document names the structural gaps that make true plugin portability hard across today's agent platforms. The `uplifting-a-plugin` skill works around these gaps as best it can, but many of them are platform-level problems that cannot be fully solved at the plugin layer.
+This document names the structural gaps that make true plugin portability hard across today's agent platforms, and describes how the superpowers self-bootstrapping pattern addresses (or fails to address) each one. The `uplifting-a-plugin` skill generates these mechanisms where it can.
 
 ---
 
-## 1. `npx skills` installs skills, not plugins
+## The Core Mechanism: Session-Start Injection
 
-**What happens:** `npx skills add owner/repo` discovers `skills/*/SKILL.md` and installs each skill as an individual directory under `~/.agents/skills/<skillname>/`. It does not install the repo. It does not symlink. It does not copy anything outside `skills/<skillname>/`.
+The central insight in the superpowers pattern is that **every platform needs the `using-superpowers` skill body delivered to the model at session start** — not installed as a file for the model to maybe discover, but injected as context before any user message is processed. The plugin ships a separate injection mechanism for each platform, since no platform agrees on how this should work:
 
-**What is lost:** Every piece of shared plugin infrastructure lives outside `skills/*/`:
+| Platform | Injection mechanism |
+|----------|-------------------|
+| Claude Code | `hooks/hooks.json` → `SessionStart` → `hooks/run-hook.cmd` → `hooks/session-start` |
+| Cursor | `hooks/hooks-cursor.json` → `sessionStart` → same script, different hook schema |
+| Copilot CLI | Same hook script; detects `COPILOT_CLI=1` env var, emits top-level `additionalContext` |
+| OpenCode | `.opencode/plugins/<name>.js` → `experimental.chat.messages.transform` prepends content to first user message |
+| Gemini CLI | `GEMINI.md` with `@./skills/using-superpowers/SKILL.md` include — context files substitute for hooks |
+| Codex | No hook system; relies on passive skill auto-discovery. Weakest guarantee. |
 
-- Plugin-level context files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) — not installed
-- Platform manifests (`.claude-plugin/`, `gemini-extension.json`, etc.) — not installed
-- Hooks — not installed
-- Shared assets, templates, documentation — not installed
-
-**The forced choice:** Plugin authors who want npx compatibility face a binary:
-
-| Option | Cost |
-|--------|------|
-| Duplicate shared content into every SKILL.md | Skills bloat. Shared instructions get out of sync. Every skill is hundreds of lines longer. |
-| Remove shared content and depend only on SKILL.md | Skills lose the richness that plugin-level context files provide. Platform-specific guidance, tool mappings, and session instructions are gone. |
-
-Neither is acceptable for a rich plugin. This is the core structural gap in the npx skills ecosystem.
-
-**What would fix it:** `npx skills add` needs a plugin-level install mode that writes shared context files into a platform-appropriate location (e.g., appending to `~/.agents/AGENTS.md`, or writing a `~/.agents/plugins/<name>/CLAUDE.md` that a harness picks up). Without this, the npx distribution model is only suitable for standalone skills, not coordinated plugin systems.
+This parallel-adapters approach is not elegant, but it works. Every platform except Codex gets guaranteed session-start delivery.
 
 ---
 
-## 2. Platform manifests are four parallel formats for the same data
+## Gap 1: Shared context files are not installed by `npx skills`
 
-**What happens:** To register a plugin with each platform, you maintain four separate manifest files, each with its own schema:
+**Status: Worked around by not using `npx skills` for whole-plugin installation.**
 
-| Platform | File | Required fields |
-|----------|------|-----------------|
-| Claude Code | `.claude-plugin/plugin.json` | `name`, `description`, `version`, `author`, `homepage`, `repository`, `license`, `keywords` |
-| Cursor | `.cursor-plugin/plugin.json` | Same + `displayName`, `skills`, `agents`, `commands`, `hooks` |
-| Gemini CLI | `gemini-extension.json` | `name`, `description`, `version`, `contextFileName` |
-| OpenCode | `package.json` | `name`, `version`, `type`, `main` |
+`npx skills add owner/repo` installs individual skill directories — it does not install the repo. For a plugin like superpowers, this would mean losing hooks, context files, platform manifests, and the `references/` sidecars that live in each skill directory but depend on the full repo being present for the hook scripts to read them.
 
-Every metadata change (new version, updated description, author email fix) must be made in four places. There is no canonical source of truth.
+**The superpowers answer:** Every supported install path is a whole-repo install:
+- Claude Code: plugin marketplace or git install — full repo under `${CLAUDE_PLUGIN_ROOT}`
+- Cursor: `.cursor-plugin/plugin.json` points to repo-relative paths — full repo required
+- Gemini CLI: git clone + `gemini-extension.json` — full repo tree required for `@`-includes to resolve
+- OpenCode: `opencode.json` pulls `git+https://...` via Bun — full repo installed
+- Codex: `git clone` + symlink `~/.agents/skills/superpowers` → the full `skills/` dir
 
-**What would fix it:** A single `plugin.json` standard that all platforms read, with each platform treating unknown fields as no-ops. The skill-portability Detection Algorithm (D1–D4) is a workaround that tries to elect the most complete existing manifest as canonical — it should not need to exist.
+`npx skills` single-skill install mode is explicitly unsupported for this plugin. The `.codex/INSTALL.md` and `.opencode/INSTALL.md` each document the correct install path.
 
----
+**What this means for plugin authors:** If your plugin has shared context, hooks, or cross-skill tooling, `npx skills` is the wrong distribution mechanism. You need to give each platform a whole-repo install path. The `uplifting-a-plugin` skill generates the per-platform manifests that make this possible — but cannot make `npx skills` installable for rich plugins.
 
-## 3. Context files are three copies of similar content
-
-**What happens:** Platforms read different files for session context:
-
-| Platform | Context file |
-|----------|-------------|
-| Claude Code | `CLAUDE.md` |
-| Gemini CLI | `GEMINI.md` (specified in `gemini-extension.json` as `contextFileName`) |
-| Codex / Copilot CLI | `AGENTS.md` |
-
-These files serve the same purpose (load skill pointers and tool-mapping guidance into the model's context at session start) but must be authored and maintained separately. They diverge over time.
-
-**The format divergence makes it worse:** `GEMINI.md` uses `@./path/to/file` include directives. `AGENTS.md` uses prose with bullet lists. `CLAUDE.md` is free-form prose. There is no shared syntax.
-
-**What would fix it:** A single context file standard with include/import semantics that all platforms support. Until that exists, any plugin with rich session context must maintain three diverging copies.
+**What would actually fix this:** `npx skills` needs a plugin-level install mode that can write shared context to a platform-appropriate location (e.g., appending to `~/.agents/AGENTS.md` or writing a plugin context file a harness reads at session start). Until then, `npx` is only suitable for standalone skills with no shared state.
 
 ---
 
-## 4. Tool name fragmentation requires per-skill mapping tables
+## Gap 2: Platform manifests are four parallel formats for the same data
 
-**What happens:** Every skill in a plugin references Claude Code tool names (`Read`, `Write`, `Edit`, `Bash`, `Glob`, `Grep`, `Skill`, `Task`). Each other platform uses different names:
+**Status: Addressed by shipping all formats in parallel.**
 
-| Claude Code | Gemini CLI | Copilot CLI | Codex |
-|-------------|------------|-------------|-------|
-| `Read` | `read_file` | `view` | native |
-| `Write` | `write_file` | `create` | native |
-| `Edit` | `replace` | `edit` | native |
-| `Bash` | `run_shell_command` | `bash` | native |
-| `Task` | (no equivalent) | `task` | `spawn_agent` |
+The repo carries six coexisting manifest files, each in the format its platform requires:
+- `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`
+- `.cursor-plugin/plugin.json` (with explicit `skills`, `agents`, `commands`, `hooks` fields — Claude auto-discovers these; Cursor does not)
+- `gemini-extension.json`
+- `package.json` (for OpenCode)
+- `.codex/INSTALL.md` (Codex has no manifest system — symlink-based discovery)
 
-The workaround is per-skill `references/{copilot,codex,gemini}-tools.md` sidecars — mapping tables installed alongside each skill. These sidecars must live inside `skills/<skillname>/` so that npx installation includes them (see gap #1). This works, but it means every skill in every plugin carries three identical boilerplate files.
+Every metadata change must be made in all files. There is no single source of truth. The `uplifting-a-plugin` skill's Detection Algorithm (D1–D4) is a workaround for the input side of this problem — it elects the most complete existing manifest as canonical so you don't have to pick one. But there is no output-side solution: the files stay separate.
 
-**What would fix it:** Standardised tool names across platforms, or a platform-level adapter that translates canonical names automatically. Until then, every plugin author maintains these tables, and every cross-platform skill invocation depends on the user reading the right mapping table.
-
----
-
-## 5. Hook event names differ between Claude Code and Cursor
-
-**What happens:** Claude Code and Cursor both support lifecycle hooks but use different event names:
-
-| Claude Code | Cursor |
-|-------------|--------|
-| `SessionStart` | `sessionStart` |
-| `UserPromptSubmit` | `userMessage` |
-| `PostToolUse` | `postToolUse` |
-| `Stop` | `agentStop` |
-
-A plugin with hooks must maintain two hook configuration files (`hooks/hooks.json` and `hooks/hooks-cursor.json`). Any hook command that uses `$CLAUDE_PLUGIN_ROOT` (a Claude-specific env var) is invalid in Cursor without manual editing.
-
-Other platforms (Gemini CLI, OpenCode, Codex) have no hook mechanism at all.
-
-**What would fix it:** A shared hook event vocabulary. Hooks are the most powerful platform extension mechanism, and their non-portability means plugin authors must choose between a rich Claude-only hook implementation and a neutered cross-platform one.
+**What would actually fix this:** A single `plugin.json` standard that all platforms read, treating unknown fields as no-ops.
 
 ---
 
-## 6. Gemini CLI has no subagent support
+## Gap 3: Session context files are three parallel formats
 
-**What happens:** Claude Code skills routinely use the `Task` tool to dispatch subagents — fresh model instances with isolated context. This is foundational to skills like `subagent-driven-development` and `dispatching-parallel-agents`. Gemini CLI has no equivalent.
+**Status: Partially addressed — per-platform injection substitutes for a unified format.**
 
-Skills that use subagents degrade silently in Gemini CLI: the agent either tries to execute the subagent dispatch instruction directly (which fails), or falls back to sequential single-session execution (which loses the isolation guarantees the skill was designed for).
+Each platform reads a different file for session context:
 
-The `gemini-tools.md` sidecar documents this limitation, but there is no runtime enforcement. A Gemini user running a skill designed for subagent parallelism will get a degraded experience with no clear error.
+| Platform | Context file / mechanism |
+|----------|--------------------------|
+| Claude Code | Injected by `SessionStart` hook — no context file read at startup |
+| Cursor | Same hook, different event name schema |
+| Gemini CLI | `GEMINI.md` with `@`-includes, filename declared in `gemini-extension.json` |
+| Codex / Copilot | `AGENTS.md` — a separate file from `CLAUDE.md` (in superpowers, `AGENTS.md` is a symlink to `CLAUDE.md`) |
+| OpenCode | JS plugin prepends content to first user message |
 
-**What would fix it:** Gemini CLI needs a subagent/parallel-task mechanism, or skills that use subagents need a way to declare their requirements so platforms can refuse gracefully rather than degrade silently.
+The superpowers `CLAUDE.md` is contributor guidelines for AI agents opening PRs — it does not reference `using-superpowers` at all, because the hook does that work. `GEMINI.md` is just two `@`-include lines. `AGENTS.md` is a symlink to `CLAUDE.md`.
 
----
+The shared content (`using-superpowers/SKILL.md` + the relevant tool-mapping sidecar) is delivered per-platform by the injection mechanism, not by a unified context file. The per-platform context files are thin wrappers or stubs — the real payload lives in the skill directory and is pulled at runtime.
 
-## 7. Skill invocation is not standardised
-
-**What happens:** Every platform invokes skills differently:
-
-| Platform | How skills are invoked |
-|----------|----------------------|
-| Claude Code | `Skill` tool with `skill` parameter |
-| Gemini CLI | `activate_skill` tool |
-| Copilot CLI | `skill` tool |
-| Codex | Skills load natively — follow instructions directly |
-| npx / AGENTS.md harnesses | No standard — depends on the harness |
-
-Skills that instruct the agent to invoke other skills (e.g., `Use the superpowers:brainstorming skill`) will fail on platforms where the `Skill` tool does not exist. The `gemini-tools.md` sidecar documents the Gemini equivalent, but this only works if the user reads the sidecar before following the skill instruction.
-
-**What would fix it:** A standardised skill invocation primitive across platforms, or a discovery mechanism so a skill can call another skill without naming a platform-specific tool.
+**What would actually fix this:** A single context file standard with include/import semantics that all platforms support. Until that exists, the parallel-adapters approach is the best available option.
 
 ---
 
-## Summary: What is genuinely portable today
+## Gap 4: Tool name fragmentation requires per-skill mapping tables
 
-The honest picture of what works across platforms without hacks:
+**Status: Addressed via static sidecars + model-time translation. No runtime rewriter exists.**
 
-| What | Works across platforms? |
-|------|------------------------|
-| Skill content (SKILL.md prose and checklists) | ✅ Yes — if the skill avoids platform-specific tool names |
-| Tool-mapping sidecars (references/*.md) | ✅ Yes — if installed alongside the skill |
-| Platform manifests | ⚠️ Partially — each platform reads a different file; no shared standard |
-| Session context (CLAUDE.md / GEMINI.md / AGENTS.md) | ❌ No — three separate files, different formats, none installed by npx |
-| Hooks | ❌ No — different event names, Claude-specific env vars, most platforms have no hooks |
-| Subagent dispatch (Task tool) | ❌ No — missing from Gemini CLI; different API in Codex and Copilot CLI |
-| Skill invocation from within skills | ⚠️ Partially — different tool names, documented in sidecars only |
+Every skill references Claude Code tool names. Each platform gets a mapping sidecar (`references/{codex,copilot,gemini}-tools.md`) delivered alongside the skill.
 
-The `uplifting-a-plugin` skill generates the necessary files to make a plugin *discoverable* on each platform. It cannot close the runtime gaps listed above. Those require platform-level changes.
+Delivery varies by platform:
+- **Gemini:** `GEMINI.md` has `@./skills/using-superpowers/references/gemini-tools.md` — auto-included every session
+- **OpenCode:** The JS plugin appends an inline tool-mapping block to the first user message — hardcoded in the plugin JS, not read from the sidecar file
+- **Codex / Copilot:** The `using-superpowers` skill instructs the model to "see `references/...`" — passive, depends on the model following the instruction
+
+The model does the translation at read time. Skills still say `Task`; Gemini users get told up front that `Task` has no equivalent and to fall back to `executing-plans`. Some capabilities have no mapping at all (Gemini subagents, Copilot `WebSearch`, Copilot plan mode) — the sidecars document these as capability gaps, not workarounds.
+
+**What would actually fix this:** Standardised tool names across platforms, or a platform-level adapter that translates canonical names. This is a platform-layer problem; skill authors cannot solve it.
+
+---
+
+## Gap 5: Hook event names and env vars differ between Claude Code and Cursor
+
+**Status: Addressed via parallel hook config files + polyglot hook script with env-var branching.**
+
+The hook script (`hooks/session-start`) outputs different JSON depending on which env var is set:
+- `CURSOR_PLUGIN_ROOT` → `{"additional_context": "..."}` (snake_case, Cursor's schema)
+- `CLAUDE_PLUGIN_ROOT` and not `COPILOT_CLI` → `{"hookSpecificOutput": {"hookEventName":"SessionStart","additionalContext":"..."}}` (Claude Code's schema)
+- `COPILOT_CLI=1` or unknown → `{"additionalContext": "..."}` (SDK standard, top-level)
+
+Two separate hook config files handle the different event name schemas:
+- `hooks/hooks.json` → `SessionStart` with matcher `startup|clear|compact`
+- `hooks/hooks-cursor.json` → `sessionStart` (lowercase), different JSON structure
+
+Windows support is via `hooks/run-hook.cmd` — a polyglot script valid as both CMD batch and bash. On Windows, CMD tries `Git\bin\bash.exe` then falls through to `where bash`; if no bash is found, it exits 0 silently (plugin still loads, just without session-start injection). On Unix, the CMD portion is swallowed by a heredoc and bash executes directly.
+
+**Hook commands using `$CLAUDE_PLUGIN_ROOT`** are not valid in Cursor — Cursor sets `CURSOR_PLUGIN_ROOT` instead. Any plugin with hook scripts that reference `$CLAUDE_PLUGIN_ROOT` directly (rather than detecting the env var) will silently break on Cursor. The `uplifting-a-plugin` skill flags these in its report.
+
+**What would actually fix this:** A shared hook event vocabulary and unified hook output format.
+
+---
+
+## Gap 6: Most platforms lack hook or subagent support
+
+**Status: Mixed — hooks are covered for all major platforms; subagents remain a genuine capability gap on Gemini.**
+
+**Session-start hooks:**
+- Claude Code: `SessionStart` hook. ✅
+- Cursor: `sessionStart` hook (different schema, same mechanism). ✅
+- Copilot CLI: `SessionStart` hook with `COPILOT_CLI` env var detection. ✅
+- OpenCode: `experimental.chat.messages.transform` JS hook in the plugin entry. ✅
+- Gemini CLI: No hook system — context files with `@`-includes substitute. ✅ (different mechanism, same effect)
+- Codex: No hook system, no context file mechanism. Relies on passive skill auto-discovery. ⚠️ (weaker guarantee — model may or may not invoke `using-superpowers`)
+
+**Subagents:**
+- Claude Code: Native `Task` tool. ✅
+- Copilot CLI: Native `task` tool. ✅
+- OpenCode: `@mention`-based subagent system. ✅
+- Codex: `spawn_agent`/`wait`/`close_agent` gated behind `[features] multi_agent = true` in config; named-agent dispatch (e.g., `superpowers:code-reviewer`) requires a prompt-template workaround since Codex has no plugin-level `agents` field. ⚠️
+- Cursor: Not documented in sidecars — unclear.
+- Gemini CLI: **No equivalent.** Skills that use subagents degrade to single-session `executing-plans`. ❌ Cannot be fixed at the plugin layer.
+
+---
+
+## Gap 7: Skill invocation is not standardised
+
+**Status: Addressed via the `using-superpowers` skill body, which includes per-platform invocation instructions.**
+
+The `using-superpowers` SKILL.md explicitly documents how skills are invoked on each platform:
+
+> **In Claude Code:** Use the `Skill` tool.
+> **In Copilot CLI:** Use the `skill` tool.
+> **In Gemini CLI:** Skills activate via the `activate_skill` tool.
+> **In other environments:** Check your platform's documentation.
+
+Because this content is injected at session start (before any other message), the model knows the correct invocation mechanism before it encounters a skill that calls another skill. It's a documentation fix delivered programmatically, not a protocol fix.
+
+---
+
+## What the Superpowers Pattern Actually Is
+
+The self-bootstrapping pattern is **six parallel delivery mechanisms for one payload** (the `using-superpowers` skill body + the platform's tool-mapping sidecar), plus six parallel manifest formats for platform discovery. Each platform gets its own adapter because there is no shared standard. The adapters are:
+
+1. Claude Code + Cursor + Copilot: shared `session-start` bash script + polyglot `.cmd` wrapper, env-var-branched output format, two separate hook config files
+2. OpenCode: JS plugin with `experimental.chat.messages.transform` hook
+3. Gemini: `GEMINI.md` `@`-include pointing at the skill file and its Gemini sidecar
+4. Codex: passive — no forced injection, relying on skill auto-discovery
+
+This is not elegant. But it works on five of six platforms with a strong guarantee (forced session-start injection), and on the sixth (Codex) with a weaker one (passive discovery).
+
+---
+
+## Summary: Gap Status After Superpowers Pattern
+
+| Gap | Status | Mechanism |
+|-----|--------|-----------|
+| npx installs skills, not plugins | ✅ Avoided | Whole-repo install on every platform; npx not used |
+| Four parallel manifest formats | ⚠️ Lived with | All formats shipped in parallel; no unified standard |
+| Three parallel context file formats | ✅ Bypassed | Per-platform injection delivers content directly; context files are stubs |
+| Tool name fragmentation | ⚠️ Documented, not fixed | Static sidecars + model-time translation; no runtime rewriter |
+| Hook event name fragmentation | ✅ Addressed | Parallel hook configs + polyglot script + env-var-branched output |
+| Gemini has no subagents | ❌ Unfixable at plugin layer | Documented; skills degrade to single-session execution |
+| Codex has no hook system | ⚠️ Partial | Passive skill auto-discovery; no forced injection |
+| Codex has no plugin `agents` field | ⚠️ Workaround | Prompt-template workaround documented in `codex-tools.md` |
+| Skill invocation not standardised | ✅ Addressed | Per-platform instructions injected at session start via `using-superpowers` |
+| Windows hook support | ✅ Addressed | Polyglot `.cmd` / bash script with graceful fallback (exit 0 if no bash) |
+
+The `uplifting-a-plugin` skill generates the manifests, hook configs, context files, and tool-mapping sidecars that this pattern requires. The remaining unfixable gaps (Gemini subagents, Codex hook injection, the fundamental lack of a unified manifest standard) require platform-level changes.
