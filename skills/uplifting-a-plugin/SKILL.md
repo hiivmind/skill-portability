@@ -607,6 +607,48 @@ If the user declines, skip Steps 18-24 and proceed to Step 25 (final report).
 
 If `skills/using-{{name}}/SKILL.md` already exists, skip the prompt and all bootstrapping steps — the user has already configured bootstrapping (possibly with custom content).
 
+- [ ] **Step 18: Generate `using-<plugin>/SKILL.md`** (if bootstrapping enabled)
+
+Create `<plugin-path>/skills/using-{{name}}/` directory. Build the skill table by reading each skill's SKILL.md frontmatter from Step 2.
+
+Write to `<plugin-path>/skills/using-{{name}}/SKILL.md`:
+
+```markdown
+---
+name: using-{{name}}
+description: Session-start bootstrapping for {{name}}. Lists available skills and platform-specific invocation instructions.
+---
+
+# Using {{displayName}}
+
+This plugin provides the following skills:
+
+| Skill | Description |
+|-------|-------------|
+{{skillTable}}
+
+## How to Invoke Skills
+
+**Claude Code / Cursor:** Use the `Skill` tool with the skill name.
+
+**Copilot CLI:** Use the `skill` tool with the skill name.
+
+**Gemini CLI:** Use the `activate_skill` tool with the skill name.
+
+**Codex / Other:** Skills are auto-discovered. Follow the SKILL.md instructions directly.
+
+## Tool Name Mapping
+
+Skills use Claude Code tool names. See each skill's `references/` directory for platform-specific equivalents.
+```
+
+Where `{{skillTable}}` is built from the skills inventoried in Step 2:
+```
+| `<skill-name>` | <description from frontmatter> |
+```
+
+One row per skill, excluding `using-{{name}}` itself.
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
