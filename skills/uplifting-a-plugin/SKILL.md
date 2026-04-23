@@ -579,34 +579,6 @@ These tools are available in Gemini CLI but have no Claude Code equivalent:
 | `enter_plan_mode` / `exit_plan_mode` | Switch to read-only research mode before making changes |
 ```
 
-- [ ] **Step 25: Emit final report**
-
-Print a summary with five sections:
-
-**Metadata inferred:**
-Repeat the D4 inference summary. List any fields that fell back to hard defaults or were left blank.
-
-**Created:**
-Every file written in this run, relative to `<plugin-path>`.
-
-**Skipped (already exists):**
-Every file that was present and therefore not overwritten.
-
-**Needs manual review:**
-- Any hook command containing `$CLAUDE_PLUGIN_ROOT`
-- Any skill with missing `name` or `description` frontmatter
-- Any metadata field that could not be inferred from any source
-
-**Session-start bootstrapping:**
-If bootstrapping was enabled:
-> "Session-start injection configured. Generated: `using-{{name}}/SKILL.md`, `hooks/session-start`, `hooks/run-hook.cmd`, hook entries in `hooks.json` and `hooks-cursor.json`, OpenCode message transform, GEMINI.md updated."
-
-If bootstrapping was declined:
-> "Session-start injection: not configured (user declined)"
-
-If bootstrapping was skipped (using-{{name}} already existed):
-> "Session-start injection: already configured (using-{{name}} exists)"
-
 - [ ] **Step 17: Prompt for bootstrapping**
 
 After completing Steps 1-15 but before emitting the final report, ask:
@@ -858,6 +830,34 @@ If user confirms (or file doesn't exist), regenerate `GEMINI.md` with the using-
 ```
 
 Where `{{otherSkillIncludes}}` contains all skills except `using-{{name}}`, in the same format as Step 9.
+
+- [ ] **Step 25: Emit final report**
+
+Print a summary with five sections:
+
+**Metadata inferred:**
+Repeat the D4 inference summary. List any fields that fell back to hard defaults or were left blank.
+
+**Created:**
+Every file written in this run, relative to `<plugin-path>`.
+
+**Skipped (already exists):**
+Every file that was present and therefore not overwritten.
+
+**Needs manual review:**
+- Any hook command containing `$CLAUDE_PLUGIN_ROOT`
+- Any skill with missing `name` or `description` frontmatter
+- Any metadata field that could not be inferred from any source
+
+**Session-start bootstrapping:**
+If bootstrapping was enabled:
+> "Session-start injection configured. Generated: `using-{{name}}/SKILL.md`, `hooks/session-start`, `hooks/run-hook.cmd`, hook entries in `hooks.json` and `hooks-cursor.json`, OpenCode message transform, GEMINI.md updated."
+
+If bootstrapping was declined:
+> "Session-start injection: not configured (user declined)"
+
+If bootstrapping was skipped (using-{{name}} already existed):
+> "Session-start injection: already configured (using-{{name}} exists)"
 
 ## Running the skill
 
