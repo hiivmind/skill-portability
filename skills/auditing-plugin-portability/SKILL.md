@@ -114,7 +114,30 @@ If `hooks/hooks.json` exists and is non-empty:
 - Verify `hooks/run-hook.cmd` exists
 - Report any missing files
 
-- [ ] **Step 8: Print report**
+- [ ] **Step 8: Check session-start injection** (only if `using-<name>` exists)
+
+If `skills/using-{{name}}/SKILL.md` does not exist, skip this step entirely — bootstrapping is not configured.
+
+If it exists, check all bootstrapping infrastructure:
+
+| Component | Check |
+|-----------|-------|
+| `skills/using-{{name}}/SKILL.md` | File exists |
+| `skills/using-{{name}}/references/gemini-tools.md` | File exists |
+| `hooks/session-start` | File exists and is executable |
+| `hooks/run-hook.cmd` | File exists and is executable |
+| `hooks/hooks.json` | File exists and contains `SessionStart` entry with command containing `session-start` |
+| `hooks/hooks-cursor.json` | File exists and contains `sessionStart` entry with command containing `session-start` |
+| `.opencode/plugins/{{name}}.js` | File exists and contains `experimental.chat.messages.transform` |
+| `GEMINI.md` | File exists and first `@./skills/` include is `using-{{name}}` |
+
+Report status for each:
+- `PRESENT` — component exists and is correctly configured
+- `MISSING` — component does not exist
+- `NO_TRANSFORM` — OpenCode plugin exists but lacks message transform
+- `NOT_FIRST` — GEMINI.md exists but using-{{name}} is not the first skill include
+
+- [ ] **Step 9: Print report**
 
 ```
 # Portability Audit: <name> v<version>
