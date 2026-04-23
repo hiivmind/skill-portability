@@ -649,6 +649,15 @@ Where `{{skillTable}}` is built from the skills inventoried in Step 2:
 
 One row per skill, excluding `using-{{name}}` itself.
 
+- [ ] **Step 19: Generate `using-<plugin>/references/` sidecars** (if bootstrapping enabled)
+
+Create `<plugin-path>/skills/using-{{name}}/references/` directory. Write the same three sidecar files as Step 15 uses:
+- `copilot-tools.md` (same template as Step 15)
+- `codex-tools.md` (same template as Step 15)
+- `gemini-tools.md` (same template as Step 15)
+
+These are identical to other skills' sidecars — reuse the templates from Step 15.
+
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
