@@ -119,7 +119,7 @@ Also check per-skill sidecars: `skills/<name>/references/{copilot,codex,gemini}-
 
 ### Phase 3: Write missing platform artifacts
 
-For each file missing (not skipped), render from the corresponding template in `assets/templates/` and write. This is identical to the current Steps 4–11, except:
+For each file missing (not skipped), render from the corresponding template in `lib/templates/` and write. This is identical to the current Steps 4–11, except:
 
 - `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` are now also rendered and written if absent.
 - The Cursor manifest omits `"agents"` or `"commands"` keys if those directories don't exist in the source.
@@ -203,9 +203,9 @@ Run the uplifting-a-plugin skill to generate all missing files automatically.
 
 Two new templates are needed (Claude Code manifests were previously assumed to already exist):
 
-- `assets/templates/claude-plugin/plugin.json.tmpl` — already exists ✅
-- `assets/templates/claude-plugin/marketplace.json.tmpl` — already exists ✅
-- `assets/templates/CLAUDE.md.tmpl` — already exists ✅
+- `lib/templates/claude-plugin/plugin.json.tmpl` — already exists ✅
+- `lib/templates/claude-plugin/marketplace.json.tmpl` — already exists ✅
+- `lib/templates/CLAUDE.md.tmpl` — already exists ✅
 
 No new template files needed. The uplift skill just needs to check and write these if absent.
 
