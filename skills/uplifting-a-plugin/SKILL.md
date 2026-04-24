@@ -381,10 +381,15 @@ Do NOT auto-write — frontmatter descriptions require human authorship.
 Adapt hooks from any source platform to all target platforms.
 See `lib/patterns/hook-merging.md` for event mapping and merge logic.
 
+Hook porting is filtered by `computed.target_platforms`. Each subsection only
+runs if its target platform is selected.
+
 ### 5.1 Claude Code → Cursor Hooks
 
 ```pseudocode
 PORT_CURSOR_HOOKS(computed):
+  IF "cursor" NOT IN computed.target_platforms:
+    RETURN
   IF any(s.path == "hooks/hooks-cursor.json" FOR s IN computed.skipped):
     RETURN
   IF computed.existing_hooks:
@@ -400,6 +405,8 @@ Copilot uses separate `bash` / `powershell` fields, no `matcher`, stored under `
 
 ```pseudocode
 PORT_COPILOT_HOOKS(computed):
+  IF "copilot-cli" NOT IN computed.target_platforms:
+    RETURN
   IF NOT computed.existing_hooks:
     RETURN
   copilot_hooks = adapt_hooks_copilot(computed.existing_hooks)  # see hook-merging.md
@@ -421,6 +428,8 @@ they cannot be written as files. Capture guidance text to include in install doc
 
 ```pseudocode
 GEMINI_HOOK_GUIDANCE(computed):
+  IF "gemini-cli" NOT IN computed.target_platforms:
+    RETURN
   IF computed.existing_hooks:
     computed.gemini_hook_text = render_gemini_hook_instructions(computed.existing_hooks)
   ELSE:
