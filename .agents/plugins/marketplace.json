@@ -1,0 +1,20 @@
+{
+  "name": "skill-portability-marketplace",
+  "interface": {
+    "displayName": "Skill Portability Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "skill-portability",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

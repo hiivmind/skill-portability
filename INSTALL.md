@@ -199,16 +199,45 @@ In Copilot CLI, invoke skills with the `/` prefix:
 
 ### Codex
 
-#### Skill-discovery install
+#### GitHub marketplace install
 
-Clone the repo and expose the skills directory:
+Register the repo as a Codex marketplace:
+
+```bash
+codex marketplace add hiivmind/skill-portability
+```
+
+This adds a marketplace entry to `~/.codex/config.toml`.
+
+Then open `/plugins` in Codex and install `skill-portability`.
+
+Codex persists the plugin enablement as a separate config entry:
+
+```toml
+[plugins."skill-portability@skill-portability-marketplace"]
+enabled = true
+```
+
+#### Local development install
+
+Use this only when you are intentionally testing a local checkout rather than installing from GitHub.
+
+```bash
+codex marketplace add /path/to/skill-portability
+```
+
+Then open `/plugins` in Codex and install `skill-portability`.
+
+#### Skill-discovery fallback
+
+If you only want the raw skills and do not need Codex plugin packaging, clone the repo and expose the skills directory:
 
 ```bash
 git clone https://github.com/hiivmind/skill-portability
 ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
 ```
 
-Restart Codex. Skills will be discoverable through native skill discovery.
+Use this as a fallback path, not the default install story for this repo.
 
 #### Context file
 
@@ -216,7 +245,11 @@ Codex uses `AGENTS.md` as its primary context file.
 
 #### Verify
 
-Start a new Codex session and check that skills are listed.
+Start a new Codex session and check one of:
+
+- `/plugins` shows `skill-portability` as installed
+- `~/.codex/config.toml` contains both the marketplace entry and the enabled plugin entry
+- `$assessing-plugin-portability` resolves in a fresh session
 
 #### Using the skills
 
@@ -300,10 +333,16 @@ ln -s /path/to/existing/skill-portability/skills skills/skill-portability
 
 ### Codex
 
-Symlink the skills directory from your existing checkout:
+For local development against an existing checkout, register the checkout itself as a marketplace:
+
+```bash
+codex marketplace add /path/to/existing/skill-portability
+```
+
+Then open `/plugins` in Codex and install `skill-portability`.
+
+If you only want skill discovery, symlink the skills directory from your existing checkout:
 
 ```bash
 ln -s /path/to/existing/skill-portability/skills ~/.agents/skills/skill-portability
 ```
-
-Restart Codex.
