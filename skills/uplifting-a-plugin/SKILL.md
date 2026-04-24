@@ -133,21 +133,125 @@ CHECK_CONFLICTS(computed):
 
 ## 3. Phase 3: Recommend
 
-Derive the Codex packaging decision before generation so Phase 4 can branch
-on `computed.codex_rec` without re-evaluating state mid-loop.
+Interactive uplift target recommendation and platform selection. Uses `computed.shape`
+from Phase 1 to derive a recommendation, then asks the user to confirm and select
+target platforms.
 
-### 3.1 Choose Codex Path
+### 3.1 Recommend and Confirm Uplift Target
 
 ```pseudocode
-RECOMMEND(computed):
-  IF computed.shape == "bare-skill-repo" AND NOT computed.existing_hooks AND len(computed.agents) == 0:
-    computed.codex_rec = "native-skill-discovery"
-  ELIF any(s.path == ".codex-plugin/plugin.json" FOR s IN computed.skipped):
-    computed.codex_rec = "native-plugin-packaging"
+RECOMMEND_AND_CONFIRM(computed):
+  # Derive recommendation from shape
+  IF computed.shape == "bare-skill-repo":
+    IF len(computed.skills) <= 3:
+      recommended = "skill-first"
+      rationale = "This repo has " + len(computed.skills) + " skill(s) and no platform manifests. Skill-first generates sidecars and context files without full plugin packaging."
+    ELSE:
+      recommended = "full-portable-plugin"
+      rationale = "This repo has " + len(computed.skills) + " skills. Full plugin packaging gives each platform a native manifest for better discoverability."
+
+  ELIF computed.shape == "single-platform-plugin":
+    recommended = "full-portable-plugin"
+    rationale = "This repo already has one platform manifest. Full plugin packaging adds the remaining platforms."
+
+  ELIF computed.shape == "multi-platform-source":
+    recommended = "full-portable-plugin"
+    rationale = "This repo already targets multiple platforms. Full plugin packaging fills the remaining gaps."
+
   ELIF computed.shape == "curated-distribution":
+    recommended = "curated-note-only"
+    rationale = "This repo is a marketplace distribution without upstream skills. Only install documentation and notes will be generated."
+
+  ELSE:
+    recommended = "full-portable-plugin"
+    rationale = "Repo shape could not be classified. Defaulting to full plugin packaging."
+
+  # If platforms input was provided, auto-confirm
+  IF inputs.platforms IS PROVIDED:
+    computed.uplift_target = recommended
+    RETURN
+
+  # Present to user
+  DISPLAY "## Uplift Target"
+  DISPLAY "Shape: " + computed.shape
+  DISPLAY "Recommendation: **" + recommended + "**"
+  DISPLAY rationale
+  DISPLAY ""
+  DISPLAY "Options:"
+  DISPLAY "  1. skill-first — sidecars, context files, AGENTS.md only (no platform manifests)"
+  DISPLAY "  2. full-portable-plugin — all platform manifests + context files + sidecars + install docs"
+  DISPLAY "  3. curated-note-only — install notes only"
+
+  response = ASK "Accept recommendation (" + recommended + "), or choose 1/2/3?"
+
+  IF response confirms recommendation:
+    computed.uplift_target = recommended
+  ELSE:
+    computed.uplift_target = parse_choice(response)
+```
+
+### 3.2 Select Target Platforms
+
+```pseudocode
+SELECT_PLATFORMS(computed):
+  all_platforms = ["claude-code", "cursor", "gemini-cli", "opencode", "copilot-cli", "codex"]
+
+  # If platforms input was provided, use it directly
+  IF inputs.platforms IS PROVIDED:
+    IF inputs.platforms == "all":
+      computed.target_platforms = all_platforms
+    ELSE:
+      computed.target_platforms = parse_csv(inputs.platforms)
+      validate_platform_names(computed.target_platforms)
+    RETURN
+
+  # Pre-select based on uplift target and existing state
+  IF computed.uplift_target == "skill-first":
+    preselected = all_platforms
+  ELIF computed.uplift_target == "curated-note-only":
+    preselected = [p FOR p IN all_platforms
+                   IF any(s.platform == p FOR s IN computed.skipped)]
+    IF len(preselected) == 0:
+      preselected = all_platforms
+  ELSE:
+    preselected = all_platforms
+
+  # Present checklist
+  DISPLAY "## Target Platforms"
+  DISPLAY ""
+  FOR p IN all_platforms:
+    marker = "[x]" IF p IN preselected ELSE "[ ]"
+    existing = " (manifest exists)" IF any(s.platform == p FOR s IN computed.skipped) ELSE ""
+    DISPLAY "  " + marker + " " + p + existing
+  DISPLAY ""
+
+  response = ASK "Confirm platforms, or list the ones you want (e.g. 'claude-code, cursor, gemini-cli')?"
+
+  IF response confirms:
+    computed.target_platforms = preselected
+  ELSE:
+    computed.target_platforms = parse_platform_list(response)
+
+  # Validate: at least one platform required
+  IF len(computed.target_platforms) == 0:
+    DISPLAY "At least one platform must be selected."
+    GOTO SELECT_PLATFORMS
+```
+
+### 3.3 Derive Codex Path
+
+```pseudocode
+DERIVE_CODEX_PATH(computed):
+  IF "codex" NOT IN computed.target_platforms:
+    computed.codex_rec = None
+    RETURN
+
+  IF computed.uplift_target == "skill-first":
+    computed.codex_rec = "native-skill-discovery"
+  ELIF computed.uplift_target == "curated-note-only":
     computed.codex_rec = "curated-package-note"
   ELSE:
-    computed.codex_rec = "native-skill-discovery"
+    computed.codex_rec = "native-plugin-packaging"
 ```
 
 ---
