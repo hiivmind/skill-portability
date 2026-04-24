@@ -4,7 +4,7 @@
 
 ## Problem
 
-`docs/ecosystem-friction.md` frames the cross-platform ecosystem purely through friction — what breaks, what's missing, what can't be fixed. This is accurate but incomplete. Each platform's ecosystem tools (`npx skills`, `gh skill`, `gemini extensions install`, Codex `$skill-installer`, Cursor marketplace, npm, OpenSkills) work well for consumers and single-skill authors. The friction only appears when an author tries to deliver a cross-platform plugin with shared state (hooks, context files, multiple skills).
+`docs/ecosystem-friction.md` frames the cross-platform ecosystem purely through friction — what breaks, what's missing, what can't be fixed. This is accurate but incomplete. Each platform's ecosystem tools (`npx skills`, `gh skill`, `gemini extensions install`, Codex `$skill-installer`, Cursor marketplace, npm, OpenSkills) work well for consumers and single-skill authors. The friction only appears when an author tries to deliver a cross-platform plugin with shared resources and patterns (hooks, context files, platform manifests, cross-skill references).
 
 The doc needs to tell both stories: what works for consumers and single-skill authors, and where cross-platform plugin delivery hits real limits.
 
@@ -42,7 +42,7 @@ For a user who has a single SKILL.md with name/description frontmatter and wants
 
 **Where it breaks down:** `npx skills add` copies only the `skills/` directory — it doesn't install the repo. Plugins with shared hooks, context files, platform manifests, and cross-skill references lose those assets. This is the fundamental install-granularity mismatch: skills are files, plugins are repos.
 
-**How skill-portability solves this:** Whole-repo install on every platform. `npx skills` is explicitly not used for plugins with shared state.
+**How skill-portability solves this:** Whole-repo install on every platform. `npx skills` is explicitly not used for plugins with shared resources.
 
 **What would fix it:** `npx skills` (or a successor) needs a plugin-level install mode that installs the full repo, writes shared context, and wires hooks per-platform.
 
@@ -141,7 +141,7 @@ Expand the current summary table to two columns per area:
 
 | Area | Consumer / single-skill author | Cross-platform plugin author |
 |------|-------------------------------|------------------------------|
-| Distribution | ✅ One-command install via `npx skills`, `gh skill`, platform CLIs | ⚠️ `npx skills` loses shared state; whole-repo install required |
+| Distribution | ✅ One-command install via `npx skills`, `gh skill`, platform CLIs | ⚠️ `npx skills` loses shared resources; whole-repo install required |
 | Discovery | ✅ Multiple registries, CLI search, gallery browsing | ⚠️ No cross-platform registry; must publish to each separately |
 | Manifests | ✅ Invisible to consumers; one file per platform for authors | ❌ Six parallel formats, no single source of truth |
 | Context files | ✅ One file per platform, reliable delivery | ⚠️ Parallel adapters needed for cross-platform delivery |
