@@ -184,4 +184,3 @@ Score 1 when:
 Score 0 when:
 - No `mcp.json` or `agents/` present
 - Runtime configuration missing
-

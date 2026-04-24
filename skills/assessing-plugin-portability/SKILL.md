@@ -24,7 +24,7 @@ Assess a plugin repo and report portability gaps across all platforms. Makes no 
 ## Overview
 
 | Phase | Description |
-|-------|-------------|
+| ----- | ----------- |
 | **Phase 1: Detect** | Scan metadata, elect canonical, build model, classify shape |
 | **Phase 2: Inventory** | Discover all assets across all platform conventions |
 | **Phase 3: Score** | Run per-platform rubric, detect blockers |
@@ -338,7 +338,7 @@ SUMMARISE_ACTIONS(computed):
 
 ### Step 5.1: Print Assessment
 
-```
+```text
 # Portability Assessment: {name} v{version}
 
 ## Repo Shape
@@ -398,7 +398,7 @@ Run the uplifting-a-plugin skill to generate all missing artifacts automatically
 
 ## State Flow
 
-```
+```text
 Phase 1               Phase 2                       Phase 3
 ─────────────────────────────────────────────────────────────
 computed              computed.manifest_results     computed.scores[platform]

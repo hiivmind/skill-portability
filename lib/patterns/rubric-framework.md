@@ -70,7 +70,7 @@ Blockers override raw scores. A repo with a decent score may still have one crit
 ## Blocker Detection Rules
 
 | Blocker | Severity | Detection |
-|---------|----------|-----------|
+| ------- | -------- | --------- |
 | No trustworthy metadata source | Critical | All metadata fields from hard fallbacks only |
 | Unresolved tool assumptions | Major | Skill references platform-specific tools with no sidecar in `references/` |
 | Hook env hard-coding | Major | Hook scripts reference `CLAUDE_PLUGIN_ROOT` or similar without env branching |

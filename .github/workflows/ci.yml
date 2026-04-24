@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: |
+          files=$(find . -name '*.sh' -type f)
+          if [ -n "$files" ]; then
+            echo "$files" | xargs shellcheck
+          else
+            echo "No .sh files found"
+          fi
+
+  validate-structure:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq
+        run: sudo apt-get install -y jq
+      - name: Validate platform artifacts
+        run: |
+          errors=0
+
+          check_file() {
+            if [ ! -f "$1" ]; then
+              echo "FAIL: $1 does not exist"
+              errors=$((errors + 1))
+            else
+              echo "OK: $1"
+            fi
+          }
+
+          check_json() {
+            if [ ! -f "$1" ]; then
+              echo "FAIL: $1 does not exist"
+              errors=$((errors + 1))
+            elif ! jq empty "$1" 2>/dev/null; then
+              echo "FAIL: $1 is not valid JSON"
+              errors=$((errors + 1))
+            else
+              echo "OK: $1 (valid JSON)"
+            fi
+          }
+
+          echo "=== Platform Artifacts ==="
+          check_json .claude-plugin/plugin.json
+          check_json .claude-plugin/marketplace.json
+          check_json .cursor-plugin/plugin.json
+          check_file GEMINI.md
+          check_file .opencode/plugins/skill-portability.js
+          check_file .github/copilot-instructions.md
+          check_file AGENTS.md
+
+          echo ""
+          echo "=== Skill Frontmatter ==="
+          for skill_dir in skills/*/; do
+            skill_file="${skill_dir}SKILL.md"
+            if [ ! -f "$skill_file" ]; then
+              echo "FAIL: $skill_file does not exist"
+              errors=$((errors + 1))
+              continue
+            fi
+            if ! grep -q '^name:' "$skill_file"; then
+              echo "FAIL: $skill_file missing name: in frontmatter"
+              errors=$((errors + 1))
+            fi
+            if ! grep -q '^description:' "$skill_file"; then
+              echo "FAIL: $skill_file missing description: in frontmatter"
+              errors=$((errors + 1))
+            fi
+            echo "OK: $skill_file (frontmatter valid)"
+          done
+
+          echo ""
+          echo "=== Per-Skill Sidecars ==="
+          for skill_dir in skills/*/; do
+            for sidecar in codex-tools.md copilot-tools.md gemini-tools.md; do
+              check_file "${skill_dir}references/${sidecar}"
+            done
+          done
+
+          echo ""
+          echo "=== Version Parity ==="
+          v_pkg=$(jq -r .version package.json)
+          v_claude=$(jq -r .version .claude-plugin/plugin.json)
+          v_cursor=$(jq -r .version .cursor-plugin/plugin.json)
+          echo "package.json: $v_pkg"
+          echo "plugin.json (claude): $v_claude"
+          echo "plugin.json (cursor): $v_cursor"
+          if [ "$v_pkg" != "$v_claude" ] || [ "$v_pkg" != "$v_cursor" ]; then
+            echo "FAIL: version mismatch"
+            errors=$((errors + 1))
+          else
+            echo "OK: all versions match ($v_pkg)"
+          fi
+
+          echo ""
+          echo "=== Session-Start Hook ==="
+          if [ ! -x hooks/session-start ]; then
+            echo "FAIL: hooks/session-start does not exist or is not executable"
+            errors=$((errors + 1))
+          else
+            echo "OK: hooks/session-start (executable)"
+          fi
+
+          echo ""
+          if [ "$errors" -gt 0 ]; then
+            echo "FAILED: $errors error(s) found"
+            exit 1
+          else
+            echo "All checks passed"
+          fi
+
+  lint-markdown:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2
+      - name: Run markdownlint
+        run: markdownlint-cli2 "**/*.md"

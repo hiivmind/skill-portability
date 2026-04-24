@@ -10,6 +10,7 @@ Publish the plugin as an npm package. No submission or review process.
 
 **npm:**
 Add to `opencode.json`:
+
 ```json
 {
   "plugin": ["{{name}}"]
