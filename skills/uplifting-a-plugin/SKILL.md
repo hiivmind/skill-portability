@@ -24,6 +24,8 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 
 > **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
 > **Manifest Schemas:** `lib/patterns/manifest-generation.md`
+> **Manifest Templates:** `lib/templates/manifests/`
+> **Context File Templates:** `lib/templates/context-files/`
 > **Hook Merging:** `lib/patterns/hook-merging.md`
 > **Bootstrapping:** `lib/patterns/bootstrapping.md`
 > **Platform References:** `lib/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md`
@@ -172,7 +174,17 @@ GENERATE_MANIFESTS(computed):
     resolved = substitute(manifest.target, computed.metadata)
     IF any(s.path == resolved FOR s IN computed.skipped):
       CONTINUE
-    content = render_schema(manifest.schema, computed.metadata)
+    template_path = schema_to_template_path(manifest.schema)
+    mode = schema_to_mode(manifest.schema)
+    template = Read(template_path)
+
+    IF mode == "plain":
+      content = substitute(template, computed.metadata)
+    ELIF mode == "conditional":
+      content = render_with_conditionals(template, computed.metadata, computed)
+    ELIF mode == "builder":
+      content = render_with_builder(template, computed.metadata, computed)
+
     Write(resolved, content)
     computed.created.append({ path: resolved, platform: manifest.platform })
 ```
