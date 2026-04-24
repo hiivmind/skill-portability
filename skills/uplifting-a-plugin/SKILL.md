@@ -1,33 +1,23 @@
 ---
 name: uplifting-a-plugin
 description: >
-  Add multi-platform portability to any plugin. Accepts any starting state —
-  Claude, Cursor, Gemini, OpenCode, Copilot, Codex, or bare SKILL.md files.
-  Detects what exists, infers canonical metadata, generates every missing
-  platform artifact, ports hooks, produces install documentation, and
+  Use when you need to add multi-platform portability to any plugin. Accepts any
+  starting state — Claude, Cursor, Gemini, OpenCode, Copilot, Codex, or bare
+  SKILL.md files. Detects what exists, infers canonical metadata, generates every
+  missing platform artifact, ports hooks, produces install documentation, and
   optionally configures session-start bootstrapping.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-inputs:
-  - name: plugin_path
-    type: string
-    required: true
-    description: Path to the plugin root directory
-  - name: platforms
-    type: string
-    required: false
-    description: >
-      Comma-separated list of target platforms. If omitted, the skill presents
-      an interactive checklist. Valid values: claude-code, cursor, gemini-cli,
-      opencode, copilot-cli, codex, all.
-outputs:
-  - name: report
-    type: object
-    description: Summary of created, skipped, and flagged files
+allowed-tools: Read, Write, Edit, Bash(readonly), Glob, Grep
 ---
 
 # Uplifting a Plugin to Multi-Platform Portability
 
 Transform any plugin into a fully portable plugin. No platform is assumed.
+
+**Inputs:**
+- `plugin_path` (string, required) — Path to the plugin root directory.
+- `platforms` (string, optional) — Comma-separated list of target platforms. If omitted, presents an interactive checklist. Valid: claude-code, cursor, gemini-cli, opencode, copilot-cli, codex, all.
+
+**Output:** Summary of created, skipped, and flagged files.
 
 > **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
 > **Manifest Schemas:** `lib/patterns/manifest-generation.md`
@@ -38,9 +28,6 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 > **Platform References:** `lib/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md`
 > **Hook Templates:** `lib/templates/hooks/session-start.sh`, `run-hook.cmd`
 > **Install Doc Templates:** `lib/templates/install-docs/`
-
----
-
 ## Overview
 
 | Phase | Description |
@@ -58,9 +45,6 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 frontmatter, or any platform manifest file.
 
 **Idempotent:** Running twice on the same repo produces no diff on the second run.
-
----
-
 ## 1. Phase 1: Detect
 
 Run the shared detection algorithm. See `lib/patterns/detection-algorithm.md` for full detail.
@@ -82,9 +66,6 @@ DETECT(plugin_path):
   computed.shape     = classify_shape(computed.sources)
   print_inference_summary(computed.metadata, computed.canonical)
 ```
-
----
-
 ## 2. Phase 2: Inventory
 
 ### 2.1 Discover Assets
@@ -128,9 +109,6 @@ CHECK_CONFLICTS(computed):
     IF file_exists(check.path):
       computed.skipped.append({ path: check.path, platform: check.platform })
 ```
-
----
-
 ## 3. Phase 3: Recommend
 
 Interactive uplift target recommendation and platform selection. Uses `computed.shape`
@@ -265,9 +243,6 @@ IF computed.uplift_target == "curated-note-only":
   RUN  Phase 8 (Report)
   RETURN
 ```
-
----
-
 ## 4. Phase 4: Generate
 
 ### 4.1 Write Platform Manifests
@@ -373,9 +348,6 @@ VALIDATE_FRONTMATTER(computed):
 ```
 
 Do NOT auto-write — frontmatter descriptions require human authorship.
-
----
-
 ## 5. Phase 5: Port
 
 Adapt hooks from any source platform to all target platforms.
@@ -445,9 +417,6 @@ PORT_WINDOWS_HOOKS(computed):
     Write("hooks/run-hook.cmd", source)
     computed.created.append({ path: "hooks/run-hook.cmd", platform: "cross" })
 ```
-
----
-
 ## 6. Phase 6: Document
 
 Generate install documentation for every platform that received artifacts.
@@ -548,9 +517,6 @@ WRITE_PUBLISHING_DOCS(computed, platforms_with_artifacts):
     Write("PUBLISHING.md", content)
     computed.created.append({ path: "PUBLISHING.md", platform: "cross" })
 ```
-
----
-
 ## 7. Phase 7: Bootstrap (opt-in)
 
 Session-start injection. See `lib/patterns/bootstrapping.md` for full generation logic.
@@ -588,75 +554,9 @@ BOOTSTRAP(computed):
 
   computed.bootstrap_status = "configured"
 ```
-
----
-
 ## 8. Phase 8: Report
 
-### 8.1 Emit Final Report
-
-```
-# Uplift Report: {name} v{version}
-
-## Repo Shape
-{shape}
-Metadata inferred from: {canonical.path}
-
-## Created
-{FOR artifact IN computed.created}
-  [{artifact.platform}]  {artifact.path}
-{/FOR}
-
-## Skipped (already exists)
-{FOR artifact IN computed.skipped}
-  [{artifact.platform}]  {artifact.path}
-{/FOR}
-
-## Needs Manual Review
-{FOR item IN computed.flagged}
-  {item}
-{/FOR}
-
-## Install Documentation
-{FOR platform IN platforms_with_artifacts}
-  {platform}: generated / flagged
-{/FOR}
-
-## Session-Start Bootstrapping
-{bootstrap_status}
-```
-
----
-
-## State Flow
-
-```
-Phase 1          Phase 2              Phase 3              Phase 4–5            Phase 6            Phase 7            Phase 8
-──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-computed         computed.skills      computed              computed.created     platforms_with     computed           Report
- .sources         .commands           .uplift_target         .skipped             _artifacts         .bootstrap        (displayed)
- .canonical       .agents             .target_platforms      .flagged              (= target         _status
- .metadata        .existing_hooks     .codex_rec                                   _platforms)
- .shape
-```
-
----
-
-## Reference Documentation
-
-- **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
-- **Manifest Schemas:** `lib/patterns/manifest-generation.md`
-- **Hook Merging:** `lib/patterns/hook-merging.md`
-- **Bootstrapping:** `lib/patterns/bootstrapping.md`
-- **Copilot Tool Mapping:** `lib/references/copilot-tools.md`
-- **Codex Tool Mapping:** `lib/references/codex-tools.md`
-- **Gemini Tool Mapping:** `lib/references/gemini-tools.md`
-- **Session-Start Template:** `lib/templates/hooks/session-start.sh`
-- **Run-Hook Template:** `lib/templates/hooks/run-hook.cmd`
-- **Install Doc Templates:** `lib/templates/install-docs/`
-
----
-
+Emit the final uplift report. See `lib/patterns/report-template.md` for the full report format and state flow diagram.
 ## Related Skills
 
-- **Audit portability:** `skills/auditing-plugin-portability/SKILL.md`
+- **Assess portability:** `skills/assessing-plugin-portability/SKILL.md`

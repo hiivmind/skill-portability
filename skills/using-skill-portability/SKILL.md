@@ -1,6 +1,6 @@
 ---
 name: using-skill-portability
-description: Session-start bootstrapping for skill-portability. Lists available skills and platform-specific invocation instructions.
+description: Use when starting a session with the skill-portability plugin. Session-start bootstrapping that lists available skills and platform-specific invocation instructions.
 ---
 
 # Using Skill Portability

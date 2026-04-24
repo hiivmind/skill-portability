@@ -2,6 +2,10 @@
 
 Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gemini, OpenCode, or bare SKILL.md repos as input. Emits every missing platform artifact.
 
+## Project Context
+
+Skill Portability is a Claude Code plugin that provides skills and commands for use across multiple AI coding platforms. Skills are defined using the open SKILL.md standard and can be invoked via each platform's native skill mechanism.
+
 ## Skills
 
 This plugin provides the following skills. Read the SKILL.md files listed to understand how to invoke each skill:
@@ -19,7 +23,7 @@ Skills use Claude Code tool names. Platform equivalents:
 - `Bash` → your platform's shell/command tool
 - `Grep` → your platform's content-search tool
 - `Glob` → your platform's file-search tool
-- `Skill` tool → your platform's skill-invoke tool (or follow instructions directly)
-- `Task` tool → your platform's subagent-dispatch tool (if supported)
+- `Skill` → your platform's skill-invoke tool
+- `Task` → your platform's subagent-dispatch tool (if supported)
 
 See `lib/references/` for platform-specific tool mapping tables (copilot-tools.md, codex-tools.md, gemini-tools.md).
