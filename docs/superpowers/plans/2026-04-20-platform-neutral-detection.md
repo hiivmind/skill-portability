@@ -17,7 +17,7 @@
 | `skills/uplifting-a-plugin/SKILL.md` | Full rewrite — platform-neutral detection phase replaces Step 1; Claude Code added as write target; report gains inferred metadata warnings section |
 | `skills/auditing-plugin-portability/SKILL.md` | Full rewrite — hard-fail on missing Claude manifest removed; detection phase added; Claude Code added to audit checklist; report updated |
 
-No other files change. Templates already cover Claude Code (`assets/templates/claude-plugin/`).
+No other files change. Templates already cover Claude Code (`lib/templates/claude-plugin/`).
 
 ---
 
@@ -173,25 +173,25 @@ Also check each `skills/<skillname>/references/copilot-tools.md`, `codex-tools.m
 
 - [ ] **Step 4: Render and write `.claude-plugin/plugin.json`** (if missing)
 
-Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/skill-portability/*/assets/templates/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
+Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
 
 - [ ] **Step 5: Render and write `.claude-plugin/marketplace.json`** (if missing)
 
-Read `assets/templates/claude-plugin/marketplace.json.tmpl` from the plugin install path. Substitute fields. Write to `<plugin-path>/.claude-plugin/marketplace.json`.
+Read `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` from the plugin install path. Substitute fields. Write to `<plugin-path>/.claude-plugin/marketplace.json`.
 
 - [ ] **Step 6: Render and write `CLAUDE.md`** (if missing)
 
-Read `assets/templates/CLAUDE.md.tmpl`. Substitute `{{displayName}}` and `{{description}}`. Write to `<plugin-path>/CLAUDE.md`.
+Read `lib/templates/context-files/CLAUDE.md.tmpl`. Substitute `{{displayName}}` and `{{description}}`. Write to `<plugin-path>/CLAUDE.md`.
 
 - [ ] **Step 7: Render and write `.cursor-plugin/plugin.json`** (if missing)
 
-Read `assets/templates/cursor-plugin/plugin.json.tmpl`. Substitute fields. Write to `<plugin-path>/.cursor-plugin/plugin.json`. Create `.cursor-plugin/` directory if needed.
+Read `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`. Substitute fields. Write to `<plugin-path>/.cursor-plugin/plugin.json`. Create `.cursor-plugin/` directory if needed.
 
 Omit `"agents"` key if `agents/` doesn't exist in source. Omit `"commands"` key if `commands/` doesn't exist.
 
 - [ ] **Step 8: Render and write `gemini-extension.json`** (if missing)
 
-Read `assets/templates/gemini-extension.json.tmpl`. Substitute fields. Write to `<plugin-path>/gemini-extension.json`.
+Read `lib/templates/manifests/gemini-extension.json.tmpl`. Substitute fields. Write to `<plugin-path>/gemini-extension.json`.
 
 - [ ] **Step 9: Render and write `GEMINI.md`** (if missing)
 
@@ -225,15 +225,15 @@ Build command bullet list for `{{commandIncludes}}` (omit entire Commands sectio
 - commands/<commandfile>.md
 ```
 
-Read `assets/templates/AGENTS.md.tmpl`. Substitute all fields. Write to `<plugin-path>/AGENTS.md`.
+Read `lib/templates/context-files/AGENTS.md.tmpl`. Substitute all fields. Write to `<plugin-path>/AGENTS.md`.
 
 - [ ] **Step 11: Render and write `package.json`** (if missing)
 
-Read `assets/templates/package.json.tmpl`. Substitute fields. Write to `<plugin-path>/package.json`.
+Read `lib/templates/manifests/package.json.tmpl`. Substitute fields. Write to `<plugin-path>/package.json`.
 
 - [ ] **Step 12: Render and write OpenCode plugin shim** (if missing)
 
-Create `<plugin-path>/.opencode/plugins/` if needed. Read `assets/templates/opencode-plugin.js.tmpl`. Substitute fields. Write to `<plugin-path>/.opencode/plugins/<name>.js`.
+Create `<plugin-path>/.opencode/plugins/` if needed. Read `lib/templates/manifests/opencode-plugin.js.tmpl`. Substitute fields. Write to `<plugin-path>/.opencode/plugins/<name>.js`.
 
 - [ ] **Step 13: Port hooks** (if source has hooks)
 
@@ -288,7 +288,7 @@ Do NOT auto-write — frontmatter descriptions require human authorship.
 
 - [ ] **Step 16: Seed per-skill tool-mapping sidecars**
 
-For each skill from Step 2, check whether `skills/<skillname>/references/` exists and whether each of the three sidecar files is present. For each missing sidecar, read from `assets/templates/skill-references/<platform>-tools.md` and write to `<plugin-path>/skills/<skillname>/references/<platform>-tools.md`. Create `references/` directory if needed.
+For each skill from Step 2, check whether `skills/<skillname>/references/` exists and whether each of the three sidecar files is present. For each missing sidecar, read from `lib/references/<platform>-tools.md` and write to `<plugin-path>/skills/<skillname>/references/<platform>-tools.md`. Create `references/` directory if needed.
 
 - [ ] **Step 17: Emit final report**
 
@@ -317,7 +317,7 @@ The skill is idempotent: running it twice on the same repo produces no diff on t
 
 ## Locating this plugin's assets
 
-Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/assets/templates/` to find the install root.
+Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/` to find the install root.
 ```
 
 - [ ] **Step 2: Verify frontmatter updated**

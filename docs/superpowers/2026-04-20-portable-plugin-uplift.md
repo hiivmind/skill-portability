@@ -4,7 +4,7 @@
 
 **Goal:** Create a standalone plugin repo (`portable-plugin-uplift`) containing a skill that takes any Claude-only plugin and emits the full multi-platform manifest set matching the superpowers portability pattern.
 
-**Architecture:** Hybrid template model — canonical manifest templates live in `assets/templates/` seeded from superpowers 5.0.7; the uplift skill reads source plugin metadata from `.claude-plugin/plugin.json`, renders templates with `{{field}}` substitution, ports hooks across platforms, seeds per-skill tool-mapping sidecars, and writes platform context files. A companion audit skill reports gaps without writing. The uplift repo itself follows the pattern it produces (dogfooding demo).
+**Architecture:** Hybrid template model — canonical manifest templates live in `lib/templates/` seeded from superpowers 5.0.7; the uplift skill reads source plugin metadata from `.claude-plugin/plugin.json`, renders templates with `{{field}}` substitution, ports hooks across platforms, seeds per-skill tool-mapping sidecars, and writes platform context files. A companion audit skill reports gaps without writing. The uplift repo itself follows the pattern it produces (dogfooding demo).
 
 **Tech Stack:** Bash (hook scripts), JSON (manifests), Markdown (skills, context files, templates). Zero runtime dependencies — all rendering done by the skill instructing the AI agent to perform string substitution.
 
@@ -37,21 +37,21 @@
 | `skills/auditing-plugin-portability/references/copilot-tools.md` | Tool mapping sidecar |
 | `skills/auditing-plugin-portability/references/codex-tools.md` | Tool mapping sidecar |
 | `skills/auditing-plugin-portability/references/gemini-tools.md` | Tool mapping sidecar |
-| `assets/templates/claude-plugin/plugin.json.tmpl` | Template for `.claude-plugin/plugin.json` |
-| `assets/templates/claude-plugin/marketplace.json.tmpl` | Template for `.claude-plugin/marketplace.json` |
-| `assets/templates/cursor-plugin/plugin.json.tmpl` | Template for `.cursor-plugin/plugin.json` |
-| `assets/templates/gemini-extension.json.tmpl` | Template for `gemini-extension.json` |
-| `assets/templates/GEMINI.md.tmpl` | Template for `GEMINI.md` |
-| `assets/templates/AGENTS.md.tmpl` | Template for `AGENTS.md` |
-| `assets/templates/CLAUDE.md.tmpl` | Template for `CLAUDE.md` |
-| `assets/templates/package.json.tmpl` | Template for `package.json` |
-| `assets/templates/opencode-plugin.js.tmpl` | Template for `.opencode/plugins/<name>.js` |
-| `assets/templates/hooks/hooks.json.tmpl` | Template for `hooks/hooks.json` |
-| `assets/templates/hooks/hooks-cursor.json.tmpl` | Template for `hooks/hooks-cursor.json` |
-| `assets/templates/skill-references/copilot-tools.md` | Canonical Copilot tool-name table (seeded from superpowers) |
-| `assets/templates/skill-references/codex-tools.md` | Canonical Codex tool-name table |
-| `assets/templates/skill-references/gemini-tools.md` | Canonical Gemini tool-name table |
-| `assets/UPSTREAM.md` | Superpowers version pin + re-seed instructions |
+| `lib/templates/manifests/claude-plugin/plugin.json.tmpl` | Template for `.claude-plugin/plugin.json` |
+| `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` | Template for `.claude-plugin/marketplace.json` |
+| `lib/templates/manifests/cursor-plugin/plugin.json.tmpl` | Template for `.cursor-plugin/plugin.json` |
+| `lib/templates/manifests/gemini-extension.json.tmpl` | Template for `gemini-extension.json` |
+| `lib/templates/context-files/GEMINI.md.tmpl` | Template for `GEMINI.md` |
+| `lib/templates/context-files/AGENTS.md.tmpl` | Template for `AGENTS.md` |
+| `lib/templates/context-files/CLAUDE.md.tmpl` | Template for `CLAUDE.md` |
+| `lib/templates/manifests/package.json.tmpl` | Template for `package.json` |
+| `lib/templates/manifests/opencode-plugin.js.tmpl` | Template for `.opencode/plugins/<name>.js` |
+| `lib/templates/hooks/hooks.json.tmpl` | Template for `hooks/hooks.json` |
+| `lib/templates/hooks/hooks-cursor.json.tmpl` | Template for `hooks/hooks-cursor.json` |
+| `lib/references/copilot-tools.md` | Canonical Copilot tool-name table (seeded from superpowers) |
+| `lib/references/codex-tools.md` | Canonical Codex tool-name table |
+| `lib/references/gemini-tools.md` | Canonical Gemini tool-name table |
+| `lib/templates/UPSTREAM.md` | Superpowers version pin + re-seed instructions |
 
 ---
 
@@ -113,24 +113,24 @@ git commit -m "chore: init repo"
 
 ---
 
-## Task 2: Seed assets/templates from superpowers 5.0.7
+## Task 2: Seed lib/templates from superpowers 5.0.7
 
 **Files:**
-- Create: `assets/templates/claude-plugin/plugin.json.tmpl`
-- Create: `assets/templates/claude-plugin/marketplace.json.tmpl`
-- Create: `assets/templates/cursor-plugin/plugin.json.tmpl`
-- Create: `assets/templates/gemini-extension.json.tmpl`
-- Create: `assets/templates/GEMINI.md.tmpl`
-- Create: `assets/templates/AGENTS.md.tmpl`
-- Create: `assets/templates/CLAUDE.md.tmpl`
-- Create: `assets/templates/package.json.tmpl`
-- Create: `assets/templates/opencode-plugin.js.tmpl`
-- Create: `assets/templates/hooks/hooks.json.tmpl`
-- Create: `assets/templates/hooks/hooks-cursor.json.tmpl`
-- Create: `assets/templates/skill-references/copilot-tools.md`
-- Create: `assets/templates/skill-references/codex-tools.md`
-- Create: `assets/templates/skill-references/gemini-tools.md`
-- Create: `assets/UPSTREAM.md`
+- Create: `lib/templates/manifests/claude-plugin/plugin.json.tmpl`
+- Create: `lib/templates/manifests/claude-plugin/marketplace.json.tmpl`
+- Create: `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`
+- Create: `lib/templates/manifests/gemini-extension.json.tmpl`
+- Create: `lib/templates/context-files/GEMINI.md.tmpl`
+- Create: `lib/templates/context-files/AGENTS.md.tmpl`
+- Create: `lib/templates/context-files/CLAUDE.md.tmpl`
+- Create: `lib/templates/manifests/package.json.tmpl`
+- Create: `lib/templates/manifests/opencode-plugin.js.tmpl`
+- Create: `lib/templates/hooks/hooks.json.tmpl`
+- Create: `lib/templates/hooks/hooks-cursor.json.tmpl`
+- Create: `lib/references/copilot-tools.md`
+- Create: `lib/references/codex-tools.md`
+- Create: `lib/references/gemini-tools.md`
+- Create: `lib/UPSTREAM.md`
 
 The superpowers source cache is at: `/home/nathanielramm/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/`
 
@@ -138,13 +138,13 @@ The superpowers source cache is at: `/home/nathanielramm/.claude/plugins/cache/c
 
 ```bash
 cd ~/git/github/portable-plugin-uplift
-mkdir -p assets/templates/claude-plugin
-mkdir -p assets/templates/cursor-plugin
-mkdir -p assets/templates/hooks
-mkdir -p assets/templates/skill-references
+mkdir -p lib/templates/manifests/claude-plugin
+mkdir -p lib/templates/manifests/cursor-plugin
+mkdir -p lib/templates/hooks
+mkdir -p lib/references
 ```
 
-- [ ] **Step 2: Write `assets/templates/claude-plugin/plugin.json.tmpl`**
+- [ ] **Step 2: Write `lib/templates/manifests/claude-plugin/plugin.json.tmpl`**
 
 ```json
 {
@@ -162,7 +162,7 @@ mkdir -p assets/templates/skill-references
 }
 ```
 
-- [ ] **Step 3: Write `assets/templates/claude-plugin/marketplace.json.tmpl`**
+- [ ] **Step 3: Write `lib/templates/manifests/claude-plugin/marketplace.json.tmpl`**
 
 ```json
 {
@@ -187,7 +187,7 @@ mkdir -p assets/templates/skill-references
 }
 ```
 
-- [ ] **Step 4: Write `assets/templates/cursor-plugin/plugin.json.tmpl`**
+- [ ] **Step 4: Write `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`**
 
 ```json
 {
@@ -210,7 +210,7 @@ mkdir -p assets/templates/skill-references
 }
 ```
 
-- [ ] **Step 5: Write `assets/templates/gemini-extension.json.tmpl`**
+- [ ] **Step 5: Write `lib/templates/manifests/gemini-extension.json.tmpl`**
 
 ```json
 {
@@ -221,7 +221,7 @@ mkdir -p assets/templates/skill-references
 }
 ```
 
-- [ ] **Step 6: Write `assets/templates/GEMINI.md.tmpl`**
+- [ ] **Step 6: Write `lib/templates/context-files/GEMINI.md.tmpl`**
 
 ```markdown
 {{skillIncludes}}
@@ -231,7 +231,7 @@ mkdir -p assets/templates/skill-references
 
 Note: `{{skillIncludes}}` expands to one `@./skills/<name>/SKILL.md` + `@./skills/<name>/references/gemini-tools.md` pair per skill in `skills/`. `{{agentIncludes}}` expands to `@./agents/<name>.md` per agent file. `{{commandIncludes}}` expands to `@./commands/<name>.md` per command file. If `agents/` or `commands/` don't exist, those lines are omitted.
 
-- [ ] **Step 7: Write `assets/templates/AGENTS.md.tmpl`**
+- [ ] **Step 7: Write `lib/templates/context-files/AGENTS.md.tmpl`**
 
 ```markdown
 # {{displayName}}
@@ -266,7 +266,7 @@ See each skill's `references/` directory for platform-specific tool mapping tabl
 
 Note: `{{skillIncludes}}` here expands to `- skills/<name>/SKILL.md` bullet list. `{{commandIncludes}}` expands to `- commands/<name>.md` bullet list. If no commands, that section is omitted.
 
-- [ ] **Step 8: Write `assets/templates/CLAUDE.md.tmpl`**
+- [ ] **Step 8: Write `lib/templates/context-files/CLAUDE.md.tmpl`**
 
 ```markdown
 # {{displayName}}
@@ -276,7 +276,7 @@ Note: `{{skillIncludes}}` here expands to `- skills/<name>/SKILL.md` bullet list
 This plugin is loaded via Claude Code's plugin system. Skills are invoked via the `Skill` tool.
 ```
 
-- [ ] **Step 9: Write `assets/templates/package.json.tmpl`**
+- [ ] **Step 9: Write `lib/templates/manifests/package.json.tmpl`**
 
 ```json
 {
@@ -287,7 +287,7 @@ This plugin is loaded via Claude Code's plugin system. Skills are invoked via th
 }
 ```
 
-- [ ] **Step 10: Write `assets/templates/opencode-plugin.js.tmpl`**
+- [ ] **Step 10: Write `lib/templates/manifests/opencode-plugin.js.tmpl`**
 
 ```javascript
 // OpenCode plugin registration for {{name}}
@@ -299,7 +299,7 @@ export default {
 };
 ```
 
-- [ ] **Step 11: Write `assets/templates/hooks/hooks.json.tmpl`**
+- [ ] **Step 11: Write `lib/templates/hooks/hooks.json.tmpl`**
 
 ```json
 {
@@ -309,7 +309,7 @@ export default {
 
 Note: This is a minimal empty hooks file. The uplift skill replaces it with a populated version when the source plugin has `hooks/hooks.json` with actual hook entries.
 
-- [ ] **Step 12: Write `assets/templates/hooks/hooks-cursor.json.tmpl`**
+- [ ] **Step 12: Write `lib/templates/hooks/hooks-cursor.json.tmpl`**
 
 ```json
 {
@@ -324,21 +324,21 @@ Note: Same as above — empty placeholder. The uplift skill derives the populate
 
 ```bash
 SP=/home/nathanielramm/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7
-DEST=~/git/github/portable-plugin-uplift/assets/templates/skill-references
+DEST=~/git/github/portable-plugin-uplift/lib/references
 
 cp "$SP/skills/using-superpowers/references/copilot-tools.md" "$DEST/copilot-tools.md"
 cp "$SP/skills/using-superpowers/references/codex-tools.md" "$DEST/codex-tools.md"
 cp "$SP/skills/using-superpowers/references/gemini-tools.md" "$DEST/gemini-tools.md"
 ```
 
-Verify: `ls ~/git/github/portable-plugin-uplift/assets/templates/skill-references/` shows three files.
+Verify: `ls ~/git/github/portable-plugin-uplift/lib/references/` shows three files.
 
-- [ ] **Step 14: Write `assets/UPSTREAM.md`**
+- [ ] **Step 14: Write `lib/UPSTREAM.md`**
 
 ```markdown
 # Template Upstream Source
 
-Templates in `assets/templates/` are seeded from [superpowers](https://github.com/obra/superpowers) v5.0.7.
+Templates in `lib/templates/` are seeded from [superpowers](https://github.com/obra/superpowers) v5.0.7.
 
 ## Re-seeding after a superpowers release
 
@@ -347,9 +347,9 @@ Templates in `assets/templates/` are seeded from [superpowers](https://github.co
 3. Update tool-mapping sidecars:
    ```bash
    SP=~/.claude/plugins/cache/claude-plugins-official/superpowers/<new-version>
-   cp "$SP/skills/using-superpowers/references/copilot-tools.md" assets/templates/skill-references/
-   cp "$SP/skills/using-superpowers/references/codex-tools.md" assets/templates/skill-references/
-   cp "$SP/skills/using-superpowers/references/gemini-tools.md" assets/templates/skill-references/
+   cp "$SP/skills/using-superpowers/references/copilot-tools.md" lib/references/
+   cp "$SP/skills/using-superpowers/references/codex-tools.md" lib/references/
+   cp "$SP/skills/using-superpowers/references/gemini-tools.md" lib/references/
    ```
 4. Compare other template files against the new superpowers manifests (`.claude-plugin/`, `.cursor-plugin/`, `gemini-extension.json`, `GEMINI.md`, hooks files) and update templates accordingly.
 5. Update this file with the new version pin.
@@ -363,7 +363,7 @@ Templates are checked in so the uplift skill works offline and produces determin
 
 ```bash
 cd ~/git/github/portable-plugin-uplift
-git add assets/
+git add lib/
 git commit -m "feat: seed manifest templates from superpowers 5.0.7"
 ```
 
@@ -387,49 +387,114 @@ mkdir -p ~/git/github/portable-plugin-uplift/skills/uplifting-a-plugin
 ```markdown
 ---
 name: uplifting-a-plugin
-description: Use when you need to add multi-platform portability to a Claude-only plugin. Takes a plugin repo with only .claude-plugin/ manifests and emits the full superpowers portability pattern: Cursor, Gemini CLI, OpenCode, and AGENTS.md support, plus per-skill tool-mapping sidecars.
+description: Use when you need to add multi-platform portability to a plugin. Accepts any starting state — a Claude plugin, a Cursor plugin, a Gemini extension, an npx skills repo, or a bare directory of SKILL.md files. Detects what is already present, infers a canonical metadata model, and emits every missing platform artifact: Claude Code, Cursor, Gemini CLI, OpenCode, AGENTS.md, per-skill tool-mapping sidecars.
 ---
 
 # Uplifting a Plugin to Multi-Platform Portability
 
-This skill transforms a Claude-only plugin into a fully portable plugin following the superpowers portability pattern.
+This skill transforms any plugin — regardless of its starting platform — into a fully portable plugin following the superpowers portability pattern. No platform is assumed to already exist. Claude Code manifests are an equally valid *target* as Cursor or Gemini manifests.
 
 ## What this skill produces
 
-For a source plugin at `<plugin-path>` with only Claude manifests, this skill adds:
+For a source plugin at `<plugin-path>`, this skill writes every missing artifact:
 
-| Platform | Files created |
+| Platform | Files written if missing |
 |---|---|
+| Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `CLAUDE.md` |
 | Cursor | `.cursor-plugin/plugin.json` |
 | Gemini CLI | `gemini-extension.json`, `GEMINI.md` |
 | OpenCode | `package.json`, `.opencode/plugins/<name>.js` |
 | Generic (Codex/Copilot CLI) | `AGENTS.md` |
 | All skills | `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md` |
 | Hook portability | `hooks/hooks-cursor.json`, `hooks/run-hook.cmd` (if hooks exist) |
+| npx skills compat | Validates every `skills/<name>/SKILL.md` has `name` + `description` frontmatter |
 
-## Prerequisites
+## Minimum starting state
 
-The source plugin MUST have `.claude-plugin/plugin.json`. If it doesn't exist, stop and report an error.
+At least ONE of the following must exist:
+- One or more `skills/*/SKILL.md` files with `name` and `description` YAML frontmatter
+- Any platform manifest: `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json`, or `package.json`
+
+If neither is found, stop and report an error (see Step 1).
+
+## Detection Algorithm
+
+Both phases below rely on a shared detection routine. Run it once at the start.
+
+### Step D1: Scan for metadata sources
+
+Check which of these exist at `<plugin-path>`:
+
+| Source | Fields extractable |
+|---|---|
+| `.claude-plugin/plugin.json` | `name`, `description`, `version`, `author.name`, `author.email`, `homepage`, `repository`, `license`, `keywords` |
+| `.cursor-plugin/plugin.json` | `name`, `displayName`, `description`, `version`, `author.name`, `author.email`, `homepage`, `repository`, `license`, `keywords` |
+| `gemini-extension.json` | `name`, `description`, `version` |
+| `package.json` | `name`, `version`, `description` |
+| `AGENTS.md` | `name` (from H1 heading — first `# Heading` line), `description` (first non-heading paragraph) |
+| `skills/*/SKILL.md` frontmatter | `name` (YAML `name:` field, or skill directory name as fallback), `description` (YAML `description:` field) |
+
+If **none** of these are found, stop and report:
+> "No recognisable plugin signals found in `<plugin-path>`. Provide at least one platform manifest or one `skills/*/SKILL.md` with `name` and `description` frontmatter."
+
+### Step D2: Score and elect canonical source
+
+For each present source, count the number of populated (non-empty) fields from the table above. The source with the **most populated fields** becomes the **canonical source**.
+
+Tie-breaking order when scores are equal (highest priority first):
+1. `.claude-plugin/plugin.json`
+2. `.cursor-plugin/plugin.json`
+3. `gemini-extension.json`
+4. `package.json`
+5. `AGENTS.md`
+6. First `skills/*/SKILL.md` alphabetically by directory name
+
+### Step D3: Build canonical metadata model
+
+Start with all fields from the canonical source. For each field that is empty or absent, check the remaining sources in descending score order and take the first non-empty value found.
+
+| Field | Hard fallback (used only when not found anywhere) |
+|---|---|
+| `name` | Directory basename of `<plugin-path>` |
+| `displayName` | Title-case `name`: replace `-` and `_` with spaces, capitalise each word |
+| `description` | `""` — flag as missing |
+| `version` | `"0.1.0"` |
+| `author.name` | `""` — flag as missing |
+| `author.email` | `""` — flag as missing |
+| `homepage` | `""` |
+| `repository` | `""` |
+| `license` | `"MIT"` |
+| `keywords` | `[]` |
+
+Always derive (never read from sources):
+- `marketplaceName` = `<name>-dev`
+- `opencodeMain` = `.opencode/plugins/<name>.js`
+
+### Step D4: Print inference summary
+
+Before writing any files, print:
+
+```
+## Metadata inferred
+  canonical source: .claude-plugin/plugin.json  (9 fields)
+  name:          my-plugin        (from .claude-plugin/plugin.json)
+  description:   Does X for Y.   (from .claude-plugin/plugin.json)
+  version:       1.2.0            (from .cursor-plugin/plugin.json)
+  author.name:   [missing — not found in any source]
+  author.email:  [missing — not found in any source]
+  homepage:                       (empty string — not found)
+  repository:                     (empty string — not found)
+  license:       MIT              (hard fallback)
+  keywords:      []               (hard fallback)
+```
+
+Fields still missing after all sources are checked are flagged here and repeated in the final report.
 
 ## Checklist
 
-- [ ] **Step 1: Read source metadata**
+- [ ] **Step 1: Run Detection Algorithm (D1–D4)**
 
-Read `<plugin-path>/.claude-plugin/plugin.json`. Extract these fields into variables for use in later steps:
-- `name`
-- `description`
-- `version`
-- `author.name` (use `"Unknown"` if absent)
-- `author.email` (use `""` if absent)
-- `homepage` (use `""` if absent)
-- `repository` (use `""` if absent)
-- `license` (default `"MIT"` if absent)
-- `keywords` (default `[]` if absent)
-
-Derive:
-- `displayName` = title-case `name` (replace `-` and `_` with spaces, capitalize each word)
-- `marketplaceName` = `<name>-dev`
-- `opencodeMain` = `.opencode/plugins/<name>.js`
+Execute Steps D1–D4 above. If no signals found, stop with the error message. Otherwise proceed with the inferred canonical metadata.
 
 - [ ] **Step 2: Inventory source assets**
 
@@ -457,140 +522,153 @@ hooks/run-hook.cmd
 
 Also check each `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md`.
 
-- [ ] **Step 4: Render and write `.cursor-plugin/plugin.json`**
+- [ ] **Step 4: Render and write `.claude-plugin/plugin.json`** (if missing)
 
-Read `assets/templates/cursor-plugin/plugin.json.tmpl` from this plugin's install path. Substitute all `{{fields}}` with values from Step 1. Write to `<plugin-path>/.cursor-plugin/plugin.json`.
+Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
 
-The `"skills"`, `"agents"`, `"commands"` fields should point at directories that exist in the source. Omit `"agents"` if `agents/` doesn't exist; omit `"commands"` if `commands/` doesn't exist.
+- [ ] **Step 5: Render and write `.claude-plugin/marketplace.json`** (if missing)
 
-- [ ] **Step 5: Render and write `gemini-extension.json`**
+Read `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` from the plugin install path. Substitute fields. Write to `<plugin-path>/.claude-plugin/marketplace.json`.
 
-Read `assets/templates/gemini-extension.json.tmpl`. Substitute `{{fields}}`. Write to `<plugin-path>/gemini-extension.json`.
+- [ ] **Step 6: Render and write `CLAUDE.md`** (if missing)
 
-- [ ] **Step 6: Render and write `GEMINI.md`**
+Read `lib/templates/context-files/CLAUDE.md.tmpl`. Substitute `{{displayName}}` and `{{description}}`. Write to `<plugin-path>/CLAUDE.md`.
 
-Build `{{skillIncludes}}` block:
-For each skill name detected in Step 2:
+- [ ] **Step 7: Render and write `.cursor-plugin/plugin.json`** (if missing)
+
+Read `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`. Substitute fields. Write to `<plugin-path>/.cursor-plugin/plugin.json`. Create `.cursor-plugin/` directory if needed.
+
+Omit `"agents"` key if `agents/` doesn't exist in source. Omit `"commands"` key if `commands/` doesn't exist.
+
+- [ ] **Step 8: Render and write `gemini-extension.json`** (if missing)
+
+Read `lib/templates/manifests/gemini-extension.json.tmpl`. Substitute fields. Write to `<plugin-path>/gemini-extension.json`.
+
+- [ ] **Step 9: Render and write `GEMINI.md`** (if missing)
+
+Build `{{skillIncludes}}` — for each skill name from Step 2:
 ```
 @./skills/<skillname>/SKILL.md
 @./skills/<skillname>/references/gemini-tools.md
 ```
 
-Build `{{agentIncludes}}` block (omit if no agents):
-For each agent file detected:
+Build `{{agentIncludes}}` (omit if no agents) — for each agent file:
 ```
 @./agents/<agentfile>.md
 ```
 
-Build `{{commandIncludes}}` block (omit if no commands):
-For each command file:
+Build `{{commandIncludes}}` (omit if no commands) — for each command file:
 ```
 @./commands/<commandfile>.md
 ```
 
-Write to `<plugin-path>/GEMINI.md`.
+Write assembled content to `<plugin-path>/GEMINI.md`.
 
-- [ ] **Step 7: Render and write `AGENTS.md`**
+- [ ] **Step 10: Render and write `AGENTS.md`** (if missing)
 
 Build skill bullet list for `{{skillIncludes}}`:
 ```
 - skills/<skillname>/SKILL.md
 ```
-(one line per skill)
 
-Build command bullet list for `{{commandIncludes}}`:
+Build command bullet list for `{{commandIncludes}}` (omit entire Commands section if no commands):
 ```
 - commands/<commandfile>.md
 ```
-(one line per command; omit entire "Commands" section if no commands)
 
-Read `assets/templates/AGENTS.md.tmpl`. Substitute all fields. Write to `<plugin-path>/AGENTS.md`.
+Read `lib/templates/context-files/AGENTS.md.tmpl`. Substitute all fields. Write to `<plugin-path>/AGENTS.md`.
 
-- [ ] **Step 8: Render and write `package.json`**
+- [ ] **Step 11: Render and write `package.json`** (if missing)
 
-Read `assets/templates/package.json.tmpl`. Substitute `{{fields}}`. Write to `<plugin-path>/package.json`.
+Read `lib/templates/manifests/package.json.tmpl`. Substitute fields. Write to `<plugin-path>/package.json`.
 
-- [ ] **Step 9: Render and write OpenCode plugin shim**
+- [ ] **Step 12: Render and write OpenCode plugin shim** (if missing)
 
-Create directory `<plugin-path>/.opencode/plugins/` if it doesn't exist. Read `assets/templates/opencode-plugin.js.tmpl`. Substitute `{{fields}}`. Write to `<plugin-path>/.opencode/plugins/<name>.js`.
+Create `<plugin-path>/.opencode/plugins/` if needed. Read `lib/templates/manifests/opencode-plugin.js.tmpl`. Substitute fields. Write to `<plugin-path>/.opencode/plugins/<name>.js`.
 
-- [ ] **Step 10: Port hooks (if source has hooks)**
+- [ ] **Step 13: Port hooks** (if source has hooks)
 
-If `<plugin-path>/hooks/hooks.json` exists and contains non-empty hook entries:
+If `<plugin-path>/hooks/hooks.json` exists and has non-empty entries:
 
-Read `hooks/hooks.json`. For each Claude hook event, derive the Cursor equivalent using this event-name mapping:
+Map Claude hook events to Cursor equivalents:
 
-| Claude hook event | Cursor hook event |
+| Claude event | Cursor event |
 |---|---|
 | `SessionStart` | `sessionStart` |
 | `UserPromptSubmit` | `userMessage` |
 | `PostToolUse` | `postToolUse` |
 | `Stop` | `agentStop` |
 
-Build `hooks-cursor.json`:
+Build and write `<plugin-path>/hooks/hooks-cursor.json`:
 ```json
 {
   "version": 1,
   "hooks": {
     "<cursorEventName>": [
-      { "command": "<same command as hooks.json, with path adjusted>" }
+      { "command": "<same command as in hooks.json>" }
     ]
   }
 }
 ```
 
-Write to `<plugin-path>/hooks/hooks-cursor.json`.
+**Flag in report:** Any hook command containing `$CLAUDE_PLUGIN_ROOT` needs manual review — Cursor uses a different env var.
 
-**Flag in report:** Any hook command containing `$CLAUDE_PLUGIN_ROOT` needs manual review — Cursor uses a different env var. Note the specific hook commands that reference it.
+If no hooks exist, write empty `hooks/hooks-cursor.json` from template.
 
-If source has no `hooks/hooks.json`, write empty `hooks/hooks-cursor.json` from the template.
+- [ ] **Step 14: Note about `hooks/run-hook.cmd`**
 
-- [ ] **Step 11: Copy `hooks/run-hook.cmd` if missing**
+Do not auto-write this file in v1. Flag in the report:
+> `hooks/run-hook.cmd` not written — copy manually from: `~/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/hooks/run-hook.cmd`
 
-If `<plugin-path>/hooks/run-hook.cmd` does not already exist, copy it from `assets/templates/hooks/run-hook.cmd` (which is a verbatim copy of the superpowers Windows wrapper).
+- [ ] **Step 15: Validate `npx skills` frontmatter**
 
-Wait — `run-hook.cmd` is not in `assets/templates/hooks/`. It is the verbatim superpowers file. For v1, instruct the user to copy it from the superpowers cache manually, and flag this in the report:
+For each skill detected in Step 2, read `skills/<skillname>/SKILL.md` and verify:
+- YAML frontmatter block (`---` delimiters) present at top of file
+- `name:` field present and non-empty
+- `description:` field present and non-empty
 
-> `hooks/run-hook.cmd` not written — copy from superpowers cache: `~/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/hooks/run-hook.cmd`
+Flag any failures in the "Needs manual review" section of the final report:
+> `skills/<skillname>/SKILL.md` missing frontmatter field(s): `<name|description>`. Add:
+> ```yaml
+> ---
+> name: <skillname>
+> description: <what this skill does and when to invoke it>
+> ---
+> ```
+Do NOT auto-write — frontmatter descriptions require human authorship.
 
-**Note for repo maintainer:** In a future version, add `run-hook.cmd` to `assets/templates/hooks/` so the skill can write it directly.
+- [ ] **Step 16: Seed per-skill tool-mapping sidecars**
 
-- [ ] **Step 12: Seed per-skill tool-mapping sidecars**
+For each skill from Step 2, check whether `skills/<skillname>/references/` exists and whether each of the three sidecar files is present. For each missing sidecar, read from `lib/templates/skill-references/<platform>-tools.md` and write to `<plugin-path>/skills/<skillname>/references/<platform>-tools.md`. Create `references/` directory if needed.
 
-For each skill name detected in Step 2, check whether `skills/<skillname>/references/` exists and whether each of the three sidecar files is present.
+- [ ] **Step 17: Emit final report**
 
-For each missing sidecar, copy from `assets/templates/skill-references/`:
+Print a summary with four sections:
 
-Read the corresponding file from this plugin's `assets/templates/skill-references/<platform>-tools.md` and write it to `<plugin-path>/skills/<skillname>/references/<platform>-tools.md`.
-
-If `references/` directory doesn't exist for a skill, create it first.
-
-- [ ] **Step 13: Emit final report**
-
-Print a summary with three sections:
+**Metadata inferred:**
+Repeat the D4 inference summary. List any fields that fell back to hard defaults or were left blank.
 
 **Created:**
-List every file written in this run (full paths relative to `<plugin-path>`).
+Every file written in this run, relative to `<plugin-path>`.
 
 **Skipped (already exists):**
-List every file that was skipped due to a conflict. User must review and either delete the existing file or manually merge.
+Every file that was present and therefore not overwritten.
 
 **Needs manual review:**
-- Any hook command containing `$CLAUDE_PLUGIN_ROOT` (list the specific commands)
-- `hooks/run-hook.cmd` if it was not written (with copy instruction)
-- Any `GEMINI.md` or `AGENTS.md` skill includes where the referenced SKILL.md does not have a `name` or `description` frontmatter field (these are needed for platform discovery)
+- Any hook command containing `$CLAUDE_PLUGIN_ROOT`
+- `hooks/run-hook.cmd` copy instruction
+- Any skill with missing `name` or `description` frontmatter
+- Any metadata field that could not be inferred from any source
 
 ## Running the skill
 
 Invoke with: `"Use the uplifting-a-plugin skill on <path/to/plugin>"`
 
-The skill is idempotent: running it twice on the same repo produces no diff on the second run (all files already exist → all skipped).
+The skill is idempotent: running it twice on the same repo produces no diff on the second run.
 
 ## Locating this plugin's assets
 
-This skill references `assets/templates/` at the plugin install root. To find the install root from within a Claude Code session:
-
-The plugin is installed under `~/.claude/plugins/cache/`. Use `Glob` with pattern `~/.claude/plugins/cache/**/portable-plugin-uplift/*/assets/templates/` to locate it.
+Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/` to find the install root.
 ```
 
 - [ ] **Step 3: Commit**
@@ -730,10 +808,10 @@ mkdir -p ~/git/github/portable-plugin-uplift/skills/uplifting-a-plugin/reference
 mkdir -p ~/git/github/portable-plugin-uplift/skills/auditing-plugin-portability/references
 ```
 
-- [ ] **Step 2: Copy sidecars from assets/templates/skill-references/ to both skills**
+- [ ] **Step 2: Copy sidecars from lib/references/ to both skills**
 
 ```bash
-SP=~/git/github/portable-plugin-uplift/assets/templates/skill-references
+SP=~/git/github/portable-plugin-uplift/lib/references
 
 for skill in uplifting-a-plugin auditing-plugin-portability; do
   cp "$SP/copilot-tools.md" "skills/$skill/references/copilot-tools.md"
@@ -995,7 +1073,7 @@ Takes a plugin that only has `.claude-plugin/` manifests (Claude Code only) and 
 
 ## Pattern source
 
-This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `assets/UPSTREAM.md` for re-seeding instructions).
+This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `lib/templates/UPSTREAM.md` for re-seeding instructions).
 
 ## This repo is itself an example
 
@@ -1108,7 +1186,7 @@ git branch -D test/portability-uplift
 | Tool-name mapping via references/ sidecars | Task 5 |
 | Standalone new plugin repo | Task 1 |
 | Port all asset types (skills, commands, agents, hooks) | Task 3 (skill covers all) |
-| Hybrid template approach (assets/templates/) | Task 2 |
+| Hybrid template approach (lib/templates/) | Task 2 |
 | Conflict detection / no-overwrite | Task 3 (Step 3 in skill) |
 | Idempotency | Task 7 Step 5 |
 | Audit skill (read-only gap report) | Task 4 |

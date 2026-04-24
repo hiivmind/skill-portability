@@ -1,6 +1,6 @@
 # Detection Algorithm
 
-Shared by `uplifting-a-plugin` and `auditing-plugin-portability`. Run once at start.
+Shared by `uplifting-a-plugin` and `assessing-plugin-portability`. Run once at start.
 
 ---
 
@@ -19,6 +19,10 @@ FUNCTION SCAN_METADATA_SOURCES(plugin_path):
       path:   ".cursor-plugin/plugin.json",
       fields: ["name", "displayName", "description", "version", "author.name",
                "author.email", "homepage", "repository", "license", "keywords"]
+    },
+    {
+      path:   ".codex-plugin/plugin.json",
+      fields: ["name", "description", "version"]
     },
     {
       path:   "gemini-extension.json",
@@ -69,6 +73,7 @@ FUNCTION ELECT_CANONICAL(found_sources):
   tie_break_order = [
     ".claude-plugin/plugin.json",
     ".cursor-plugin/plugin.json",
+    ".codex-plugin/plugin.json",
     "gemini-extension.json",
     "package.json",
     "AGENTS.md",
@@ -170,3 +175,47 @@ Example output:
 
 Fields still missing after all sources are checked are flagged here and repeated
 in the final report.
+
+---
+
+## Step D5: Classify Repo Shape
+
+```pseudocode
+FUNCTION CLASSIFY_SHAPE(found_sources):
+  platform_manifests = FILTER found_sources WHERE path IN [
+    ".claude-plugin/plugin.json",
+    ".cursor-plugin/plugin.json",
+    ".codex-plugin/plugin.json",
+    "gemini-extension.json",
+  ]
+
+  has_skills = ANY source.path MATCHES "skills/*/SKILL.md"
+  has_marketplace = ANY source.path MATCHES "*marketplace.json"
+  has_package_json = ANY source.path == "package.json"
+  has_opencode_shim = ANY source.path MATCHES ".opencode/plugins/*.js"
+
+  manifest_count = len(platform_manifests)
+  IF has_package_json OR has_opencode_shim:
+    manifest_count += 1
+
+  IF manifest_count == 0 AND has_skills:
+    RETURN "bare-skill-repo"
+  ELIF manifest_count == 1:
+    RETURN "single-platform-plugin"
+  ELIF manifest_count >= 2:
+    RETURN "multi-platform-source"
+  ELIF has_marketplace AND NOT has_skills:
+    RETURN "curated-distribution"
+  ELSE:
+    RETURN "unclassified"
+```
+
+Shape definitions:
+
+| Shape | Description |
+|-------|-------------|
+| `bare-skill-repo` | Skills exist but no platform manifests |
+| `single-platform-plugin` | One platform's manifest present |
+| `multi-platform-source` | Two or more platform manifests |
+| `curated-distribution` | Marketplace packaging without upstream skill authoring |
+| `unclassified` | Does not match any known pattern |

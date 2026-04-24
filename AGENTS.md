@@ -7,7 +7,7 @@ Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gem
 This plugin provides the following skills. Read the SKILL.md files listed to understand how to invoke each skill:
 
 - skills/uplifting-a-plugin/SKILL.md
-- skills/auditing-plugin-portability/SKILL.md
+- skills/assessing-plugin-portability/SKILL.md
 
 ## Tool Name Mapping
 
@@ -22,4 +22,4 @@ Skills use Claude Code tool names. Platform equivalents:
 - `Skill` tool → your platform's skill-invoke tool (or follow instructions directly)
 - `Task` tool → your platform's subagent-dispatch tool (if supported)
 
-See each skill's `references/` directory for platform-specific tool mapping tables.
+See `lib/references/` for platform-specific tool mapping tables (copilot-tools.md, codex-tools.md, gemini-tools.md).
