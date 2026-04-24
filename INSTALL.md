@@ -7,7 +7,7 @@ individual skill directories. Installing via `npx skills` (which copies only the
 directory) will lose these shared files and break session-start injection.
 
 Every install path below clones or references the full repo. See
-[docs/ecosystem-friction.md](docs/ecosystem-friction.md) for background on why this is
+[docs/ecosystem-landscape.md](docs/ecosystem-landscape.md) for background on why this is
 necessary across today's agent platforms.
 
 ## Fresh Install

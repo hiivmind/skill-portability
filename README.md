@@ -35,9 +35,9 @@ Starting from whatever platform manifests already exist, it detects plugin metad
 - **`assessing-plugin-portability`** — Report portability gaps without making changes
 - **`uplifting-a-plugin`** — Write all missing platform manifests for a target plugin
 
-## Known ecosystem gaps
+## Ecosystem landscape
 
-Cross-platform portability has real structural limits in today's agent platforms: `npx skills` installs individual skill directories rather than whole plugins (losing shared context files), each platform uses different manifest formats and context file names, tool names differ across platforms, and most platforms lack hook or subagent support. The `uplifting-a-plugin` skill generates everything that *can* be generated. For what cannot be fixed at the plugin layer, see [`docs/ecosystem-friction.md`](docs/ecosystem-friction.md).
+Cross-platform portability has real structural limits — but the ecosystem is maturing fast. For consumers and single-skill authors, tools like `npx skills`, `gh skill`, and platform-native CLIs make distribution easy. The friction appears when delivering cross-platform plugins with shared resources (hooks, manifests, context files). The `uplifting-a-plugin` skill generates everything that *can* be generated. For the full picture — what works, what doesn't, and what needs platform-level changes — see [`docs/ecosystem-landscape.md`](docs/ecosystem-landscape.md).
 
 ## Acknowledgements
 
