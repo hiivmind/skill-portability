@@ -457,10 +457,7 @@ See `lib/templates/install-docs/` for section templates.
 
 ```pseudocode
 DETERMINE_PLATFORMS(computed):
-  all_records = computed.created + computed.skipped
-  platforms_with_artifacts = deduplicate([
-    r.platform FOR r IN all_records IF r.platform != "cross"
-  ])
+  platforms_with_artifacts = computed.target_platforms
 ```
 
 ### 6.2 Render Per-Platform Install Sections
@@ -480,8 +477,8 @@ RENDER_INSTALL_SECTIONS(computed, platforms_with_artifacts):
 
 ```pseudocode
 WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
-  # Codex gets its own install doc
-  IF "codex" IN platforms_with_artifacts AND computed.codex_rec != "native-skill-discovery":
+  # Codex: always gets its own install doc when targeted
+  IF "codex" IN platforms_with_artifacts:
     Write(".codex/INSTALL.md", sections["codex"])
     computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
 
