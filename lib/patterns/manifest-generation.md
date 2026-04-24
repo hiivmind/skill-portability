@@ -4,27 +4,86 @@ Templates for each platform manifest. All `{{fields}}` are substituted from the 
 
 ---
 
+## Rendering Contract
+
+Three rendering modes handle different template complexity:
+
+### Mode 1: Plain substitution
+
+Read template, replace `{{field}}` with metadata value, write output.
+
+### Mode 2: Conditional key omission
+
+Template includes all possible keys. Renderer parses JSON after substitution and removes keys whose corresponding directory does not exist.
+
+Applies to: `cursor-plugin`
+
+```pseudocode
+RENDER_WITH_CONDITIONALS(template, metadata, computed):
+  content = substitute(template, metadata)
+  parsed = JSON.parse(content)
+  IF NOT directory_exists("agents/"):
+    delete parsed["agents"]
+  IF NOT directory_exists("commands/"):
+    delete parsed["commands"]
+  RETURN JSON.stringify(parsed, indent=2)
+```
+
+### Mode 3: Builder logic
+
+Template provides structure with `{{sectionPlaceholders}}`. Builder constructs dynamic sections from skill/agent/command inventory.
+
+Applies to: `gemini-context`, `agents-context`, `copilot-instructions`
+
+```pseudocode
+RENDER_WITH_BUILDER(template, metadata, computed):
+  skill_lines = build_skill_includes(computed.skills, template_type)
+  agent_lines = build_agent_includes(computed.agents) IF computed.agents ELSE ""
+  command_lines = build_command_includes(computed.commands) IF computed.commands ELSE ""
+
+  content = substitute(template, metadata)
+  content = content.replace("{{skillIncludes}}", skill_lines)
+
+  IF agent_lines == "":
+    content = remove_section(content, "{{agentIncludes}}")
+  ELSE:
+    content = content.replace("{{agentIncludes}}", agent_lines)
+
+  IF command_lines == "":
+    content = remove_section(content, "{{commandIncludes}}")
+  ELSE:
+    content = content.replace("{{commandIncludes}}", command_lines)
+
+  RETURN content
+```
+
+---
+
+## Schema-to-Template Mapping
+
+| Schema | Mode | Template file |
+|--------|------|---------------|
+| claude-plugin | Plain | `lib/templates/manifests/claude-plugin/plugin.json.tmpl` |
+| claude-marketplace | Plain | `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` |
+| claude-context | Plain | `lib/templates/context-files/CLAUDE.md.tmpl` |
+| cursor-plugin | Conditional | `lib/templates/manifests/cursor-plugin/plugin.json.tmpl` |
+| gemini-extension | Plain | `lib/templates/manifests/gemini-extension.json.tmpl` |
+| gemini-context | Builder | `lib/templates/context-files/GEMINI.md.tmpl` |
+| agents-context | Builder | `lib/templates/context-files/AGENTS.md.tmpl` |
+| opencode-package | Plain | `lib/templates/manifests/package.json.tmpl` |
+| opencode-shim | Plain | `lib/templates/manifests/opencode-plugin.js.tmpl` |
+| codex-plugin | Plain | `lib/templates/manifests/codex-plugin/plugin.json.tmpl` |
+| copilot-instructions | Plain | `lib/templates/context-files/copilot-instructions.md.tmpl` |
+
+---
+
 ## claude-plugin
 
 **Target:** `.claude-plugin/plugin.json`
 
 Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array literal (e.g. `["ai", "skills"]`).
 
-```json
-{
-  "name": "{{name}}",
-  "description": "{{description}}",
-  "version": "{{version}}",
-  "author": {
-    "name": "{{author.name}}",
-    "email": "{{author.email}}"
-  },
-  "homepage": "{{homepage}}",
-  "repository": "{{repository}}",
-  "license": "{{license}}",
-  "keywords": {{keywords}}
-}
-```
+> **Template:** `lib/templates/manifests/claude-plugin/plugin.json.tmpl`
 
 ---
 
@@ -32,28 +91,7 @@ Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array lit
 
 **Target:** `.claude-plugin/marketplace.json`
 
-```json
-{
-  "name": "{{marketplaceName}}",
-  "description": "Development marketplace for {{name}}",
-  "owner": {
-    "name": "{{author.name}}",
-    "email": "{{author.email}}"
-  },
-  "plugins": [
-    {
-      "name": "{{name}}",
-      "description": "{{description}}",
-      "version": "{{version}}",
-      "source": "./",
-      "author": {
-        "name": "{{author.name}}",
-        "email": "{{author.email}}"
-      }
-    }
-  ]
-}
-```
+> **Template:** `lib/templates/manifests/claude-plugin/marketplace.json.tmpl`
 
 ---
 
@@ -61,13 +99,7 @@ Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array lit
 
 **Target:** `CLAUDE.md`
 
-```markdown
-# {{displayName}}
-
-{{description}}
-
-This plugin is loaded via Claude Code's plugin system. Skills are invoked via the `Skill` tool.
-```
+> **Template:** `lib/templates/context-files/CLAUDE.md.tmpl`
 
 ---
 
@@ -79,26 +111,7 @@ Create `.cursor-plugin/` directory if needed.
 
 **Conditional logic:** Omit the `"agents"` key if `agents/` doesn't exist. Omit the `"commands"` key if `commands/` doesn't exist.
 
-```json
-{
-  "name": "{{name}}",
-  "displayName": "{{displayName}}",
-  "description": "{{description}}",
-  "version": "{{version}}",
-  "author": {
-    "name": "{{author.name}}",
-    "email": "{{author.email}}"
-  },
-  "homepage": "{{homepage}}",
-  "repository": "{{repository}}",
-  "license": "{{license}}",
-  "keywords": {{keywords}},
-  "skills": "./skills/",
-  "agents": "./agents/",
-  "commands": "./commands/",
-  "hooks": "./hooks/hooks-cursor.json"
-}
-```
+> **Template:** `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`
 
 ---
 
@@ -106,14 +119,7 @@ Create `.cursor-plugin/` directory if needed.
 
 **Target:** `gemini-extension.json`
 
-```json
-{
-  "name": "{{name}}",
-  "description": "{{description}}",
-  "version": "{{version}}",
-  "contextFileName": "GEMINI.md"
-}
-```
+> **Template:** `lib/templates/manifests/gemini-extension.json.tmpl`
 
 ---
 
@@ -123,23 +129,7 @@ Create `.cursor-plugin/` directory if needed.
 
 Build the include blocks from the skills/agents/commands lists inventoried during discovery. The file contains only `@` include directives and no other prose.
 
-`{{skillIncludes}}` — one line per skill:
-```
-@./skills/<skillname>/SKILL.md
-@./skills/<skillname>/references/gemini-tools.md
-```
-
-`{{agentIncludes}}` — one line per agent file (omit this block entirely if no agents):
-```
-@./agents/<agentfile>.md
-```
-
-`{{commandIncludes}}` — one line per command file (omit this block entirely if no commands):
-```
-@./commands/<commandfile>.md
-```
-
-Assembled result written to `GEMINI.md` contains only the `@` include directives — no prose, no headings.
+> **Template:** `lib/templates/context-files/GEMINI.md.tmpl`
 
 ---
 
@@ -147,46 +137,9 @@ Assembled result written to `GEMINI.md` contains only the `@` include directives
 
 **Target:** `AGENTS.md`
 
-Build skill bullet list for `{{skillIncludes}}`:
-```
-- skills/<skillname>/SKILL.md
-```
+Build skill bullet list for `{{skillIncludes}}` and command bullet list for `{{commandIncludes}}` (omit the entire Commands section if no commands exist).
 
-Build command bullet list for `{{commandIncludes}}` (omit the entire Commands section if no commands exist):
-```
-- commands/<commandfile>.md
-```
-
-```markdown
-# {{displayName}}
-
-{{description}}
-
-## Skills
-
-This plugin provides the following skills. Read the SKILL.md files listed to understand how to invoke each skill:
-
-{{skillIncludes}}
-
-## Commands
-
-{{commandIncludes}}
-
-## Tool Name Mapping
-
-Skills use Claude Code tool names. Platform equivalents:
-
-- `Read` → your platform's file-read tool
-- `Write` → your platform's file-write tool
-- `Edit` → your platform's file-edit tool
-- `Bash` → your platform's shell/command tool
-- `Grep` → your platform's content-search tool
-- `Glob` → your platform's file-search tool
-- `Skill` tool → your platform's skill-invoke tool (or follow instructions directly)
-- `Task` tool → your platform's subagent-dispatch tool (if supported)
-
-See each skill's `references/` directory for platform-specific tool mapping tables.
-```
+> **Template:** `lib/templates/context-files/AGENTS.md.tmpl`
 
 ---
 
@@ -194,14 +147,7 @@ See each skill's `references/` directory for platform-specific tool mapping tabl
 
 **Target:** `package.json`
 
-```json
-{
-  "name": "{{name}}",
-  "version": "{{version}}",
-  "type": "module",
-  "main": "{{opencodeMain}}"
-}
-```
+> **Template:** `lib/templates/manifests/package.json.tmpl`
 
 ---
 
@@ -211,15 +157,7 @@ See each skill's `references/` directory for platform-specific tool mapping tabl
 
 Create `.opencode/plugins/` directory if needed. This is the minimal non-bootstrap version of the OpenCode plugin shim.
 
-```javascript
-// OpenCode plugin registration for {{name}}
-// Skills are loaded from ./skills/ by the OpenCode runtime.
-export default {
-  name: "{{name}}",
-  description: "{{description}}",
-  skills: "./skills/",
-};
-```
+> **Template:** `lib/templates/manifests/opencode-plugin.js.tmpl`
 
 ---
 
@@ -229,15 +167,7 @@ export default {
 
 Create `.codex-plugin/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
 
-```json
-{
-  "name": "{{name}}",
-  "description": "{{description}}",
-  "version": "{{version}}",
-  "skills": "./skills/",
-  "hooks": "./hooks/"
-}
-```
+> **Template:** `lib/templates/manifests/codex-plugin/plugin.json.tmpl`
 
 ---
 
@@ -247,27 +177,4 @@ Create `.codex-plugin/` directory if needed. Only generated when Codex recommend
 
 Create `.github/` directory if needed.
 
-```markdown
-# {{displayName}}
-
-{{description}}
-
-## Skills
-
-This project provides agent skills in the `skills/` directory. Skills follow the open SKILL.md standard and are auto-discovered by Copilot CLI.
-
-## Tool Name Mapping
-
-Skills use Claude Code tool names. Copilot CLI equivalents:
-
-- `Read` → `view`
-- `Write` → `create`
-- `Edit` → `edit` / `apply_patch`
-- `Bash` → `bash` / `powershell`
-- `Grep` → `grep` / `rg`
-- `Glob` → `glob`
-- `Skill` → `skill`
-- `Task` / `Agent` → subagent dispatch
-
-See each skill's `references/copilot-tools.md` for detailed mapping.
-```
+> **Template:** `lib/templates/context-files/copilot-instructions.md.tmpl`
