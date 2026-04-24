@@ -126,7 +126,11 @@ metadata:               # optional, string-to-string map
 ---
 ```
 
-Invocation: agents invoke via the `skill` tool. Full content loads on demand. Permissions configurable: `allow`, `deny`, `ask`.
+### Invocation
+
+Mention a skill by name and the agent activates it automatically via the `skill` tool. Skills can also be listed with `/skills list` in the session. Full content loads on demand. Permissions configurable: `allow`, `deny`, `ask`.
+
+Skill names must be lowercase alphanumeric with hyphens only (regex: `^[a-z0-9]+(-[a-z0-9]+)*$`, 1–64 characters).
 
 ## Context files (instructions)
 
@@ -145,6 +149,13 @@ Search order:
 2. `.opencode/AGENTS.md` (loaded in addition to root-level files)
 3. Global `~/.config/opencode/AGENTS.md`
 4. Claude Code fallback `~/.claude/CLAUDE.md` (if no global `AGENTS.md`)
+
+### Disabling Claude Code compatibility
+
+Claude Code compatibility paths can be disabled via environment variables:
+- `OPENCODE_DISABLE_CLAUDE_CODE=1` — disables all Claude Code compat
+- `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1` — disables global `~/.claude/CLAUDE.md`
+- `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` — disables `.claude/skills/` discovery
 
 Additional instruction files via config:
 ```json
@@ -247,6 +258,8 @@ Plugins can inject MCP servers programmatically via the `config` hook.
 | `webfetch` | `WebFetch` |
 | `question` | N/A (ask user) |
 | `skill` | `Skill` |
+| `apply_patch` | `Edit` (alternative) |
+| `lsp` | `LSP` |
 
 Tools use ripgrep under the hood and respect `.gitignore`.
 

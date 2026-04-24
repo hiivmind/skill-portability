@@ -102,26 +102,52 @@ Two shapes:
 | Repo-local | `<repo>/plugins/<name>` | `<repo>/.agents/plugins/marketplace.json` |
 | Home-local | `~/plugins/<name>` | `~/.agents/plugins/marketplace.json` |
 
+### CLI marketplace commands
+
+```bash
+codex plugin marketplace add owner/repo
+codex plugin marketplace add owner/repo --ref main
+codex plugin marketplace remove marketplace-name
+codex plugin marketplace upgrade [marketplace-name]
+```
+
+### Built-in skill commands
+
+Codex ships with built-in skills for managing other skills:
+- `$skill-installer` — install skills from the curated catalog at `github.com/openai/skills` or by GitHub URL
+- `$skill-creator` — scaffold a new skill with guided prompts
+
 ## Skills system
 
 Codex supports the open SKILL.md standard.
 
 ### Skill discovery paths
 
-- `~/.codex/skills/<name>/SKILL.md`
-- `~/.agents/skills/<name>/SKILL.md`
-- Plugin-bundled `skills/` directory
+| Scope | Path |
+|-------|------|
+| Repo (closest) | `.agents/skills/` in current directory |
+| Repo (parents) | `.agents/skills/` in parent directories |
+| Repo (root) | `.agents/skills/` at repository root |
+| User | `~/.agents/skills/` |
+| User | `~/.codex/skills/` |
+| Admin | `/etc/codex/skills/` |
+| System | Bundled with Codex (e.g., `$skill-installer`, `$skill-creator`) |
+| Plugin-bundled | `skills/` directory in plugin |
 
 ### SKILL.md frontmatter
 
 `name` (required), `description` (required). Standard YAML frontmatter.
+
+### Invocation
+
+Skills can be invoked explicitly with the `$` prefix (`$skill-name`) or implicitly — Codex matches task descriptions to skill descriptions and loads matching skills automatically.
 
 ## Context files
 
 Codex uses `AGENTS.md` as its primary context file.
 
 - `AGENTS.md` at project root or in `.agents/` directories
-- Also reads `CLAUDE.md` as a fallback
+- The `project_doc_fallback_filenames` config key can be expanded to recognize alternate names. `CLAUDE.md` is not a documented default fallback.
 
 For Codex skill-discovery installs, `.codex/INSTALL.md` should document the install path.
 
@@ -167,6 +193,8 @@ Requires `multi_agent = true` in `~/.codex/config.toml`:
 [features]
 multi_agent = true
 ```
+
+As of 2026, multi-agent is enabled by default and no longer requires manual configuration.
 
 ### Environment detection
 
