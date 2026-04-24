@@ -87,6 +87,16 @@ For consumers, discovery is solved. Multiple registries with different curation 
 
 Each registry is platform-native. There is no cross-platform registry. A plugin author who wants to be discoverable on Cursor, Gemini, Codex, and Copilot must publish to each platform's registry separately — or rely on consumers finding their GitHub repo directly.
 
+### How skill-portability solves this
+
+The uplift skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each registry requires — so a plugin published to GitHub is installable via each platform's native tool without additional setup by the author.
+
+Discovery itself remains a manual step: authors must submit to each platform's registry separately.
+
+### What would actually fix this
+
+A cross-platform plugin registry — or registry federation — that lets authors publish once and appear on all platforms.
+
 ### Security note
 
 GitHub and most registries do not vet third-party skills. A Snyk study ("ToxicSkills", Feb 2026) found that 13.4% of 3,984 skills from third-party registries carry critical security issues including prompt injections, hidden instructions, and malicious scripts. Always run `gh skill preview` or inspect skill content before installing.
