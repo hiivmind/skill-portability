@@ -53,19 +53,18 @@ See [INSTALL.md](INSTALL.md) for per-platform install instructions covering Clau
 **Quick start (Claude Code):**
 
 ```bash
-claude plugin install skill-portability@skill-portability-dev
+claude plugin install skill-portability@skill-portability-marketplace
 ```
 
 ## Usage
 
-Audit a plugin's portability gaps:
+| Platform | Assess portability | Uplift a plugin |
+|----------|--------------------|-----------------|
+| **Claude Code** | `Assess the portability of /path/to/plugin` | `Use the uplifting-a-plugin skill on /path/to/plugin` |
+| **Cursor** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Copilot CLI** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Codex** | `$assessing-plugin-portability` | `$uplifting-a-plugin` |
+| **Gemini CLI** | Mention skill by name — auto-activated | Same |
+| **OpenCode** | Mention skill by name — auto-activated | Same |
 
-```
-Use the assessing-plugin-portability skill on /path/to/your/plugin
-```
-
-Then uplift it:
-
-```
-Use the uplifting-a-plugin skill on /path/to/your/plugin
-```
+See [INSTALL.md](INSTALL.md) for full install and usage details per platform.
