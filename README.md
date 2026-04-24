@@ -33,7 +33,7 @@ This plugin implements the [superpowers](https://github.com/obra/superpowers) po
 
 ## Installation
 
-See [docs/INSTALL.md](docs/INSTALL.md) for per-platform install instructions covering Claude Code, Cursor, Gemini CLI, OpenCode, Codex, and Copilot CLI.
+See [INSTALL.md](INSTALL.md) for per-platform install instructions covering Claude Code, Cursor, Gemini CLI, OpenCode, Codex, and Copilot CLI.
 
 **Quick start (Claude Code):**
 
