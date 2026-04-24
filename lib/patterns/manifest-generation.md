@@ -220,3 +220,54 @@ export default {
   skills: "./skills/",
 };
 ```
+
+---
+
+## codex-plugin
+
+**Target:** `.codex-plugin/plugin.json`
+
+Create `.codex-plugin/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
+
+```json
+{
+  "name": "{{name}}",
+  "description": "{{description}}",
+  "version": "{{version}}",
+  "skills": "./skills/",
+  "hooks": "./hooks/"
+}
+```
+
+---
+
+## copilot-instructions
+
+**Target:** `.github/copilot-instructions.md`
+
+Create `.github/` directory if needed.
+
+```markdown
+# {{displayName}}
+
+{{description}}
+
+## Skills
+
+This project provides agent skills in the `skills/` directory. Skills follow the open SKILL.md standard and are auto-discovered by Copilot CLI.
+
+## Tool Name Mapping
+
+Skills use Claude Code tool names. Copilot CLI equivalents:
+
+- `Read` → `view`
+- `Write` → `create`
+- `Edit` → `edit` / `apply_patch`
+- `Bash` → `bash` / `powershell`
+- `Grep` → `grep` / `rg`
+- `Glob` → `glob`
+- `Skill` → `skill`
+- `Task` / `Agent` → subagent dispatch
+
+See each skill's `references/copilot-tools.md` for detailed mapping.
+```
