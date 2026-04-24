@@ -254,6 +254,18 @@ DERIVE_CODEX_PATH(computed):
     computed.codex_rec = "native-plugin-packaging"
 ```
 
+### 3.4 Early Exit for Curated-Note-Only
+
+```pseudocode
+IF computed.uplift_target == "curated-note-only":
+  SKIP Phase 4 (Generate)
+  SKIP Phase 5 (Port)
+  RUN  Phase 6 (Document) — install docs only, for selected platforms
+  SKIP Phase 7 (Bootstrap)
+  RUN  Phase 8 (Report)
+  RETURN
+```
+
 ---
 
 ## 4. Phase 4: Generate
@@ -280,11 +292,21 @@ GENERATE_MANIFESTS(computed):
   ]
 
   FOR manifest IN manifests:
+    # Skip if platform not targeted (cross-platform always included)
+    IF manifest.platform != "cross" AND manifest.platform NOT IN computed.target_platforms:
+      CONTINUE
+
     IF manifest.condition AND NOT eval(manifest.condition):
       CONTINUE
+
     resolved = substitute(manifest.target, computed.metadata)
     IF any(s.path == resolved FOR s IN computed.skipped):
       CONTINUE
+
+    # Skill-first: skip platform manifests, only generate context files
+    IF computed.uplift_target == "skill-first" AND is_manifest(manifest.schema):
+      CONTINUE
+
     template_path = schema_to_template_path(manifest.schema)
     mode = schema_to_mode(manifest.schema)
     template = Read(template_path)
@@ -300,18 +322,42 @@ GENERATE_MANIFESTS(computed):
     computed.created.append({ path: resolved, platform: manifest.platform })
 ```
 
+The `is_manifest()` predicate classifies schemas as packaging vs context:
+
+```pseudocode
+MANIFEST_SCHEMAS = [
+  "claude-plugin", "claude-marketplace", "cursor-plugin",
+  "gemini-extension", "opencode-package", "opencode-shim", "codex-plugin"
+]
+CONTEXT_SCHEMAS = [
+  "claude-context", "gemini-context", "agents-context", "copilot-instructions"
+]
+
+FUNCTION is_manifest(schema):
+  RETURN schema IN MANIFEST_SCHEMAS
+```
+
+Under `skill-first`, only context schemas are generated (plus sidecars). Under `full-portable-plugin`, both manifest and context schemas are generated.
+
 ### 4.2 Seed Tool-Mapping Sidecars
 
 ```pseudocode
 GENERATE_SIDECARS(computed):
-  platforms = ["copilot-tools.md", "codex-tools.md", "gemini-tools.md"]
+  sidecar_platform_map = {
+    "copilot-tools.md": "copilot-cli",
+    "codex-tools.md":   "codex",
+    "gemini-tools.md":  "gemini-cli",
+  }
+
   FOR skill IN computed.skills:
-    FOR platform IN platforms:
-      target = skill.dir + "/references/" + platform
+    FOR sidecar, platform IN sidecar_platform_map:
+      IF platform NOT IN computed.target_platforms:
+        CONTINUE
+      target = skill.dir + "/references/" + sidecar
       IF NOT file_exists(target):
-        source = Read("lib/references/" + platform)
+        source = Read("lib/references/" + sidecar)
         Write(target, source)
-        computed.created.append({ path: target, platform: "cross" })
+        computed.created.append({ path: target, platform: platform })
 ```
 
 ### 4.3 Validate npx Skills Frontmatter
