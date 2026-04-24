@@ -22,4 +22,4 @@ Skills use Claude Code tool names. Platform equivalents:
 - `Skill` tool → your platform's skill-invoke tool (or follow instructions directly)
 - `Task` tool → your platform's subagent-dispatch tool (if supported)
 
-See each skill's `references/` directory for platform-specific tool mapping tables.
+See `lib/references/` for platform-specific tool mapping tables (copilot-tools.md, codex-tools.md, gemini-tools.md).

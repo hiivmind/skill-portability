@@ -17,7 +17,7 @@ Detects whatever platform manifests are already present, infers plugin metadata,
 ## Skills
 
 - **`uplifting-a-plugin`** — Write all missing platform manifests for a target plugin
-- **`auditing-plugin-portability`** — Report portability gaps without making changes
+- **`assessing-plugin-portability`** — Report portability gaps without making changes
 
 ## Known ecosystem gaps
 
@@ -31,6 +31,16 @@ This plugin implements the [superpowers](https://github.com/obra/superpowers) po
 
 `skill-portability` is structured using the exact pattern it produces. Check the root-level manifests as a reference.
 
+## Installation
+
+See [docs/INSTALL.md](docs/INSTALL.md) for per-platform install instructions covering Claude Code, Cursor, Gemini CLI, OpenCode, Codex, and Copilot CLI.
+
+**Quick start (Claude Code):**
+
+```bash
+claude plugin install skill-portability@skill-portability-dev
+```
+
 ## Usage
 
 ```
@@ -40,5 +50,5 @@ Use the uplifting-a-plugin skill on /path/to/your/plugin
 Or audit first without changes:
 
 ```
-Use the auditing-plugin-portability skill on /path/to/your/plugin
+Use the assessing-plugin-portability skill on /path/to/your/plugin
 ```

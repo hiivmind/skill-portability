@@ -1,3 +1,10 @@
 {
-  "hooks": {}
+  "hooks": {
+    "SessionStart": [
+      {
+        "command": "hooks/run-hook.cmd session-start",
+        "matcher": "startup|clear|compact"
+      }
+    ]
+  }
 }
