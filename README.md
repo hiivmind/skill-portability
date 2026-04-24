@@ -1,3 +1,7 @@
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)
+
 # Skill Portability
 
 A plugin for agent skill and plugin authors who have built for one platform — often Claude Code — and need to go cross-platform.
