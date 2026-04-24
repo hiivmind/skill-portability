@@ -524,12 +524,22 @@ BOOTSTRAP(computed):
     RETURN
 
   generate_using_skill(computed)
-  generate_using_sidecars(computed)
+  generate_using_sidecars(computed)        # filtered by target_platforms (same as Phase 4.2)
   generate_session_start(computed)
   generate_run_hook_cmd(computed)
-  merge_session_start_hooks(computed)
-  enhance_opencode_plugin(computed)
-  update_gemini_md(computed)
+
+  # Hook merging gated on platform targeting
+  IF "claude-code" IN computed.target_platforms:
+    merge_session_start_hooks_claude(computed)
+  IF "cursor" IN computed.target_platforms:
+    merge_session_start_hooks_cursor(computed)
+
+  # Platform-specific enhancements
+  IF "opencode" IN computed.target_platforms:
+    enhance_opencode_plugin(computed)
+  IF "gemini-cli" IN computed.target_platforms:
+    update_gemini_md(computed)
+
   computed.bootstrap_status = "configured"
 ```
 
