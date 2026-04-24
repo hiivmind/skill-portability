@@ -1,21 +1,22 @@
 # Skill Portability
 
-An agent skill — not a CLI, not a framework — that makes any plugin fully portable across all agent platforms.
+A plugin for agent skill and plugin authors who have built for one platform — often Claude Code — and need to go cross-platform.
 
-Point it at a plugin repo and it tells you what's missing. Say the word and it emits every missing artifact in place. No install step, no sync daemon, no registry. The agent itself is the portability engine.
+Point it at a plugin repo and it tells you what's missing. Say the word and it emits every missing artifact in place — platform manifests, context files, tool mappings, install docs, and publishing guidance. No CLI to install, no sync daemon, no registry. The agent itself is the portability engine.
 
 ## How it's different
 
-The cross-platform skill portability space is full of [CLI tools and broad frameworks](docs/competitive-landscape.md). They require installation, maintain canonical directories or registries, and often absorb scope far beyond portability (workflows, memory systems, eval loops, marketplaces).
+The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md). They are separate programs you install and run alongside your agent. Most target consumers (people installing others' skills), not authors. The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance.
 
 skill-portability takes a different approach:
 
-- **It's a skill, not a CLI.** Runs inside the agent. Nothing to install beyond the plugin itself.
+- **It works where authors already work.** It's a plugin you install into the same agent you're already using to build your skill. No context switch, no separate CLI — assessment and uplift happen inside the authoring workflow.
 - **Analysis first.** Examines what platform artifacts exist and reports gaps before touching anything.
+- **Any platform as input.** Not locked to Claude Code as the starting point. A Cursor plugin, a Codex skill, a bare SKILL.md — all valid inputs.
 - **Optional uplift in place.** Emits missing artifacts directly into the project in each platform's native format. No intermediate representation, no `.agents/` directory to maintain.
-- **Zero infrastructure.** No marketplace, no registry, no sync daemon. One job: assess and optionally fill portability gaps.
+- **Publishing guidance included.** Generates PUBLISHING.md with per-platform steps for getting discovered and installed — not just the artifacts, but how to ship them.
 
-## What it emits
+## What it does
 
 Starting from whatever platform manifests already exist, it detects plugin metadata and generates everything missing:
 
@@ -48,24 +49,54 @@ This plugin owes a direct debt to [obra/superpowers](https://github.com/obra/sup
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md) for per-platform install instructions covering Claude Code, Cursor, Gemini CLI, OpenCode, Codex, and Copilot CLI.
+Full details for all platforms in [INSTALL.md](INSTALL.md).
 
-**Quick start (Claude Code):**
+**Claude Code** — register the marketplace, then install:
+
+```
+/plugin marketplace add hiivmind/skill-portability
+/plugin install skill-portability@skill-portability-marketplace
+```
+
+**Cursor** — in Agent chat:
+
+```
+/add-plugin hiivmind/skill-portability
+```
+
+**Gemini CLI:**
 
 ```bash
-claude plugin install skill-portability@skill-portability-dev
+gemini extensions install https://github.com/hiivmind/skill-portability
+```
+
+**Copilot CLI:**
+
+```bash
+gh skill install hiivmind/skill-portability
+```
+
+**Codex:**
+
+```bash
+git clone https://github.com/hiivmind/skill-portability
+ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+```
+
+**OpenCode** — clone and copy the plugin entrypoint:
+
+```bash
+git clone https://github.com/hiivmind/skill-portability
+cp skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/
 ```
 
 ## Usage
 
-Audit a plugin's portability gaps:
-
-```
-Use the assessing-plugin-portability skill on /path/to/your/plugin
-```
-
-Then uplift it:
-
-```
-Use the uplifting-a-plugin skill on /path/to/your/plugin
-```
+| Platform | Assess portability | Uplift a plugin |
+|----------|--------------------|-----------------|
+| **Claude Code** | `Assess the portability of /path/to/plugin` | `Use the uplifting-a-plugin skill on /path/to/plugin` |
+| **Cursor** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Copilot CLI** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Codex** | `$assessing-plugin-portability` | `$uplifting-a-plugin` |
+| **Gemini CLI** | Mention skill by name — auto-activated | Same |
+| **OpenCode** | Mention skill by name — auto-activated | Same |

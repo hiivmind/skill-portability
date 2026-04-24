@@ -7,8 +7,8 @@
     "name": "Nathaniel Ramm",
     "email": "nathaniel.ramm@discretedatascience.com"
   },
-  "homepage": "https://github.com/nathanielramm/skill-portability",
-  "repository": "https://github.com/nathanielramm/skill-portability",
+  "homepage": "https://github.com/hiivmind/skill-portability",
+  "repository": "https://github.com/hiivmind/skill-portability",
   "license": "MIT",
   "keywords": ["skills", "portability", "multi-platform", "plugin-uplift"],
   "skills": "./skills/"

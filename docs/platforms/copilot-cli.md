@@ -69,10 +69,21 @@ For portability purposes, the repo's existing manifests for other platforms serv
 | Repository | `.github/skills/<name>/SKILL.md` |
 | Personal (CLI) | `~/.copilot/skills/<name>/SKILL.md` |
 | Cross-platform | `.claude/skills/`, `.agents/skills/` also discovered |
+| Cross-platform | `~/.claude/skills/`, `~/.agents/skills/` also discovered |
 
 Skills follow the open Agent Skills spec at agentskills.io — works across Copilot, Claude Code, Cursor, Codex, and Gemini.
 
-CLI commands: `gh skill install`, `gh skill update`, `gh skill publish`
+CLI commands (requires GitHub CLI v2.90.0+):
+- `gh skill install <owner/repo> [skill-name]` — install from GitHub
+- `gh skill install <owner/repo> <skill-name>@<tag>` — pin to version/tag/SHA
+- `gh skill search <keyword>` — find skills by keyword
+- `gh skill preview <owner/repo> <skill-name>` — inspect before installing (recommended for security)
+- `gh skill update [--all]` — check for and apply upstream changes
+- `gh skill publish [--fix]` — validate skills against the Agent Skills spec
+
+Key flags: `--agent` (target specific host), `--scope` (user or project), `--pin` (lock version).
+
+**Security:** GitHub does not vet third-party skills. Always run `gh skill preview` before installing skills from unknown sources.
 
 ## Context files and instructions
 
@@ -119,6 +130,10 @@ Skills follow the open SKILL.md standard with YAML frontmatter.
 `name` (required), `description` (required), `license` (optional).
 
 Copilot loads skills based on task relevance — the description drives when injection happens. All files in the skill directory are auto-discovered.
+
+### Invocation
+
+In Copilot CLI, invoke skills with the `/` prefix: `/skill-name`. Skills are also auto-routed by the agent based on task relevance.
 
 ### Prompt files (VS Code only)
 

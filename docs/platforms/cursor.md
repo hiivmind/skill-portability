@@ -88,6 +88,7 @@ Three installation channels:
 | Marketplace | `cursor.com/marketplace` | Curated, manually reviewed, open-source only |
 | Local development | `~/.cursor/plugins/local/<name>/` | Restart required |
 | Team/Enterprise | Distribution groups | Admins set required/optional plugins |
+| GitHub install | `/add-plugin owner/repo` in Agent chat | Accepts shorthand or full URL |
 
 Plugins are Git repositories — no binaries shipped. Submission at `cursor.com/marketplace/publish`.
 
@@ -140,7 +141,7 @@ Four activation modes:
 | Agent-Requested | `false` | empty | set |
 | Manual | `false` | empty | empty |
 
-Important: the `globs` field is comma-separated, NOT a YAML array. Do not use brackets or quotes.
+The `globs` field accepts both comma-separated strings and YAML array syntax (e.g., `globs: ["pattern/**/*.ts"]`).
 
 Rule precedence: Team Rules > Project Rules > User Rules.
 
@@ -291,7 +292,7 @@ Cursor provides standard file, shell, and search tools. Tool names differ from C
 4. Not VS Code extensions — completely separate system
 5. MCP Resources not supported
 6. `.cursor-plugin/` is distinct from `.claude-plugin/` — copying without renaming fails
-7. `.mdc` frontmatter `globs` is comma-separated, not YAML array
+7. `.mdc` frontmatter `globs` accepts both comma-separated strings and YAML array syntax
 8. No dynamic plugin loading — restart required for changes
 9. Hook `additional_context` is snake_case (differs from Claude Code's camelCase)
 10. Cross-platform skill paths are one-way: Cursor reads `.claude/skills/` but not vice versa

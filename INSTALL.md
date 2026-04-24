@@ -17,7 +17,7 @@ necessary across today's agent platforms.
 #### Marketplace install
 
 ```bash
-claude plugin install skill-portability@skill-portability-dev
+claude plugin install skill-portability@skill-portability-marketplace
 ```
 
 #### Local development
@@ -32,7 +32,14 @@ Add to `.claude/settings.json`:
 
 ```json
 {
-  "extraKnownMarketplaces": ["./path-to-marketplace"]
+  "extraKnownMarketplaces": {
+    "skill-portability-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "hiivmind/skill-portability"
+      }
+    }
+  }
 }
 ```
 
@@ -44,32 +51,57 @@ claude plugin list
 
 Look for `skill-portability` in the output.
 
+#### Using the skills
+
+In Claude Code, invoke skills by describing what you want in natural language:
+
+```
+Assess the portability of /path/to/my-plugin
+```
+
+```
+Use the uplifting-a-plugin skill on /path/to/my-plugin
+```
+
 ### Cursor
 
-#### Marketplace install
+#### Install from GitHub
 
-Search for **Skill Portability** in the Cursor marketplace panel or visit `cursor.com/marketplace`.
+In Cursor's Agent chat:
+
+```
+/add-plugin hiivmind/skill-portability
+```
 
 #### Local development
 
-Copy the plugin directory to `~/.cursor/plugins/local/skill-portability/` and restart Cursor (Developer: Reload Window).
+Symlink or copy the plugin directory to `~/.cursor/plugins/local/skill-portability/` and restart Cursor (Developer: Reload Window).
 
 #### Verify
 
 Open Cursor and check that skills from Skill Portability appear when typing `/` in chat.
+
+#### Using the skills
+
+In Cursor's chat, invoke skills with the `/` prefix:
+
+```
+/assessing-plugin-portability
+/uplifting-a-plugin
+```
 
 ### Gemini CLI
 
 #### Install from GitHub
 
 ```bash
-gemini extensions install https://github.com/nathanielramm/skill-portability
+gemini extensions install https://github.com/hiivmind/skill-portability
 ```
 
 #### Install from local path
 
 ```bash
-gemini extensions install /path/to/skill-portability
+gemini extensions link /path/to/skill-portability
 ```
 
 #### Verify
@@ -79,6 +111,16 @@ gemini extensions list
 ```
 
 Look for `skill-portability` in the output. Restart Gemini CLI if it was running during install.
+
+#### Using the skills
+
+Gemini CLI activates skills automatically when it determines they are relevant. You can also mention a skill by name:
+
+```
+Assess the portability of /path/to/my-plugin using assessing-plugin-portability
+```
+
+List available skills with `/skills list`.
 
 ### OpenCode
 
@@ -108,20 +150,28 @@ Restart OpenCode and check that skills are listed when the agent invokes the `sk
 
 OpenCode requires [Bun](https://bun.sh) for plugin loading.
 
+#### Using the skills
+
+OpenCode discovers skills automatically. Mention a skill by name and the agent will activate it:
+
+```
+Run assessing-plugin-portability on /path/to/my-plugin
+```
+
 ### Copilot CLI
 
 #### Skill install
 
-Skills are auto-discovered from the `skills/` directory. Clone the repo and skills will be available:
+Install skills via GitHub CLI:
 
 ```bash
-git clone https://github.com/nathanielramm/skill-portability
+gh skill install hiivmind/skill-portability
 ```
 
-Alternatively, install individual skills:
+Or clone the repo — skills are auto-discovered from the `skills/` directory:
 
 ```bash
-gh skill install https://github.com/nathanielramm/skill-portability
+git clone https://github.com/hiivmind/skill-portability
 ```
 
 #### Context
@@ -138,6 +188,15 @@ copilot
 
 Type `/` to see available skills.
 
+#### Using the skills
+
+In Copilot CLI, invoke skills with the `/` prefix:
+
+```
+/assessing-plugin-portability
+/uplifting-a-plugin
+```
+
 ### Codex
 
 #### Skill-discovery install
@@ -145,7 +204,7 @@ Type `/` to see available skills.
 Clone the repo and expose the skills directory:
 
 ```bash
-git clone https://github.com/nathanielramm/skill-portability
+git clone https://github.com/hiivmind/skill-portability
 ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
 ```
 
@@ -158,6 +217,15 @@ Codex uses `AGENTS.md` as its primary context file.
 #### Verify
 
 Start a new Codex session and check that skills are listed.
+
+#### Using the skills
+
+In Codex, invoke skills with the `$` prefix:
+
+```
+$assessing-plugin-portability
+$uplifting-a-plugin
+```
 
 ## Adding Another Platform
 
@@ -175,7 +243,14 @@ Or add to `.claude/settings.json` for persistent access:
 
 ```json
 {
-  "extraKnownMarketplaces": ["/path/to/existing/skill-portability"]
+  "extraKnownMarketplaces": {
+    "skill-portability-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "hiivmind/skill-portability"
+      }
+    }
+  }
 }
 ```
 
@@ -191,10 +266,10 @@ Restart Cursor (Developer: Reload Window).
 
 ### Gemini CLI
 
-Point Gemini at your existing checkout:
+Link Gemini to your existing checkout:
 
 ```bash
-gemini extensions install /path/to/existing/skill-portability
+gemini extensions link /path/to/existing/skill-portability
 ```
 
 ### OpenCode

@@ -69,12 +69,16 @@ CLI commands:
 - `gemini extensions install <source>` — from GitHub repo or local path
 - `gemini extensions list` — list installed
 - `gemini extensions uninstall <name>` — remove
-- `gemini extensions activate|deactivate <name>` — toggle without uninstalling
+- `gemini extensions enable|disable <name> [--scope <scope>]` — toggle without uninstalling
 - `gemini extensions update [name]` — pull latest
-- `gemini extensions validate <path>` — validate manifest
-- `gemini extensions config <name> [setting]` — configure settings
+- `gemini extensions new <path> [template]` — scaffold new extension
+- `gemini extensions link <path>` — symlink for local development
 
 Extensions loaded at session start; changes require CLI restart.
+
+### Extensions gallery
+
+Gemini CLI has an extensions gallery at [geminicli.com/extensions](https://geminicli.com/extensions/) with 897+ extensions. Extensions are not vetted by Google — review before installing.
 
 ## Skills system
 
@@ -154,7 +158,7 @@ As of April 2026, `AGENTS.md` is included in the default context filename list a
 
 ## Hooks system
 
-Configured in `settings.json`, not in a standalone hooks.json file.
+Configured in `settings.json` for project/user scope, or `hooks/hooks.json` within extensions.
 
 ### Hook events (11)
 
@@ -327,7 +331,7 @@ No subagent dispatch tool — uses `@agent-name` syntax instead.
 5. Extension `name` must exactly match directory name (lowercase, dashes only)
 6. Extension policies cannot grant `allow` decisions
 7. Subagent frontmatter is mandatory — files without YAML frontmatter silently fail
-8. Hooks configured in `settings.json`, not a standalone `hooks.json`
+8. Hooks configured in `settings.json` for project/user scope, or `hooks/hooks.json` within extensions
 9. No `trust` option in extension MCP servers
 10. Hook event names use PascalCase (unlike Cursor's camelCase or Claude Code's PascalCase)
 
