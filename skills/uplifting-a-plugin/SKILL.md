@@ -519,13 +519,34 @@ WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
     Write(".codex/INSTALL.md", "See [INSTALL.md](../INSTALL.md) for installation instructions.\n")
     computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
 
-  # Flag missing Installation section in README
+  # Flag missing Installation and Publishing sections in README
   IF file_exists("README.md"):
     readme = Read("README.md")
     IF "## Installation" NOT IN readme AND "## Install" NOT IN readme:
       computed.flagged.append(
         "README.md — no Installation section found. Add install instructions or link to INSTALL.md."
       )
+    IF "PUBLISHING.md" NOT IN readme:
+      computed.flagged.append(
+        "README.md — no link to PUBLISHING.md. Add a link so plugin authors can find publishing guidance."
+      )
+```
+
+### 6.4 Write Publishing Docs
+
+```pseudocode
+WRITE_PUBLISHING_DOCS(computed, platforms_with_artifacts):
+  header = render(Read("lib/templates/install-docs/publishing.md"), computed.metadata)
+  sections = ""
+  FOR platform IN platforms_with_artifacts:
+    template = read_if_exists("lib/templates/install-docs/publishing/" + platform + ".md")
+    IF template:
+      sections += render(template, computed.metadata) + "\n\n"
+
+  IF sections:
+    content = header + "\n\n" + sections
+    Write("PUBLISHING.md", content)
+    computed.created.append({ path: "PUBLISHING.md", platform: "cross" })
 ```
 
 ---
