@@ -47,7 +47,7 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 |-------|-------------|
 | **Phase 1: Detect** | Scan metadata, elect canonical, build model, classify shape |
 | **Phase 2: Inventory** | Discover assets, init tracking, check conflicts |
-| **Phase 3: Recommend** | Choose uplift target and Codex packaging path |
+| **Phase 3: Recommend** | Recommend uplift target, confirm with user, select target platforms |
 | **Phase 4: Generate** | Write missing manifests, context files, sidecars per platform |
 | **Phase 5: Port** | Adapt hooks across platforms |
 | **Phase 6: Document** | Generate install docs per platform in target repo |
@@ -585,12 +585,12 @@ Metadata inferred from: {canonical.path}
 ## State Flow
 
 ```
-Phase 1          Phase 2              Phase 3          Phase 4–5            Phase 6            Phase 7            Phase 8
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-computed         computed.skills      computed         computed.created     platforms_with     computed           Report
- .sources         .commands           .codex_rec        .skipped             _artifacts         .bootstrap        (displayed)
- .canonical       .agents                               .flagged                                _status
- .metadata        .existing_hooks
+Phase 1          Phase 2              Phase 3              Phase 4–5            Phase 6            Phase 7            Phase 8
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+computed         computed.skills      computed              computed.created     platforms_with     computed           Report
+ .sources         .commands           .uplift_target         .skipped             _artifacts         .bootstrap        (displayed)
+ .canonical       .agents             .target_platforms      .flagged              (= target         _status
+ .metadata        .existing_hooks     .codex_rec                                   _platforms)
  .shape
 ```
 
