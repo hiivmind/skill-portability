@@ -12,6 +12,13 @@ inputs:
     type: string
     required: true
     description: Path to the plugin root directory
+  - name: platforms
+    type: string
+    required: false
+    description: >
+      Comma-separated list of target platforms. If omitted, the skill presents
+      an interactive checklist. Valid values: claude-code, cursor, gemini-cli,
+      opencode, copilot-cli, codex, all.
 outputs:
   - name: report
     type: object
