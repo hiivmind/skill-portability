@@ -477,29 +477,54 @@ RENDER_INSTALL_SECTIONS(computed, platforms_with_artifacts):
 
 ```pseudocode
 WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
-  # Codex: always gets its own install doc when targeted
-  IF "codex" IN platforms_with_artifacts:
-    Write(".codex/INSTALL.md", sections["codex"])
-    computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
+  # Whole-repo note: only include when plugin has shared assets that require
+  # whole-repo install (hooks, session-start bootstrapping, root context files,
+  # or platform manifests). Bare skill repos without these can use npx skills.
+  has_shared_assets = (
+    computed.existing_hooks
+    OR file_exists("skills/using-" + computed.metadata.name + "/SKILL.md")
+    OR any(file_exists(p) FOR p IN ["CLAUDE.md", "AGENTS.md", "GEMINI.md"])
+    OR computed.uplift_target == "full-portable-plugin"
+  )
+  IF has_shared_assets:
+    whole_repo_note = render(Read("lib/templates/install-docs/whole-repo-note.md"), computed.metadata)
+  ELSE:
+    whole_repo_note = ""
 
-  # Copilot gets its own install doc under .github
+  fresh_install = ""
+  adding_platform = ""
+  FOR platform IN platforms_with_artifacts:
+    fresh_install += sections[platform] + "\n\n"
+    adding_tmpl = read_if_exists("lib/templates/install-docs/adding-platform/" + platform + ".md")
+    IF adding_tmpl:
+      adding_platform += render(adding_tmpl, computed.metadata) + "\n\n"
+
+  content = "# Installation\n\n"
+  IF whole_repo_note:
+    content += whole_repo_note + "\n\n"
+  content += "## Fresh Install\n\n" + fresh_install
+  content += "## Adding Another Platform\n\n"
+  content += "Already have the repo cloned for one platform? Add others by pointing them at the same checkout.\n\n"
+  content += adding_platform
+
+  Write("INSTALL.md", content)
+  computed.created.append({ path: "INSTALL.md", platform: "cross" })
+
+  # Platform-specific pointers (not full docs)
   IF "copilot-cli" IN platforms_with_artifacts:
-    Write(".github/INSTALL.md", sections["copilot-cli"])
+    Write(".github/INSTALL.md", "See [INSTALL.md](../INSTALL.md) for installation instructions.\n")
     computed.created.append({ path: ".github/INSTALL.md", platform: "copilot-cli" })
 
-  # Composite doc for remaining platforms
-  remaining = [p FOR p IN platforms_with_artifacts IF p NOT IN ["codex", "copilot-cli"]]
-  IF remaining:
-    composite = join_sections([sections[p] FOR p IN remaining])
-    Write("docs/INSTALL.md", composite)
-    computed.created.append({ path: "docs/INSTALL.md", platform: "cross" })
+  IF "codex" IN platforms_with_artifacts:
+    Write(".codex/INSTALL.md", "See [INSTALL.md](../INSTALL.md) for installation instructions.\n")
+    computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
 
   # Flag missing Installation section in README
   IF file_exists("README.md"):
     readme = Read("README.md")
     IF "## Installation" NOT IN readme AND "## Install" NOT IN readme:
       computed.flagged.append(
-        "README.md — no Installation section found. Add install instructions or link to docs/INSTALL.md."
+        "README.md — no Installation section found. Add install instructions or link to INSTALL.md."
       )
 ```
 
