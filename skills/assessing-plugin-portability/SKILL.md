@@ -1,24 +1,18 @@
 ---
 name: assessing-plugin-portability
 description: >
-  Assess a plugin for multi-platform portability. Classifies repo shape, scores
-  readiness per platform using a 7-category rubric, detects structural blockers,
-  and recommends an uplift target. Read-only — makes no changes.
+  Use when you need to assess a plugin for multi-platform portability. Classifies
+  repo shape, scores readiness per platform using a 7-category rubric, detects
+  structural blockers, and recommends an uplift target. Read-only — makes no changes.
 allowed-tools: Read, Glob, Grep
-inputs:
-  - name: plugin_path
-    type: string
-    required: true
-    description: Path to the plugin root directory
-outputs:
-  - name: assessment
-    type: object
-    description: Complete portability assessment with per-platform scores and recommendation
 ---
 
 # Assessing Plugin Portability
 
 Assess a plugin repo and report portability gaps across all platforms. Makes no changes.
+
+**Input:** `plugin_path` (string, required) — Path to the plugin root directory.
+**Output:** Complete portability assessment with per-platform scores and recommendation.
 
 > **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
 > **Rubric Framework:** `lib/patterns/rubric-framework.md`
