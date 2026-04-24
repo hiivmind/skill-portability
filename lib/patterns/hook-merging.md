@@ -151,3 +151,110 @@ Target structure:
 ```
 
 Both merge operations must preserve all other existing hooks. Only the session-start entry is added or updated.
+
+---
+
+## Claude Code → Copilot Event Mapping
+
+| Claude Code | Copilot CLI | Copilot VS Code |
+|-------------|-------------|-----------------|
+| `SessionStart` | `sessionStart` | `SessionStart` |
+| `PreToolUse` | `preToolUse` | `PreToolUse` |
+| `PostToolUse` | `postToolUse` | `PostToolUse` |
+| `SubagentStart` | N/A | `SubagentStart` |
+| `SubagentStop` | `subagentStop` | `SubagentStop` |
+| `Stop` | `agentStop` | `Stop` |
+| `PreCompact` | N/A | `PreCompact` |
+| `UserPromptSubmit` | `userPromptSubmitted` | `UserPromptSubmit` |
+
+---
+
+## Copilot Hook Format
+
+```pseudocode
+GENERATE_COPILOT_HOOKS(claude_hooks):
+  copilot_hooks = { "version": 1, "hooks": {} }
+
+  event_map = {
+    "SessionStart":    "sessionStart",
+    "PreToolUse":      "preToolUse",
+    "PostToolUse":     "postToolUse",
+    "SubagentStop":    "subagentStop",
+    "Stop":            "agentStop",
+    "UserPromptSubmit": "userPromptSubmitted",
+  }
+
+  FOR event, entries IN claude_hooks.hooks:
+    IF event NOT IN event_map:
+      SKIP
+    copilot_event = event_map[event]
+    copilot_hooks.hooks[copilot_event] = []
+
+    FOR entry IN entries:
+      copilot_entry = {
+        "type": "command",
+        "bash": entry.hooks[0].command,
+        "powershell": convert_to_powershell_path(entry.hooks[0].command),
+        "timeoutSec": min(entry.hooks[0].timeout / 1000, 30)
+      }
+      copilot_hooks.hooks[copilot_event].append(copilot_entry)
+
+  Write(".github/hooks/hooks.json", JSON.stringify(copilot_hooks, indent=2))
+```
+
+Key differences from Claude Code hooks:
+- Separate `bash` and `powershell` fields instead of `command`
+- No `matcher` — tool name filtering must be done in the script by inspecting `toolName` from stdin JSON
+- Default timeout is 30 seconds
+- Only `preToolUse` can deny/block actions; all other hooks are observational
+- Hooks stored in `.github/hooks/` not `hooks/`
+
+---
+
+## Gemini Hook Guidance
+
+Gemini CLI hooks are configured in user `settings.json`, not in the repo. The uplift skill generates guidance text for install docs instead of writing a hooks file.
+
+```pseudocode
+GENERATE_GEMINI_HOOK_GUIDANCE(claude_hooks):
+  gemini_event_map = {
+    "SessionStart":    "SessionStart",
+    "PreToolUse":      "BeforeTool",
+    "PostToolUse":     "AfterTool",
+    "PreCompact":      "PreCompress",
+    "Stop":            "AfterAgent",
+  }
+
+  guidance = "### Gemini CLI Hook Configuration\n\n"
+  guidance += "Add the following to your `~/.gemini/settings.json`:\n\n"
+  guidance += "```json\n{\n  \"hooks\": {\n"
+
+  FOR event, entries IN claude_hooks.hooks:
+    IF event NOT IN gemini_event_map:
+      SKIP
+    gemini_event = gemini_event_map[event]
+
+    FOR entry IN entries:
+      guidance += '    "' + gemini_event + '": [{\n'
+      IF entry.matcher:
+        guidance += '      "matcher": "' + entry.matcher + '",\n'
+      guidance += '      "sequential": true,\n'
+      guidance += '      "hooks": [{\n'
+      guidance += '        "type": "command",\n'
+      guidance += '        "command": "' + entry.hooks[0].command + '",\n'
+      guidance += '        "timeout": ' + str(entry.hooks[0].timeout or 60000) + '\n'
+      guidance += '      }]\n'
+      guidance += '    }],\n'
+
+  guidance += "  }\n}\n```\n"
+  RETURN guidance
+```
+
+Key differences from Claude Code hooks:
+- Hooks configured in `settings.json`, not a standalone JSON file
+- Event names differ: `BeforeTool`/`AfterTool` not `PreToolUse`/`PostToolUse`
+- `PreCompress` not `PreCompact`
+- Timeout in milliseconds (default 60000), not seconds
+- `matcher` field uses regex or exact match (similar to Claude Code)
+- Exit code 2 = system block (same as Claude Code)
+- Built-in migration: `gemini hooks migrate --from-claude`
