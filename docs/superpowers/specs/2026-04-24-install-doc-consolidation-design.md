@@ -9,7 +9,7 @@
 1. **INSTALL.md is in `docs/`** — less discoverable than root. README links to `docs/INSTALL.md`.
 2. **Copilot CLI missing from central install doc** — has its own `.github/INSTALL.md` but isn't in the composite doc.
 3. **No "adding another platform" guidance** — users who clone for one platform don't know they can symlink/config other platforms at the same checkout.
-4. **No context about why whole-repo install is required** — `npx skills` installs individual skill dirs, losing hooks, context files, and manifests. This is documented in `docs/ecosystem-friction.md` (Gap 1) but not surfaced in install docs.
+4. **No context about why whole-repo install is required** — `npx skills` installs individual skill dirs, losing hooks, context files, and manifests. This is documented in `docs/ecosystem-landscape.md` (Gap 1) but not surfaced in install docs.
 
 ## Solution
 
@@ -19,7 +19,7 @@ Single file at repo root with three sections:
 
 #### Section 1: Whole-repo install note
 
-Brief explanation that this plugin requires whole-repo install (not `npx skills`) because it depends on shared hooks, context files, and platform manifests. Links to `docs/ecosystem-friction.md` for full details.
+Brief explanation that this plugin requires whole-repo install (not `npx skills`) because it depends on shared hooks, context files, and platform manifests. Links to `docs/ecosystem-landscape.md` for full details.
 
 ```markdown
 ## Important: Whole-repo install required
@@ -29,7 +29,7 @@ individual skill directories. Installing via `npx skills` (which copies only the
 directory) will lose these shared files and break session-start injection.
 
 Every install path below clones or references the full repo. See
-[docs/ecosystem-friction.md](docs/ecosystem-friction.md) for background on why this is
+[docs/ecosystem-landscape.md](docs/ecosystem-landscape.md) for background on why this is
 necessary across today's agent platforms.
 ```
 

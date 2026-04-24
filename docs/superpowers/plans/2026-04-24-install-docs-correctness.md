@@ -1,3 +1,56 @@
+# Install Docs Correctness & Platform Invocation Examples — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Fix incorrect install commands, wrong GitHub URLs, and generic usage instructions across INSTALL.md, README.md, and `.cursor-plugin/plugin.json`.
+
+**Architecture:** Three files edited with exact string replacements. No code, no tests — pure documentation fixes. All changes in one atomic commit to avoid the inconsistency Codex flagged.
+
+**Tech Stack:** Markdown, JSON
+
+---
+
+### Task 1: Fix `.cursor-plugin/plugin.json` GitHub URLs
+
+**Files:**
+- Modify: `.cursor-plugin/plugin.json:10-11`
+
+- [ ] **Step 1: Fix homepage and repository URLs**
+
+Replace:
+```json
+  "homepage": "https://github.com/nathanielramm/skill-portability",
+  "repository": "https://github.com/nathanielramm/skill-portability",
+```
+
+With:
+```json
+  "homepage": "https://github.com/hiivmind/skill-portability",
+  "repository": "https://github.com/hiivmind/skill-portability",
+```
+
+---
+
+### Task 2: Rewrite INSTALL.md
+
+**Files:**
+- Modify: `INSTALL.md` (full rewrite of platform sections)
+
+- [ ] **Step 1: Replace INSTALL.md content**
+
+Write the entire file with these corrections applied:
+
+1. Claude Code section: `skill-portability@skill-portability-dev` → `skill-portability@skill-portability-marketplace`. Replace `extraKnownMarketplaces` array format with object format. Add "Using the skills" subsection.
+2. Cursor section: Remove false marketplace claim. Replace with `/add-plugin hiivmind/skill-portability`. Add "Using the skills" subsection.
+3. Gemini CLI section: Fix URL `nathanielramm` → `hiivmind`. Add "Using the skills" subsection.
+4. OpenCode section: Add "Using the skills" subsection.
+5. Copilot CLI section: Fix URLs `nathanielramm` → `hiivmind`. Add "Using the skills" subsection.
+6. Codex section: Fix URL `nathanielramm` → `hiivmind`. Add "Using the skills" subsection.
+7. "Adding Another Platform" section: Fix `extraKnownMarketplaces` format in Claude Code subsection.
+
+Full replacement content:
+
+```markdown
 # Installation
 
 ## Important: Whole-repo install required
@@ -307,3 +360,108 @@ ln -s /path/to/existing/skill-portability/skills ~/.agents/skills/skill-portabil
 ```
 
 Restart Codex.
+```
+
+- [ ] **Step 2: Verify no `nathanielramm` references remain**
+
+Run: `grep -n "nathanielramm" INSTALL.md`
+Expected: no output
+
+- [ ] **Step 3: Verify no `skill-portability-dev` references remain**
+
+Run: `grep -n "skill-portability-dev" INSTALL.md`
+Expected: no output
+
+---
+
+### Task 3: Update README.md usage and quick-start sections
+
+**Files:**
+- Modify: `README.md:53-71`
+
+- [ ] **Step 1: Fix quick-start marketplace name**
+
+Replace:
+```markdown
+**Quick start (Claude Code):**
+
+```bash
+claude plugin install skill-portability@skill-portability-dev
+```
+```
+
+With:
+```markdown
+**Quick start (Claude Code):**
+
+```bash
+claude plugin install skill-portability@skill-portability-marketplace
+```
+```
+
+- [ ] **Step 2: Replace generic usage section with per-platform invocation table**
+
+Replace:
+```markdown
+## Usage
+
+Audit a plugin's portability gaps:
+
+```
+Use the assessing-plugin-portability skill on /path/to/your/plugin
+```
+
+Then uplift it:
+
+```
+Use the uplifting-a-plugin skill on /path/to/your/plugin
+```
+```
+
+With:
+```markdown
+## Usage
+
+| Platform | Assess portability | Uplift a plugin |
+|----------|--------------------|-----------------|
+| **Claude Code** | `Assess the portability of /path/to/plugin` | `Use the uplifting-a-plugin skill on /path/to/plugin` |
+| **Cursor** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Copilot CLI** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
+| **Codex** | `$assessing-plugin-portability` | `$uplifting-a-plugin` |
+| **Gemini CLI** | Mention skill by name — auto-activated | Same |
+| **OpenCode** | Mention skill by name — auto-activated | Same |
+
+See [INSTALL.md](INSTALL.md) for full install and usage details per platform.
+```
+
+- [ ] **Step 3: Verify no `skill-portability-dev` references remain**
+
+Run: `grep -n "skill-portability-dev" README.md`
+Expected: no output
+
+---
+
+### Task 4: Commit all changes atomically
+
+**Files:**
+- All modified: `.cursor-plugin/plugin.json`, `INSTALL.md`, `README.md`
+
+- [ ] **Step 1: Stage and commit**
+
+```bash
+git add .cursor-plugin/plugin.json INSTALL.md README.md
+git commit -m "fix: correct install docs — marketplace name, GitHub URLs, platform invocation examples
+
+- Fix marketplace name: skill-portability-dev → skill-portability-marketplace
+- Fix all GitHub URLs: nathanielramm → hiivmind
+- Fix extraKnownMarketplaces to use correct object format
+- Replace false Cursor marketplace claim with /add-plugin
+- Fix Gemini local install to use 'extensions link' (not 'install')
+- Add per-platform skill invocation examples (/, $, natural language)
+- Replace generic README usage with per-platform invocation table"
+```
+
+- [ ] **Step 2: Verify consistency**
+
+Run: `grep -rn "nathanielramm/skill-portability\|skill-portability-dev" README.md INSTALL.md .cursor-plugin/plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json`
+Expected: no output (all references now use `hiivmind` and `skill-portability-marketplace`)
