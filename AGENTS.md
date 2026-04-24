@@ -7,7 +7,7 @@ Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gem
 This plugin provides the following skills. Read the SKILL.md files listed to understand how to invoke each skill:
 
 - skills/uplifting-a-plugin/SKILL.md
-- skills/auditing-plugin-portability/SKILL.md
+- skills/assessing-plugin-portability/SKILL.md
 
 ## Tool Name Mapping
 
