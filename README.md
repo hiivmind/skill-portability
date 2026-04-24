@@ -6,16 +6,17 @@ Point it at a plugin repo and it tells you what's missing. Say the word and it e
 
 ## How it's different
 
-The cross-platform skill portability space is full of [CLI tools and broad frameworks](docs/competitive-landscape.md). They require installation, maintain canonical directories or registries, and often absorb scope far beyond portability (workflows, memory systems, eval loops, marketplaces).
+The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md). They are separate programs you install and run alongside your agent. Most target consumers (people installing others' skills), not authors. The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance.
 
 skill-portability takes a different approach:
 
-- **It's a skill, not a CLI.** Runs inside the agent. Nothing to install beyond the plugin itself.
+- **It works where authors already work.** It's a plugin you install into the same agent you're already using to build your skill. No context switch, no separate CLI — assessment and uplift happen inside the authoring workflow.
 - **Analysis first.** Examines what platform artifacts exist and reports gaps before touching anything.
+- **Any platform as input.** Not locked to Claude Code as the starting point. A Cursor plugin, a Codex skill, a bare SKILL.md — all valid inputs.
 - **Optional uplift in place.** Emits missing artifacts directly into the project in each platform's native format. No intermediate representation, no `.agents/` directory to maintain.
-- **Zero infrastructure.** No marketplace, no registry, no sync daemon. One job: assess and optionally fill portability gaps.
+- **Publishing guidance included.** Generates PUBLISHING.md with per-platform steps for getting discovered and installed — not just the artifacts, but how to ship them.
 
-## What it emits
+## What it does
 
 Starting from whatever platform manifests already exist, it detects plugin metadata and generates everything missing:
 
@@ -48,12 +49,45 @@ This plugin owes a direct debt to [obra/superpowers](https://github.com/obra/sup
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md) for per-platform install instructions covering Claude Code, Cursor, Gemini CLI, OpenCode, Codex, and Copilot CLI.
+Full details for all platforms in [INSTALL.md](INSTALL.md).
 
-**Quick start (Claude Code):**
+**Claude Code** — register the marketplace, then install:
+
+```
+/plugin marketplace add hiivmind/skill-portability
+/plugin install skill-portability@skill-portability-marketplace
+```
+
+**Cursor** — in Agent chat:
+
+```
+/add-plugin hiivmind/skill-portability
+```
+
+**Gemini CLI:**
 
 ```bash
-claude plugin install skill-portability@skill-portability-marketplace
+gemini extensions install https://github.com/hiivmind/skill-portability
+```
+
+**Copilot CLI:**
+
+```bash
+gh skill install hiivmind/skill-portability
+```
+
+**Codex:**
+
+```bash
+git clone https://github.com/hiivmind/skill-portability
+ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+```
+
+**OpenCode** — clone and copy the plugin entrypoint:
+
+```bash
+git clone https://github.com/hiivmind/skill-portability
+cp skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/
 ```
 
 ## Usage
@@ -66,5 +100,3 @@ claude plugin install skill-portability@skill-portability-marketplace
 | **Codex** | `$assessing-plugin-portability` | `$uplifting-a-plugin` |
 | **Gemini CLI** | Mention skill by name — auto-activated | Same |
 | **OpenCode** | Mention skill by name — auto-activated | Same |
-
-See [INSTALL.md](INSTALL.md) for full install and usage details per platform.
