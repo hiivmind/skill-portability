@@ -292,13 +292,13 @@ RECOMMEND_TARGET(computed):
     ELSE:
       computed.recommendation = "full-portable-plugin"
 
-  ELIF computed.shape == "single-platform":
+  ELIF computed.shape == "single-platform-plugin":
     computed.recommendation = "full-portable-plugin"
 
-  ELIF computed.shape == "multi-platform":
-    computed.recommendation = "hybrid"
+  ELIF computed.shape == "multi-platform-source":
+    computed.recommendation = "full-portable-plugin"
 
-  ELIF computed.shape == "curated":
+  ELIF computed.shape == "curated-distribution":
     computed.recommendation = "curated-note-only"
 
   ELSE:
@@ -311,10 +311,14 @@ RECOMMEND_TARGET(computed):
 RECOMMEND_CODEX(computed):
   IF ".codex-plugin/plugin.json" PRESENT in computed.manifest_results:
     computed.codex_rec = "native-plugin-packaging"
-  ELIF computed.shape IN ["bare-skill-repo", "single-platform"] AND len(computed.skills) > 0:
+  ELIF computed.shape == "bare-skill-repo" AND len(computed.skills) > 0:
     computed.codex_rec = "native-skill-discovery"
-  ELSE:
+  ELIF computed.shape IN ["single-platform-plugin", "multi-platform-source"]:
+    computed.codex_rec = "native-plugin-packaging"
+  ELIF computed.shape == "curated-distribution":
     computed.codex_rec = "curated-package-note"
+  ELSE:
+    computed.codex_rec = "native-plugin-packaging"
 ```
 
 ### Step 4.3: Per-Platform Action Summary
