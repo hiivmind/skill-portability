@@ -15,7 +15,7 @@ For repos that are mostly instructions with no plugin UI metadata:
 For first-class plugin packages with marketplace metadata:
 
 - Create `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`
-- For a single-plugin GitHub repo, the marketplace entry should point at the repo root with `source.path: "."`
+- For a single-plugin GitHub repo, the marketplace entry should point at the repo root with `source.path: "./"`
 - Users register via `codex marketplace add {{repository}}`
 - Users then enable the plugin from `/plugins`
 - Public self-serve plugin publishing is coming soon per OpenAI docs

@@ -43,7 +43,7 @@ Key properties:
 
 Use when: first-class Codex plugin package needed, bundles more than plain skill content, marketplace presentation desired.
 
-For a single-plugin GitHub repo, the marketplace entry should point back to the repo root with `source.path: "."`.
+For a single-plugin GitHub repo, the marketplace entry should point back to the repo root with `source.path: "./"`.
 
 Curated multi-plugin marketplace repos can still use `plugins/<name>/` packaging under one shared marketplace root.
 
@@ -81,7 +81,7 @@ Location: `.agents/plugins/marketplace.json` (repo-local) or `~/.agents/plugins/
       "name": "my-plugin",
       "source": {
         "source": "local",
-        "path": "."
+        "path": "./"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -93,7 +93,7 @@ Location: `.agents/plugins/marketplace.json` (repo-local) or `~/.agents/plugins/
 }
 ```
 
-For a single-plugin upstream repo installed from GitHub, `path: "."` is the important detail: the marketplace entry points at the repository root because the repo itself is the plugin.
+For a single-plugin upstream repo installed from GitHub, `path: "./"` is the important detail: the marketplace entry points at the repository root because the repo itself is the plugin.
 
 ## Installation and discovery
 

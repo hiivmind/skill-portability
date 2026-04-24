@@ -114,7 +114,7 @@ Use this pattern when:
 - you need Codex plugin metadata or marketplace presentation
 - you want the repo to model plugin packaging explicitly, not only skill loading
 
-For a single-plugin GitHub repo, `.agents/plugins/marketplace.json` should point to the repo root with `source.path: "."`.
+For a single-plugin GitHub repo, `.agents/plugins/marketplace.json` should point to the repo root with `source.path: "./"`.
 Use the `plugins/<name>/` layout only for curated marketplace repos that contain multiple plugins.
 
 ### Important portability note
@@ -381,7 +381,7 @@ Choose this when:
 Typical output:
 
 - `.codex-plugin/plugin.json`
-- `.agents/plugins/marketplace.json` with `source.path: "."` for single-plugin repos
+- `.agents/plugins/marketplace.json` with `source.path: "./"` for single-plugin repos
 - repo-local or home-local `marketplace.json` using `plugins/<name>/` for curated multi-plugin repos
 - optional bundled `skills`, `hooks`, `.mcp.json`, `.app.json`
 - install guidance for plugin registration and discovery
