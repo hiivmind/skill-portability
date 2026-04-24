@@ -6,7 +6,7 @@ Point it at a plugin repo and it tells you what's missing. Say the word and it e
 
 ## How it's different
 
-The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md). They are separate programs you install and run alongside your agent. Most target consumers (people installing others' skills), not authors. The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance.
+The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md). They are separate programs you install and run alongside your plugin. Most target consumers (people installing others' skills), not authors. The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance, no choice of target platforms.
 
 skill-portability takes a different approach:
 
