@@ -58,7 +58,7 @@ DETECT(plugin_path):
 
 ### Step 2.1: Check Platform Manifests
 
-Check all 9 manifest paths across 5 platforms, recording `{ platform, path, status }`:
+Check all 10 manifest paths across 6 platforms, recording `{ platform, path, status }`:
 
 ```pseudocode
 INVENTORY_MANIFESTS(computed):
@@ -70,6 +70,7 @@ INVENTORY_MANIFESTS(computed):
     { platform: "gemini-cli",   path: "GEMINI.md" },
     { platform: "opencode",     path: ".opencode/plugins/" + computed.metadata.name + ".js" },
     { platform: "codex",        path: ".codex-plugin/plugin.json" },
+    { platform: "codex",        path: ".agents/plugins/marketplace.json" },
     { platform: "copilot-cli",  path: "package.json" },
     { platform: "copilot-cli",  path: ".github/copilot-instructions.md" }
   ]

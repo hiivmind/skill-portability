@@ -73,6 +73,7 @@ RENDER_WITH_BUILDER(template, metadata, computed):
 | opencode-package | Plain | `lib/templates/manifests/package.json.tmpl` |
 | opencode-shim | Plain | `lib/templates/manifests/opencode-plugin.js.tmpl` |
 | codex-plugin | Plain | `lib/templates/manifests/codex-plugin/plugin.json.tmpl` |
+| codex-marketplace | Plain | `lib/templates/manifests/codex-plugin/marketplace.json.tmpl` |
 | copilot-instructions | Plain | `lib/templates/context-files/copilot-instructions.md.tmpl` |
 
 ---
@@ -168,6 +169,18 @@ Create `.opencode/plugins/` directory if needed. This is the minimal non-bootstr
 Create `.codex-plugin/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
 
 > **Template:** `lib/templates/manifests/codex-plugin/plugin.json.tmpl`
+
+---
+
+## codex-marketplace
+
+**Target:** `.agents/plugins/marketplace.json`
+
+Create `.agents/plugins/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
+
+For single-plugin upstream repos, this manifest points to the repo root with `source.path: "."`.
+
+> **Template:** `lib/templates/manifests/codex-plugin/marketplace.json.tmpl`
 
 ---
 

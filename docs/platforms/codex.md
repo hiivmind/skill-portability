@@ -23,18 +23,16 @@ Proper Codex plugin package.
 
 ```
 <root>/
+  .codex-plugin/
+    plugin.json
   .agents/
     plugins/
       marketplace.json
-  plugins/
-    my-plugin/
-      .codex-plugin/
-        plugin.json
-      skills/
-      hooks/
-      .mcp.json
-      .app.json
-      assets/
+  skills/
+  hooks/
+  .mcp.json
+  .app.json
+  assets/
 ```
 
 Key properties:
@@ -44,6 +42,10 @@ Key properties:
 - Discovery at plugin level, not only through raw skill discovery
 
 Use when: first-class Codex plugin package needed, bundles more than plain skill content, marketplace presentation desired.
+
+For a single-plugin GitHub repo, the marketplace entry should point back to the repo root with `source.path: "."`.
+
+Curated multi-plugin marketplace repos can still use `plugins/<name>/` packaging under one shared marketplace root.
 
 ### Upstream vs curated distinction
 
@@ -73,16 +75,25 @@ Location: `.agents/plugins/marketplace.json` (repo-local) or `~/.agents/plugins/
 
 ```json
 {
+  "name": "my-marketplace",
   "plugins": [
     {
       "name": "my-plugin",
-      "source": "./plugins/my-plugin",
-      "description": "...",
-      "version": "1.0.0"
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
     }
   ]
 }
 ```
+
+For a single-plugin upstream repo installed from GitHub, `path: "."` is the important detail: the marketplace entry points at the repository root because the repo itself is the plugin.
 
 ## Installation and discovery
 
@@ -98,17 +109,25 @@ Location: `.agents/plugins/marketplace.json` (repo-local) or `~/.agents/plugins/
 Two shapes:
 
 | Shape | Plugin path | Marketplace path |
-|-------|------------|-----------------|
-| Repo-local | `<repo>/plugins/<name>` | `<repo>/.agents/plugins/marketplace.json` |
+|-------|-------------|------------------|
+| Single-plugin upstream repo | `<repo>/` | `<repo>/.agents/plugins/marketplace.json` |
+| Curated multi-plugin repo | `<repo>/plugins/<name>` | `<repo>/.agents/plugins/marketplace.json` |
 | Home-local | `~/plugins/<name>` | `~/.agents/plugins/marketplace.json` |
 
 ### CLI marketplace commands
 
 ```bash
-codex plugin marketplace add owner/repo
-codex plugin marketplace add owner/repo --ref main
-codex plugin marketplace remove marketplace-name
-codex plugin marketplace upgrade [marketplace-name]
+codex marketplace add owner/repo
+codex marketplace add owner/repo --ref main
+codex marketplace add https://github.com/owner/repo
+codex marketplace add /path/to/local/marketplace-root
+```
+
+Current Codex CLI exposes marketplace registration directly. Plugin enablement then happens in the `/plugins` UI, or equivalently through `~/.codex/config.toml` by adding:
+
+```toml
+[plugins."my-plugin@my-marketplace"]
+enabled = true
 ```
 
 ### Built-in skill commands
@@ -149,7 +168,7 @@ Codex uses `AGENTS.md` as its primary context file.
 - `AGENTS.md` at project root or in `.agents/` directories
 - The `project_doc_fallback_filenames` config key can be expanded to recognize alternate names. `CLAUDE.md` is not a documented default fallback.
 
-For Codex skill-discovery installs, `.codex/INSTALL.md` should document the install path.
+For Codex plugin repos, `.codex/INSTALL.md` should point to the marketplace install instructions. For skill-discovery installs, it should document the symlink or copy path.
 
 ## Tool mapping
 
@@ -225,7 +244,7 @@ Codex supports hooks through its plugin system. Hook configuration follows a sim
 
 1. Two materially different consumption patterns — must decide skill-discovery vs plugin packaging
 2. No named agent registry — `spawn_agent` uses generic roles, not named types
-3. Multi-agent support requires explicit config flag
+3. Plugin installation is a two-step flow: marketplace registration, then plugin enablement
 4. Codex App sandbox may block branch/push operations (detached HEAD)
 5. Upstream source layout may differ from curated marketplace packaging
 6. `update_plan` instead of `TodoWrite` for task tracking
@@ -239,6 +258,7 @@ Score 3 when:
 - Explicit decision made between skill-discovery and plugin packaging
 - Chosen path fully implemented
 - `.codex-plugin/plugin.json` present if plugin path chosen
+- `.agents/plugins/marketplace.json` present if the repo should be installable as a Codex plugin from GitHub
 - Install docs match the chosen path
 
 Score 2 when:

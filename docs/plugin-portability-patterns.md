@@ -88,18 +88,16 @@ Minimal structure:
 
 ```text
 <root>/
+  .codex-plugin/
+    plugin.json
   .agents/
     plugins/
       marketplace.json
-  plugins/
-    my-plugin/
-      .codex-plugin/
-        plugin.json
-      skills/
-      hooks/
-      .mcp.json
-      .app.json
-      assets/
+  skills/
+  hooks/
+  .mcp.json
+  .app.json
+  assets/
 ```
 
 Key properties:
@@ -115,6 +113,9 @@ Use this pattern when:
 - you want one installable unit for multiple capabilities
 - you need Codex plugin metadata or marketplace presentation
 - you want the repo to model plugin packaging explicitly, not only skill loading
+
+For a single-plugin GitHub repo, `.agents/plugins/marketplace.json` should point to the repo root with `source.path: "."`.
+Use the `plugins/<name>/` layout only for curated marketplace repos that contain multiple plugins.
 
 ### Important portability note
 
@@ -380,7 +381,8 @@ Choose this when:
 Typical output:
 
 - `.codex-plugin/plugin.json`
-- repo-local or home-local `marketplace.json`
+- `.agents/plugins/marketplace.json` with `source.path: "."` for single-plugin repos
+- repo-local or home-local `marketplace.json` using `plugins/<name>/` for curated multi-plugin repos
 - optional bundled `skills`, `hooks`, `.mcp.json`, `.app.json`
 - install guidance for plugin registration and discovery
 
@@ -426,7 +428,11 @@ Use this when the uplifted repo ships `.codex-plugin/plugin.json`.
 
 Two common shapes:
 
-- **repo-local marketplace**
+- **single-plugin upstream repo**
+  - plugin at `<repo>/`
+  - marketplace at `<repo>/.agents/plugins/marketplace.json`
+  - marketplace entry points at `.`
+- **curated multi-plugin repo**
   - plugin at `<repo>/plugins/<plugin-name>`
   - marketplace at `<repo>/.agents/plugins/marketplace.json`
 - **home-local marketplace**
@@ -437,8 +443,10 @@ Users need:
 
 1. the plugin directory in the expected location
 2. a valid `.codex-plugin/plugin.json`
-3. a marketplace entry pointing at `./plugins/<plugin-name>`
-4. a Codex restart or refresh
+3. a marketplace entry pointing at `.` for single-plugin repos, or `./plugins/<plugin-name>` for curated multi-plugin repos
+4. `codex marketplace add <owner/repo>` or `codex marketplace add <local-path>`
+5. plugin enablement in `/plugins` or an equivalent `[plugins."<plugin>@<marketplace>"]` entry in `~/.codex/config.toml`
+6. a Codex restart or fresh session if the plugin is not immediately visible
 
 This is the proper Codex plugin installation pattern.
 

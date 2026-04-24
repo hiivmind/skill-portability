@@ -1,36 +1,44 @@
 ## Codex
 
-### Skill-discovery install
+Codex supports two different install shapes. Use the one that matches what this repo ships.
 
-Clone the repo and expose the skills directory:
+### Native plugin packaging
+
+If the repo includes both `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`, install it as a Codex plugin:
+
+```bash
+codex marketplace add {{repository}}
+```
+
+Then open `/plugins` in Codex and install `{{name}}`.
+
+Codex persists the plugin enablement as a separate config entry:
+
+```toml
+[plugins."{{name}}@{{marketplaceName}}"]
+enabled = true
+```
+
+### Local development for plugin repos
+
+Use this only when you are intentionally testing a local checkout rather than installing from GitHub:
+
+```bash
+codex marketplace add /path/to/{{name}}
+```
+
+Then open `/plugins` in Codex and install `{{name}}`.
+
+### Skill discovery
+
+If the repo is published as raw skills only, or you only want the skills and do not need Codex plugin packaging, clone the repo and expose the skills directory:
 
 ```bash
 git clone {{repository}}
 ln -s $(pwd)/{{name}}/skills ~/.agents/skills/{{name}}
 ```
 
-Restart Codex. Skills will be discoverable through native skill discovery.
-
-### Native plugin install
-
-If packaged as a Codex plugin:
-
-1. Ensure `.codex-plugin/plugin.json` exists in the plugin directory
-2. Add a marketplace entry:
-
-```json
-{
-  "plugins": [
-    {
-      "name": "{{name}}",
-      "source": "./plugins/{{name}}"
-    }
-  ]
-}
-```
-
-1. Place `marketplace.json` at `~/.agents/plugins/marketplace.json` (home-local) or `<repo>/.agents/plugins/marketplace.json` (repo-local)
-2. Restart Codex
+Use this path when the repo does not ship Codex plugin manifests, or when you intentionally want skills without plugin packaging.
 
 ### Context file
 
@@ -38,7 +46,7 @@ Codex uses `AGENTS.md` as its primary context file.
 
 ### Multi-agent support
 
-If this plugin's skills use subagent dispatch, enable multi-agent mode:
+If this plugin's skills use subagent dispatch, confirm multi-agent mode is enabled:
 
 ```toml
 # ~/.codex/config.toml
@@ -48,4 +56,8 @@ multi_agent = true
 
 ### Verify
 
-Start a new Codex session and check that skills are listed.
+Start a new Codex session and check one of:
+
+- `/plugins` shows `{{name}}` as installed
+- `~/.codex/config.toml` contains both the marketplace entry and the enabled plugin entry
+- the relevant `$` skill resolves in a fresh session

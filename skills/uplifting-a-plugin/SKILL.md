@@ -99,6 +99,7 @@ CHECK_CONFLICTS(computed):
     { path: ".claude-plugin/marketplace.json",                     platform: "claude-code" },
     { path: ".cursor-plugin/plugin.json",                          platform: "cursor"      },
     { path: ".codex-plugin/plugin.json",                           platform: "codex"       },
+    { path: ".agents/plugins/marketplace.json",                    platform: "codex"       },
     { path: "gemini-extension.json",                               platform: "gemini-cli"  },
     { path: "GEMINI.md",                                           platform: "gemini-cli"  },
     { path: "AGENTS.md",                                           platform: "cross"       },
@@ -268,6 +269,8 @@ GENERATE_MANIFESTS(computed):
     { target: ".opencode/plugins/{{name}}.js",   platform: "opencode",    schema: "opencode-shim"         },
     { target: ".codex-plugin/plugin.json",       platform: "codex",       schema: "codex-plugin",
       condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
+    { target: ".agents/plugins/marketplace.json", platform: "codex",      schema: "codex-marketplace",
+      condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
     { target: "AGENTS.md",                       platform: "cross",       schema: "agents-context"        },
     { target: ".github/copilot-instructions.md", platform: "copilot-cli", schema: "copilot-instructions"  },
   ]
@@ -308,7 +311,8 @@ The `is_manifest()` predicate classifies schemas as packaging vs context:
 ```pseudocode
 MANIFEST_SCHEMAS = [
   "claude-plugin", "claude-marketplace", "cursor-plugin",
-  "gemini-extension", "opencode-package", "opencode-shim", "codex-plugin"
+  "gemini-extension", "opencode-package", "opencode-shim", "codex-plugin",
+  "codex-marketplace"
 ]
 CONTEXT_SCHEMAS = [
   "claude-context", "gemini-context", "agents-context", "copilot-instructions"

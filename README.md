@@ -31,8 +31,9 @@ Starting from whatever platform manifests already exist, it detects plugin metad
 | **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `CLAUDE.md` |
 | **Cursor** | `.cursor-plugin/plugin.json` |
 | **Gemini CLI** | `gemini-extension.json`, `GEMINI.md` |
+| **Codex** | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.codex/INSTALL.md`, `AGENTS.md` |
 | **OpenCode** | `package.json`, `.opencode/plugins/<name>.js` |
-| **Generic harnesses** (Codex, Copilot CLI) | `AGENTS.md` |
+| **Copilot CLI** | `AGENTS.md` |
 | **Per-skill tool mapping** | `references/{copilot,codex,gemini}-tools.md` |
 | **Hook portability** | `hooks-cursor.json` derived from `hooks.json` |
 
@@ -93,9 +94,10 @@ gh skill install hiivmind/skill-portability
 **Codex:**
 
 ```bash
-git clone https://github.com/hiivmind/skill-portability
-ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+codex marketplace add hiivmind/skill-portability
 ```
+
+Then open `/plugins` in Codex and install `skill-portability`.
 
 **OpenCode** — clone and copy the plugin entrypoint:
 
