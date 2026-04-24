@@ -83,12 +83,16 @@ SELECT_PLATFORMS(computed):
 
   # Pre-select based on uplift target and existing state
   IF computed.uplift_target == "skill-first":
-    # Skill-first: pre-select platforms that already have manifests, plus cross-platform
+    # Skill-first: pre-select all platforms — sidecars and context files are
+    # useful everywhere. Platforms with existing manifests are annotated in
+    # the checklist so the user can see what already exists.
+    preselected = all_platforms
+  ELIF computed.uplift_target == "curated-note-only":
+    # Curated: pre-select platforms that already have manifests (install docs only)
     preselected = [p FOR p IN all_platforms
                    IF any(s.platform == p FOR s IN computed.skipped)]
-    # Always include cross-platform artifacts (sidecars, AGENTS.md)
-  ELIF computed.uplift_target == "curated-note-only":
-    preselected = []
+    IF len(preselected) == 0:
+      preselected = all_platforms  # no manifests to anchor on, default to all
   ELSE:  # full-portable-plugin
     preselected = all_platforms  # all pre-selected
 
@@ -107,6 +111,11 @@ SELECT_PLATFORMS(computed):
     computed.target_platforms = preselected
   ELSE:
     computed.target_platforms = parse_platform_list(response)
+
+  # Validate: at least one platform required
+  IF len(computed.target_platforms) == 0:
+    DISPLAY "At least one platform must be selected."
+    GOTO SELECT_PLATFORMS  # re-prompt
 ```
 
 #### Step 3.3: Derive Codex path (no longer interactive)
@@ -127,10 +136,26 @@ DERIVE_CODEX_PATH(computed):
 
 ### Part A impact on downstream phases
 
+#### Early exit for curated-note-only
+
+`curated-note-only` skips Phases 4, 5, and 7 entirely. Only Phase 6 (install docs) runs.
+
+```pseudocode
+IF computed.uplift_target == "curated-note-only":
+  SKIP Phase 4 (Generate)
+  SKIP Phase 5 (Port)
+  RUN  Phase 6 (Document) — install docs only, for selected platforms
+  SKIP Phase 7 (Bootstrap)
+  RUN  Phase 8 (Report)
+  RETURN
+```
+
 #### Phase 4.1: Filter manifest table by target platforms
 
 ```pseudocode
 GENERATE_MANIFESTS(computed):
+  # curated-note-only never reaches here (short-circuited above)
+
   manifests = [
     { target: ".claude-plugin/plugin.json",      platform: "claude-code", ... },
     { target: ".claude-plugin/marketplace.json", platform: "claude-code", ... },
@@ -217,11 +242,37 @@ PORT_HOOKS(computed):
 
 #### Phase 6: Filter install docs by target platforms
 
+The existing `WRITE_INSTALL_DOCS` gates `.codex/INSTALL.md` on `codex_rec != 'native-skill-discovery'`.
+This spec replaces that condition with a target-platform check so Codex install docs are always
+generated when codex is a target platform, regardless of the packaging path.
+
 ```pseudocode
 DETERMINE_PLATFORMS(computed):
-  # Replace current logic with explicit target list
+  # Replace artifact-derived logic with explicit target list
   platforms_with_artifacts = computed.target_platforms
+
+WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
+  # Codex: always gets its own install doc when targeted
+  IF "codex" IN platforms_with_artifacts:
+    Write(".codex/INSTALL.md", sections["codex"])
+    computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
+
+  # Copilot: always gets its own install doc when targeted
+  IF "copilot-cli" IN platforms_with_artifacts:
+    Write(".github/INSTALL.md", sections["copilot-cli"])
+    computed.created.append({ path: ".github/INSTALL.md", platform: "copilot-cli" })
+
+  # Composite doc for remaining platforms
+  remaining = [p FOR p IN platforms_with_artifacts IF p NOT IN ["codex", "copilot-cli"]]
+  IF remaining:
+    composite = join_sections([sections[p] FOR p IN remaining])
+    Write("docs/INSTALL.md", composite)
+    computed.created.append({ path: "docs/INSTALL.md", platform: "cross" })
 ```
+
+Note: the old condition `computed.codex_rec != "native-skill-discovery"` is removed. The `codex_rec`
+field now only controls whether `.codex-plugin/plugin.json` is generated (Phase 4), not whether
+install docs are emitted.
 
 #### Phase 7: Bootstrap filters
 
@@ -331,11 +382,13 @@ RECOMMEND_CODEX(computed):
 | Scenario | Behaviour |
 |----------|-----------|
 | User selects 0 platforms | Error: "At least one platform must be selected." Re-prompt. |
-| User selects only codex with skill-first target | Generate sidecars + AGENTS.md + .codex/INSTALL.md. No .codex-plugin/ manifest. |
-| User selects codex with full-portable-plugin target | Generate .codex-plugin/plugin.json + sidecars + install docs. |
+| User selects only codex with skill-first target | Generate sidecars + AGENTS.md + `.codex/INSTALL.md`. No `.codex-plugin/` manifest. `codex_rec` is `native-skill-discovery`; Phase 6 emits install docs regardless. |
+| User selects codex with full-portable-plugin target | Generate `.codex-plugin/plugin.json` + sidecars + `.codex/INSTALL.md`. |
 | `platforms` input provided but uplift_target not | Auto-confirm shape-based recommendation. |
 | Plugin already has all manifests for selected platforms | All skipped, no writes. Report confirms "already portable for selected platforms." |
-| curated-note-only with platforms selected | Only install docs generated for selected platforms. No manifests or sidecars. |
+| curated-note-only with platforms selected | Phases 4, 5, 7 short-circuited. Only Phase 6 (install docs) runs for selected platforms. No manifests, sidecars, or hooks. |
+| curated-note-only with 0 preselected (no existing manifests) | Preselection defaults to all platforms. User can narrow via checklist. |
+| bare-skill-repo with skill-first confirmed | All platforms pre-selected for sidecars/context. No platform manifests generated (`is_manifest` filter). |
 
 ## Testing
 
