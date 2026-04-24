@@ -189,4 +189,3 @@ Score 1 when:
 Score 0 when:
 - No agents or commands present
 - No runtime configuration found
-

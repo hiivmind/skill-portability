@@ -3,7 +3,7 @@
 Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent:
 
 | Skill references | Codex equivalent |
-|-----------------|------------------|
+| ---------------- | ---------------- |
 | `Task` tool (dispatch subagent) | `spawn_agent` (see [Named agent dispatch](#named-agent-dispatch)) |
 | Multiple `Task` calls (parallel) | Multiple `spawn_agent` calls |
 | Task returns result | `wait` |
@@ -39,7 +39,7 @@ When a skill says to dispatch a named agent type:
 4. Spawn a `worker` agent with the filled content as the `message`
 
 | Skill instruction | Codex equivalent |
-|-------------------|------------------|
+| ----------------- | ---------------- |
 | `Task tool (superpowers:code-reviewer)` | `spawn_agent(agent_type="worker", message=...)` with `code-reviewer.md` content |
 | `Task tool (general-purpose)` with inline prompt | `spawn_agent(message=...)` with the same prompt |
 
@@ -48,7 +48,7 @@ When a skill says to dispatch a named agent type:
 The `message` parameter is user-level input, not a system prompt. Structure it
 for maximum instruction adherence:
 
-```
+```text
 Your task is to perform the following. Follow the instructions below exactly.
 
 <agent-instructions>

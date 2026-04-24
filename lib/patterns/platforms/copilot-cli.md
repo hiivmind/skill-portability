@@ -191,4 +191,3 @@ Score 1 when:
 Score 0 when:
 - No agents or hooks present
 - Runtime configuration missing
-

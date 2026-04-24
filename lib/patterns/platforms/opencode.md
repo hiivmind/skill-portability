@@ -184,4 +184,3 @@ Score 1 when:
 Score 0 when:
 - No MCP or runtime configuration
 - No server injection mechanism
-

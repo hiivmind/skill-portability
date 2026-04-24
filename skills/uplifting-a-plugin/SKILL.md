@@ -14,6 +14,7 @@ allowed-tools: Read, Write, Edit, Bash(readonly), Glob, Grep
 Transform any plugin into a fully portable plugin. No platform is assumed.
 
 **Inputs:**
+
 - `plugin_path` (string, required) — Path to the plugin root directory.
 - `platforms` (string, optional) — Comma-separated list of target platforms. If omitted, presents an interactive checklist. Valid: claude-code, cursor, gemini-cli, opencode, copilot-cli, codex, all.
 
@@ -28,10 +29,11 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 > **Platform References:** `lib/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md`
 > **Hook Templates:** `lib/templates/hooks/session-start.sh`, `run-hook.cmd`
 > **Install Doc Templates:** `lib/templates/install-docs/`
+
 ## Overview
 
 | Phase | Description |
-|-------|-------------|
+| ----- | ----------- |
 | **Phase 1: Detect** | Scan metadata, elect canonical, build model, classify shape |
 | **Phase 2: Inventory** | Discover assets, init tracking, check conflicts |
 | **Phase 3: Recommend** | Recommend uplift target, confirm with user, select target platforms |
@@ -45,6 +47,7 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 frontmatter, or any platform manifest file.
 
 **Idempotent:** Running twice on the same repo produces no diff on the second run.
+
 ## 1. Phase 1: Detect
 
 Run the shared detection algorithm. See `lib/patterns/detection-algorithm.md` for full detail.
@@ -66,6 +69,7 @@ DETECT(plugin_path):
   computed.shape     = classify_shape(computed.sources)
   print_inference_summary(computed.metadata, computed.canonical)
 ```
+
 ## 2. Phase 2: Inventory
 
 ### 2.1 Discover Assets
@@ -109,6 +113,7 @@ CHECK_CONFLICTS(computed):
     IF file_exists(check.path):
       computed.skipped.append({ path: check.path, platform: check.platform })
 ```
+
 ## 3. Phase 3: Recommend
 
 Interactive uplift target recommendation and platform selection. Uses `computed.shape`
@@ -243,6 +248,7 @@ IF computed.uplift_target == "curated-note-only":
   RUN  Phase 8 (Report)
   RETURN
 ```
+
 ## 4. Phase 4: Generate
 
 ### 4.1 Write Platform Manifests
@@ -348,6 +354,7 @@ VALIDATE_FRONTMATTER(computed):
 ```
 
 Do NOT auto-write — frontmatter descriptions require human authorship.
+
 ## 5. Phase 5: Port
 
 Adapt hooks from any source platform to all target platforms.
@@ -417,6 +424,7 @@ PORT_WINDOWS_HOOKS(computed):
     Write("hooks/run-hook.cmd", source)
     computed.created.append({ path: "hooks/run-hook.cmd", platform: "cross" })
 ```
+
 ## 6. Phase 6: Document
 
 Generate install documentation for every platform that received artifacts.
@@ -517,6 +525,7 @@ WRITE_PUBLISHING_DOCS(computed, platforms_with_artifacts):
     Write("PUBLISHING.md", content)
     computed.created.append({ path: "PUBLISHING.md", platform: "cross" })
 ```
+
 ## 7. Phase 7: Bootstrap (opt-in)
 
 Session-start injection. See `lib/patterns/bootstrapping.md` for full generation logic.
@@ -554,9 +563,11 @@ BOOTSTRAP(computed):
 
   computed.bootstrap_status = "configured"
 ```
+
 ## 8. Phase 8: Report
 
 Emit the final uplift report. See `lib/patterns/report-template.md` for the full report format and state flow diagram.
+
 ## Related Skills
 
 - **Assess portability:** `skills/assessing-plugin-portability/SKILL.md`

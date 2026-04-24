@@ -10,7 +10,9 @@ Point it at a plugin repo and it tells you what's missing. Say the word and it e
 
 ## How it's different
 
-The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md). They are separate programs you install and run alongside your plugin. Most target consumers (people installing others' skills), not authors. The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance, no choice of target platforms.
+The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md).
+They are separate programs you install and run alongside your plugin. Most target consumers (people installing others' skills), not authors.
+The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance, no choice of target platforms.
 
 skill-portability takes a different approach:
 
@@ -25,7 +27,7 @@ skill-portability takes a different approach:
 Starting from whatever platform manifests already exist, it detects plugin metadata and generates everything missing:
 
 | Platform | Artifacts |
-|----------|-----------|
+| -------- | --------- |
 | **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `CLAUDE.md` |
 | **Cursor** | `.cursor-plugin/plugin.json` |
 | **Gemini CLI** | `gemini-extension.json`, `GEMINI.md` |
@@ -41,11 +43,19 @@ Starting from whatever platform manifests already exist, it detects plugin metad
 
 ## Ecosystem landscape
 
-Cross-platform portability has real structural limits — but the ecosystem is maturing fast. For consumers and single-skill authors, tools like `npx skills`, `gh skill`, and platform-native CLIs make distribution easy. The friction appears when delivering cross-platform plugins with shared resources (hooks, manifests, context files). The `uplifting-a-plugin` skill generates everything that *can* be generated. For the full picture — what works, what doesn't, and what needs platform-level changes — see [`docs/ecosystem-landscape.md`](docs/ecosystem-landscape.md).
+Cross-platform portability has real structural limits — but the ecosystem is maturing fast.
+For consumers and single-skill authors, tools like `npx skills`, `gh skill`, and platform-native CLIs make distribution easy.
+The friction appears when delivering cross-platform plugins with shared resources (hooks, manifests, context files).
+The `uplifting-a-plugin` skill generates everything that *can* be generated.
+For the full picture — what works, what doesn't, and what needs platform-level changes — see [`docs/ecosystem-landscape.md`](docs/ecosystem-landscape.md).
 
 ## Acknowledgements
 
-This plugin owes a direct debt to [obra/superpowers](https://github.com/obra/superpowers) by Jesse Vincent. Superpowers pioneered the multi-platform plugin pattern for Claude Code — the manifest structures, context file conventions, tool-mapping references, and hook portability approach that skill-portability now automates all originate there. Templates in this repo are seeded from superpowers v5.0.7 (see [`lib/templates/UPSTREAM.md`](lib/templates/UPSTREAM.md) for re-seeding instructions). Beyond patterns, superpowers was used directly to build this plugin — the skills that wrote skill-portability were themselves superpowers skills.
+This plugin owes a direct debt to [obra/superpowers](https://github.com/obra/superpowers) by Jesse Vincent.
+Superpowers pioneered the multi-platform plugin pattern for Claude Code — the manifest structures, context file conventions,
+tool-mapping references, and hook portability approach that skill-portability now automates all originate there.
+Templates in this repo are seeded from superpowers v5.0.7 (see [`lib/templates/UPSTREAM.md`](lib/templates/UPSTREAM.md) for re-seeding instructions).
+Beyond patterns, superpowers was used directly to build this plugin — the skills that wrote skill-portability were themselves superpowers skills.
 
 ## This repo is itself an example
 
@@ -57,14 +67,14 @@ Full details for all platforms in [INSTALL.md](INSTALL.md).
 
 **Claude Code** — register the marketplace, then install:
 
-```
+```text
 /plugin marketplace add hiivmind/skill-portability
 /plugin install skill-portability@skill-portability-marketplace
 ```
 
 **Cursor** — in Agent chat:
 
-```
+```text
 /add-plugin hiivmind/skill-portability
 ```
 
@@ -97,7 +107,7 @@ cp skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/
 ## Usage
 
 | Platform | Assess portability | Uplift a plugin |
-|----------|--------------------|-----------------|
+| -------- | ------------------ | --------------- |
 | **Claude Code** | `Assess the portability of /path/to/plugin` | `Use the uplifting-a-plugin skill on /path/to/plugin` |
 | **Cursor** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
 | **Copilot CLI** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |

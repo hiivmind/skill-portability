@@ -10,9 +10,10 @@ However, skill content could be injected if a malicious source repository is use
 
 If you discover a security vulnerability, please report it responsibly:
 
-**Email:** nathaniel.ramm@discretedatascience.com
+**Email:** <nathaniel.ramm@discretedatascience.com>
 
 Please include:
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact

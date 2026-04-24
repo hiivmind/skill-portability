@@ -20,11 +20,13 @@ For first-class plugin packages with marketplace metadata:
 ### How users find and install {{displayName}}
 
 **Skills path:**
+
 ```bash
 $skill-installer install {{repository}}
 ```
 
 **Plugin path:**
+
 ```bash
 codex plugin marketplace add {{repository}}
 ```

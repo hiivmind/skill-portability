@@ -29,8 +29,8 @@ If packaged as a Codex plugin:
 }
 ```
 
-3. Place `marketplace.json` at `~/.agents/plugins/marketplace.json` (home-local) or `<repo>/.agents/plugins/marketplace.json` (repo-local)
-4. Restart Codex
+1. Place `marketplace.json` at `~/.agents/plugins/marketplace.json` (home-local) or `<repo>/.agents/plugins/marketplace.json` (repo-local)
+2. Restart Codex
 
 ### Context file
 
