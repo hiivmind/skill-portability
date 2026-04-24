@@ -48,7 +48,7 @@ For users who already have the repo cloned for one platform and want to add anot
 | Claude Code | `claude --plugin-dir /path/to/existing/checkout` |
 | Cursor | Symlink or copy to `~/.cursor/plugins/local/{{name}}/` |
 | Gemini CLI | `gemini extensions install /path/to/existing/checkout` |
-| OpenCode | Copy `.opencode/plugins/{{name}}.js` or add to `opencode.json` |
+| OpenCode | Symlink `.opencode/plugins/{{name}}.js` from checkout, or add checkout path to `opencode.json` (do not copy the JS file — it resolves paths relative to the repo root) |
 | Copilot CLI | Symlink `skills/` or work from the cloned directory |
 | Codex | `ln -s /path/to/existing/checkout/skills ~/.agents/skills/{{name}}` |
 
@@ -90,7 +90,20 @@ Updated pseudocode:
 ```pseudocode
 WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
   # Build consolidated INSTALL.md at root
-  whole_repo_note = render(Read("lib/templates/install-docs/whole-repo-note.md"), computed.metadata)
+
+  # Whole-repo note: only include when plugin has shared assets that require
+  # whole-repo install (hooks, session-start bootstrapping, root context files,
+  # or platform manifests). Bare skill repos without these can use npx skills.
+  has_shared_assets = (
+    computed.existing_hooks
+    OR file_exists("skills/using-" + computed.metadata.name + "/SKILL.md")
+    OR any(file_exists(p) FOR p IN ["CLAUDE.md", "AGENTS.md", "GEMINI.md"])
+    OR computed.uplift_target == "full-portable-plugin"
+  )
+  IF has_shared_assets:
+    whole_repo_note = render(Read("lib/templates/install-docs/whole-repo-note.md"), computed.metadata)
+  ELSE:
+    whole_repo_note = ""
 
   fresh_install = ""
   adding_platform = ""
@@ -101,7 +114,8 @@ WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
       adding_platform += render(adding_tmpl, computed.metadata) + "\n\n"
 
   content = "# Installation\n\n"
-  content += whole_repo_note + "\n\n"
+  IF whole_repo_note:
+    content += whole_repo_note + "\n\n"
   content += "## Fresh Install\n\n" + fresh_install
   content += "## Adding Another Platform\n\n"
   content += "Already have the repo cloned for one platform? Add others by pointing them at the same checkout.\n\n"
