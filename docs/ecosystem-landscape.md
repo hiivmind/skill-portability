@@ -12,7 +12,7 @@ This document maps both sides: what works today, and where cross-platform plugin
 |------|-------------------------------|------------------------------|
 | Distribution | ✅ One-command install via `npx skills`, `gh skill`, platform CLIs | ⚠️ `npx skills` loses shared resources; whole-repo install required |
 | Discovery | ✅ Multiple registries, CLI search, gallery browsing | ⚠️ No cross-platform registry; must publish to each separately |
-| Manifests | ✅ Invisible to consumers; one file per platform for authors | ❌ Six parallel formats, no single source of truth |
+| Manifests | ✅ Invisible to consumers; one file per platform for authors | ⚠️ Six parallel formats; skill-portability generates all from one canonical source |
 | Context files | ✅ One file per platform, reliable delivery | ⚠️ Parallel adapters needed for cross-platform delivery |
 | Hooks | ✅ Rich event systems on 4 platforms | ⚠️ Event names, schemas, env vars all differ |
 | Tool names | ✅ Each platform's names work natively | ⚠️ Static sidecars + model-time translation; no runtime rewriter |
@@ -89,7 +89,7 @@ Each registry is platform-native. There is no cross-platform registry. A plugin 
 
 ### How skill-portability solves this
 
-The uplift skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each registry requires — so a plugin published to GitHub is installable via each platform's native tool without additional setup by the author.
+The uplift skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each platform requires for installation — so for platforms that install directly from GitHub (Claude Code, Copilot CLI, Gemini CLI, Codex), the plugin is installable without additional setup by the author.
 
 Discovery itself remains a manual step: authors must submit to each platform's registry separately.
 
