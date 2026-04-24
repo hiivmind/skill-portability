@@ -25,7 +25,7 @@ Cross-platform portability has real structural limits in today's agent platforms
 
 ## Pattern source
 
-This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `assets/UPSTREAM.md` for re-seeding instructions).
+This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `lib/templates/UPSTREAM.md` for re-seeding instructions).
 
 ## This repo is itself an example
 

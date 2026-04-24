@@ -51,7 +51,7 @@
 | `lib/references/copilot-tools.md` | Canonical Copilot tool-name table (seeded from superpowers) |
 | `lib/references/codex-tools.md` | Canonical Codex tool-name table |
 | `lib/references/gemini-tools.md` | Canonical Gemini tool-name table |
-| `assets/UPSTREAM.md` | Superpowers version pin + re-seed instructions |
+| `lib/templates/UPSTREAM.md` | Superpowers version pin + re-seed instructions |
 
 ---
 
@@ -1073,7 +1073,7 @@ Takes a plugin that only has `.claude-plugin/` manifests (Claude Code only) and 
 
 ## Pattern source
 
-This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `assets/UPSTREAM.md` for re-seeding instructions).
+This plugin implements the [superpowers](https://github.com/obra/superpowers) portability pattern. Templates are seeded from superpowers v5.0.7 (see `lib/templates/UPSTREAM.md` for re-seeding instructions).
 
 ## This repo is itself an example
 

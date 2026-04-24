@@ -1,0 +1,8 @@
+
+❯ WE should:
+  - incorporate the codex plugin ecosystem
+  - design a rubric system pattern for all target platforms, and possibly a specialised set of ruels for each within that pattern
+  - classify what we have by shape and covergage per platform
+  - produce / uplift documentation in the target repo/plugin
+  - look for these blockers
+  - research the patterns (using exa) for each platform, to get information of eequivalent quality to what we have for codex
