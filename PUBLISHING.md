@@ -132,26 +132,32 @@ Two publishing paths — choose based on what you're distributing.
 For repos that are mostly instructions with no plugin UI metadata:
 
 - Submit a PR to `github.com/openai/skills` for inclusion in the curated catalog
-- Or publish as a standalone GitHub repo — users install via `$skill-installer install hiivmind/skill-portability`
+- Or publish as a standalone GitHub repo — users install through Codex skill discovery
+- Only recommend `$skill-installer install hiivmind/skill-portability` when the distributed artifact is truly a skill-only repo and does not depend on root-level plugin manifests, hooks, or shared context files
 
 ### Plugin packaging (full)
 
 For first-class plugin packages with marketplace metadata:
 
-- Create `.codex-plugin/plugin.json` and a `marketplace.json` listing the plugin
-- Users register via `codex plugin marketplace add hiivmind/skill-portability`
+- Create `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`
+- For a single-plugin GitHub repo, the marketplace entry should point at the repo root with `source.path: "."`
+- Users register via `codex marketplace add hiivmind/skill-portability`
+- Users then enable the plugin from `/plugins`
 - Public self-serve plugin publishing is coming soon per OpenAI docs
 
 ### How users find and install Skill Portability
 
-**Skills path:**
+**Skill-only repo:**
 
 ```bash
-$skill-installer install hiivmind/skill-portability
+git clone hiivmind/skill-portability
+ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
 ```
 
-**Plugin path:**
+**Plugin repo:**
 
 ```bash
-codex plugin marketplace add hiivmind/skill-portability
+codex marketplace add hiivmind/skill-portability
 ```
+
+Then enable `skill-portability` from `/plugins`.
