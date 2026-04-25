@@ -6,12 +6,20 @@ Event name mapping and merge logic for porting hooks across platforms.
 
 ## Event Name Mapping
 
-| Claude Code event | Cursor event |
-|---|---|
-| `SessionStart` | `sessionStart` |
-| `UserPromptSubmit` | `userMessage` |
-| `PostToolUse` | `postToolUse` |
-| `Stop` | `agentStop` |
+| Claude Code event | Cursor event | Notes |
+|---|---|---|
+| `SessionStart` | `sessionStart` | |
+| `PreToolUse` | `preToolUse` | |
+| `PostToolUse` | `postToolUse` | |
+| `PostToolUseFailure` | `postToolUseFailure` | |
+| `SubagentStart` | `subagentStart` | |
+| `SubagentStop` | `subagentStop` | |
+| `PreCompact` | `preCompact` | |
+| `Stop` | `stop` | |
+| `UserPromptSubmit` | `beforeSubmitPrompt` | |
+
+Cursor-only events (no Claude Code equivalent):
+`sessionEnd`, `beforeShellExecution`, `afterShellExecution`, `beforeMCPExecution`, `afterMCPExecution`, `beforeReadFile`, `afterFileEdit`, `afterAgentResponse`, `afterAgentThought`
 
 ---
 

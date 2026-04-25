@@ -262,6 +262,7 @@ A practical uplift target looks like this:
     marketplace.json
   .cursor-plugin/
     plugin.json
+    marketplace.json           # multi-plugin repos only
   .codex-plugin/
     plugin.json
   .codex/
@@ -276,10 +277,15 @@ A practical uplift target looks like this:
         codex-tools.md
         copilot-tools.md
         gemini-tools.md
+  rules/                       # Cursor .mdc rules (optional)
+  agents/                      # Cursor/Codex agent definitions (optional)
+  commands/                    # Cursor/Codex commands (optional)
   hooks/
-    hooks.json
-    hooks-cursor.json
+    hooks.json                 # Claude Code + Cursor default discovery path
+    hooks-cursor.json          # Cursor override (if events need remapping)
     run-hook.cmd
+  scripts/                     # Hook and utility scripts
+  mcp.json                     # Cursor MCP server definitions (optional)
   AGENTS.md
   CLAUDE.md
   GEMINI.md
@@ -462,7 +468,26 @@ If the repo relies on hooks or shared context, whole-repo installation is strong
 
 ### Cursor install pattern
 
-The uplifted repo should provide `.cursor-plugin/plugin.json` and document how Cursor discovers or adds the plugin. Cursor usually needs explicit paths for skills, hooks, agents, and commands.
+The uplifted repo should provide `.cursor-plugin/plugin.json` (only `name` is required; all other fields are optional).
+
+Cursor auto-discovers components from default directories:
+
+- `skills/` — each subdirectory containing a `SKILL.md`
+- `rules/` — all `.md`, `.mdc`, or `.markdown` files
+- `agents/` — all `.md`, `.mdc`, or `.markdown` files
+- `commands/` — all `.md`, `.mdc`, `.markdown`, or `.txt` files
+- `hooks/hooks.json` — parsed for hook events
+- `mcp.json` — parsed for MCP server entries
+
+Explicit paths in the manifest override auto-discovery for that component type. Only specify paths when using non-default directories.
+
+Installation paths:
+
+- **Marketplace:** `/add-plugin <name>` in Cursor chat, or browse `cursor.com/marketplace`
+- **Local dev:** copy or symlink to `~/.cursor/plugins/local/<name>/`
+- **Submit:** `cursor.com/marketplace/publish`
+
+For multi-plugin repos, add `.cursor-plugin/marketplace.json` at the repo root listing all plugins with their source paths.
 
 ### Gemini CLI install pattern
 

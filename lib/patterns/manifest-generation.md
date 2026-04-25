@@ -26,6 +26,8 @@ RENDER_WITH_CONDITIONALS(template, metadata, computed):
     delete parsed["agents"]
   IF NOT directory_exists("commands/"):
     delete parsed["commands"]
+  IF NOT file_exists("hooks/hooks.json") AND NOT file_exists("hooks/hooks-cursor.json"):
+    delete parsed["hooks"]
   RETURN JSON.stringify(parsed, indent=2)
 ```
 
@@ -67,6 +69,7 @@ RENDER_WITH_BUILDER(template, metadata, computed):
 | claude-marketplace | Plain | `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` |
 | claude-context | Plain | `lib/templates/context-files/CLAUDE.md.tmpl` |
 | cursor-plugin | Conditional | `lib/templates/manifests/cursor-plugin/plugin.json.tmpl` |
+| cursor-marketplace | Plain | `lib/templates/manifests/cursor-plugin/marketplace.json.tmpl` |
 | gemini-extension | Plain | `lib/templates/manifests/gemini-extension.json.tmpl` |
 | gemini-context | Builder | `lib/templates/context-files/GEMINI.md.tmpl` |
 | agents-context | Builder | `lib/templates/context-files/AGENTS.md.tmpl` |
@@ -110,9 +113,21 @@ Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array lit
 
 Create `.cursor-plugin/` directory if needed.
 
-**Conditional logic:** Omit the `"agents"` key if `agents/` doesn't exist. Omit the `"commands"` key if `commands/` doesn't exist.
+**Conditional logic:** Omit the `"agents"` key if `agents/` doesn't exist. Omit the `"commands"` key if `commands/` doesn't exist. Omit `"hooks"` if no hooks config exists. Omit `"mcpServers"` if no `mcp.json` exists.
+
+Cursor auto-discovers components from default directories (`skills/`, `rules/`, `agents/`, `commands/`, `hooks/hooks.json`, `mcp.json`). Only specify explicit paths when overriding defaults.
+
+**Note:** `displayName` is not part of the official Cursor manifest schema. Use `name` (kebab-case identifier) and `description` for display purposes.
 
 > **Template:** `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`
+
+## cursor-marketplace
+
+**Target:** `.cursor-plugin/marketplace.json`
+
+Only generated for multi-plugin repositories. Lists all plugins with their source paths, descriptions, and optional metadata (category, tags, logo).
+
+> **Template:** `lib/templates/manifests/cursor-plugin/marketplace.json.tmpl`
 
 ---
 
