@@ -1,6 +1,5 @@
 {
   "name": "skill-portability",
-  "displayName": "Skill Portability",
   "description": "Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gemini, OpenCode, or bare SKILL.md repos as input. Emits every missing platform artifact.",
   "version": "0.1.0",
   "author": {
@@ -10,6 +9,5 @@
   "homepage": "https://github.com/hiivmind/skill-portability",
   "repository": "https://github.com/hiivmind/skill-portability",
   "license": "MIT",
-  "keywords": ["skills", "portability", "multi-platform", "plugin-uplift"],
-  "skills": "./skills/"
+  "keywords": ["skills", "portability", "multi-platform", "plugin-uplift"]
 }

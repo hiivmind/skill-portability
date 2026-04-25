@@ -58,6 +58,7 @@ Look for:
 - `.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json`
 - `.cursor-plugin/plugin.json`
+- `.cursor-plugin/marketplace.json` (multi-plugin repos only)
 - `.codex-plugin/plugin.json`
 - `gemini-extension.json`
 - `package.json`
@@ -68,6 +69,18 @@ Record:
 - which platforms are already represented
 - which manifest is richest
 - whether manifests agree on metadata and component paths
+
+### B2. Cursor-specific components
+
+Look for:
+
+- `rules/*.mdc` (Cursor rules with `description`, `alwaysApply`, optional `globs` frontmatter)
+- `agents/*.md` (agent definitions with `name`, `description` frontmatter)
+- `commands/*.md` or `commands/*.txt` (command definitions with `name`, `description` frontmatter)
+- `mcp.json` (MCP server definitions at plugin root)
+- `assets/logo.svg` or other logo files
+
+Record whether any Cursor-specific component types exist that have no cross-platform equivalent.
 
 ### C. Context and instruction files
 
@@ -89,19 +102,21 @@ Record:
 
 Look for:
 
-- `hooks/hooks.json`
-- `hooks/hooks-cursor.json`
-- hook scripts
-- `.mcp.json`
+- `hooks/hooks.json` (Claude Code and Cursor shared default path)
+- `hooks/hooks-cursor.json` (Cursor-specific override, referenced via manifest `hooks` field)
+- hook scripts in `scripts/` or `hooks/`
+- `.mcp.json` or `mcp.json` (MCP server definitions — `mcp.json` is Cursor's default discovery)
 - `.app.json`
-- `commands/`
-- `agents/`
+- `commands/` (Cursor and Codex)
+- `agents/` (Cursor agent definitions)
+- `rules/*.mdc` (Cursor rules)
 
 Record:
 
 - which runtime components exist
 - whether they are shared or platform-specific
 - whether they appear portable or hard-coded to one platform
+- whether Cursor hook events use the correct casing (`sessionStart`, `preToolUse`, etc.)
 
 ## Step 2: Identify the canonical metadata source
 
