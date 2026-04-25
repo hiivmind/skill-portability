@@ -7,8 +7,7 @@
     {
       "name": "skill-portability",
       "source": {
-        "source": "local",
-        "path": "./"
+        "source": "local"
       },
       "policy": {
         "installation": "AVAILABLE",
