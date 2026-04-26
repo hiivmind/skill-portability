@@ -189,27 +189,40 @@ Auto-derives uplift strategy from shape AND scores (two-layer decision):
 - `incremental`: only fix failing conditions (for viable+ platforms)
 - `full`: generate all missing artifacts for that platform
 
-### Condition-to-Artifact Index
+### Condition-to-Artifact Mapping
 
-The `fixes:` annotations in templates are the source of truth for which
-conditions map to which artifacts. At scoring time, build a reverse index:
+The `template` field in each rubric YAML condition IS the mapping. No JIT
+scanning, no separate index file.
 
-```pseudocode
-  # Build condition → artifact mapping from template annotations
-  computed.artifact_index = {}
-  FOR template_file IN glob("lib/templates/**/*.tmpl", "lib/templates/**/*.md"):
-    content = read(template_file)
-    FOR line IN content:
-      IF line matches "{{! fixes: {condition_id} }}":
-        computed.artifact_index[condition_id] = template_file
+**Rule:** Every fixable condition MUST populate the `template` field:
 
-  # Also index fixes: from the uplift skill pseudocode itself
-  # (for generated artifacts not backed by templates, e.g., hook porting)
+```yaml
+- id: cursor.1_manifest.plugin_json.required_fields
+  type: checkable
+  component: plugin_json
+  critical: true
+  points: 1
+  check: |
+    fields = read_json(".cursor-plugin/plugin.json")
+    for f in LOOKUP["manifest_required_fields"]["cursor"]:
+      assert f in fields
+  template: manifests/cursor-plugin/plugin.json.tmpl    # ← REQUIRED for fixable conditions
 ```
 
-This index is used by:
-- Phase 4 (Report): to show which artifacts would be generated
-- Phase 5 (Generate): to find the template for each failing condition
+Conditions that are assessment-only (no artifact can fix them, e.g.,
+`judgement` conditions about documentation quality) leave `template` empty.
+
+**Drift detection** becomes a simple rubric validation:
+- Condition has `template` but file doesn't exist → stale rubric
+- Template has `{{! fixes: }}` but no condition references it → orphan template annotation
+
+The `{{! fixes: }}` annotations in templates remain as documentation (which
+conditions a template resolves), but the rubric `template` field is the
+authoritative mapping used by Phases 4 and 5.
+
+**Implementation note for rubric tightening:** The 6 platform YAML rubrics
+created in the prior spec need to be updated to populate `template` on every
+fixable condition. This is part of the migration order for this spec.
 
 ### Phase 4: Report
 
@@ -239,8 +252,8 @@ REPORT(computed, intent):
     DISPLAY "## Artifacts to Generate"
     FOR platform IN intent.platforms:
       FOR condition IN computed.scores[platform].failing:
-        IF condition.template:
-          DISPLAY "- " + condition.template + " (fixes: " + condition.id + ")"
+        IF condition.template:  # from rubric YAML template field
+          DISPLAY "- " + condition.template + " → fixes: " + condition.id
 
   IF intent.mode == "assess":
     STOP
@@ -268,13 +281,12 @@ FOR platform IN intent.platforms:
     
     # Filter 2: Per-platform depth
     IF computed.recommendation_for[platform] == "incremental":
-      # Only fix failing conditions
-      IF condition.id NOT IN computed.artifact_index:
-        SKIP  # No template to fix this condition
-      template = computed.artifact_index[condition.id]
-      target_path = resolve_target_path(template, platform)
+      # Only fix failing conditions that have a template
+      IF NOT condition.template:
+        SKIP  # Assessment-only condition, no artifact to generate
+      target_path = resolve_target_path(condition.template, platform)
       IF target_path NOT IN computed.existing_files:
-        render(template, computed.metadata)
+        render(condition.template, computed.metadata)
         # fixes: {condition.id}
     ELSE:
       # Full generation — render all templates for this platform
@@ -336,20 +348,22 @@ Phases 0, 4, 9 are inline (short, skill-specific interaction).
 
 ## Migration Order
 
-1. Create `lib/patterns/inventory.md` (consolidated pseudocode)
-2. Create `skills/plugin-portability/SKILL.md` (merged workflow)
-3. Move reference files to `skills/plugin-portability/references/`
-4. Update `skills/using-skill-portability/SKILL.md`
-5. Remove old skill directories
-6. Validate: no remaining references to old skill names
+1. Populate `template` field on fixable conditions in all 6 platform YAML rubrics
+2. Create `lib/patterns/inventory.md` (consolidated pseudocode)
+3. Create `skills/plugin-portability/SKILL.md` (merged workflow)
+4. Move reference files to `skills/plugin-portability/references/`
+5. Update `skills/using-skill-portability/SKILL.md`
+6. Remove old skill directories
+7. Validate: no remaining references to old skill names, all fixable conditions have `template`
 
 ## Addendum: Codex Adversarial Review Response (2026-04-26)
 
 **[high] Incremental uplift has no condition-to-template mapping** — Fixed.
-Added explicit condition-to-artifact index step in Phase 3 that builds a
-reverse lookup from template `{{! fixes: }}` annotations. Phase 5 uses this
-index to find the template for each failing condition. Conditions with no
-mapped artifact are skipped with a note in the report.
+The `template` field in each rubric YAML condition is now required for every
+fixable condition. The rubric IS the mapping — no JIT scanning, no separate
+index. Phase 5 reads `condition.template` directly. Conditions without a
+template are assessment-only (skipped during generation). The 6 platform YAML
+rubrics need `template` fields populated as part of implementation.
 
 **[high] Score-only strategy removes shape-based safe modes** — Fixed.
 Restored two-layer decision: Layer 1 is shape-based uplift target
