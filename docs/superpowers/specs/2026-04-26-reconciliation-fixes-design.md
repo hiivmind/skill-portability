@@ -21,7 +21,9 @@ install docs, rubric conditions, templates). Not in scope here.
 | 4 | `lib/rubrics/codex.yaml` | hooks_path, hook conditions (1 item) |
 | 5 | `lib/patterns/hook-merging.md` | Codex hook generation, Gemini hooks location (2 items) |
 | 6 | `lib/templates/hooks/` | Codex hook template evaluation (1 item) |
-| 7 | `docs/reconciliation-matrix.md` | Status updates for all fixed items |
+| 7 | `lib/templates/install-docs/codex.md` | Add hooks feature flag enablement (1 item) |
+| 8 | `lib/patterns/manifest-generation.md` | Gemini manifest fields incomplete (1 item) |
+| 9 | `docs/reconciliation-matrix.md` | Status updates for all fixed items |
 
 ---
 
@@ -156,7 +158,48 @@ Decision: make during implementation based on schema comparison.
 
 ---
 
-## 7. reconciliation-matrix.md
+## 7. install-docs/codex.md
+
+Add a "Hooks" section to the Codex install doc template documenting the feature
+flag requirement. Without this, generated Codex hooks silently do nothing.
+
+```markdown
+### Hooks
+
+If this plugin includes hooks, enable the Codex hooks feature flag:
+
+\```toml
+# ~/.codex/config.toml
+[features]
+codex_hooks = true
+\```
+```
+
+This pairs with the hook conditions in codex.yaml (item 4) which verify that
+install docs include the feature flag.
+
+---
+
+## 8. manifest-generation.md
+
+The gemini-extension section is incomplete — it documents only the target path
+and template reference. Research shows the Gemini manifest supports additional
+fields not reflected in the generation pattern:
+
+- `hooksDir` — custom hooks directory path (default: `hooks/`)
+- `skillsDir` — custom skills directory path (default: `skills/`)
+- `settings` — structured user settings array (name, description, envVar, sensitive)
+- `plan` — planning artifacts directory
+- `mcpServers` — MCP server configuration map
+- `excludeTools` — tool exclusion list
+
+Update the gemini-extension section to document these optional fields and when
+the generation logic should include them (e.g., include `mcpServers` if source
+plugin has `.mcp.json`, include `hooksDir` if hooks are in a non-default path).
+
+---
+
+## 9. reconciliation-matrix.md
 
 After all fixes are applied, update every fixed item's status from
 `Wrong`/`Missing` to `Fixed` in the matrix tables.
@@ -166,21 +209,22 @@ After all fixes are applied, update every fixed item's status from
 ## Exclusions
 
 - No changes to the per-skill sidecar pointer files (tracked in issues #11/#12)
-- No changes to manifest templates (schemas are a "Needs review" item for the
-  systematic follow-up)
-- No changes to install doc templates (systematic follow-up)
+- No changes to manifest JSON templates themselves (schemas are a "Needs review"
+  item for the systematic follow-up — this batch fixes the generation *pattern*
+  documentation, not the template files)
 - No changes to SKILL.md pseudocode (no platform-specific errors found there)
 
 ---
 
 ## Follow-Up Task
 
-Systematic verification of every "Needs review" cell in the reconciliation
-matrix. This covers:
+Systematic verification of every remaining "Needs review" cell in the
+reconciliation matrix. This covers:
 
 - All remaining tool name mappings (Table 2) against source code refs
-- All manifest template schemas against researched schemas
-- All install doc commands against researched install methods
+- All manifest JSON template schemas against researched schemas
+- All install doc commands (beyond the Codex hooks fix above) against
+  researched install methods
 - All rubric conditions against researched platform capabilities
 - All context file templates against researched context file formats
 
