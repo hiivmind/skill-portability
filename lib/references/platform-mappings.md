@@ -35,7 +35,7 @@ Maps Claude Code model shortnames to platform equivalents.
 |---|---|---|---|---|---|
 | Read | read_file | Read | Read | Read | Read |
 | Write | write_file | Write | Write | Write | Write |
-| Edit | replace | Edit | Edit | Edit | Edit |
+| Edit | replace | apply_patch | Edit | Edit | Edit |
 | Bash | run_shell_command | Bash | Bash | Bash | Bash |
 | Grep | grep_search | Grep | Grep | Grep | Grep |
 | Glob | glob | Glob | Glob | Glob | Glob |
@@ -44,7 +44,7 @@ Maps Claude Code model shortnames to platform equivalents.
 | TodoWrite | write_todos | update_plan | TodoWrite | TodoWrite | (N/A) |
 | Skill | activate_skill | (N/A) | Skill | Skill | (N/A) |
 | WebSearch | google_web_search | WebSearch | WebSearch | WebSearch | WebSearch |
-| WebFetch | web_fetch | WebFetch | WebFetch | WebFetch | WebFetch |
+| WebFetch | web_fetch | (N/A — use MCP) | WebFetch | WebFetch | WebFetch |
 | AskUserQuestion | ask_user | AskUserQuestion | AskUserQuestion | AskUserQuestion | AskUserQuestion |
 
 **Rules**:
@@ -60,21 +60,29 @@ Maps Claude Code model shortnames to platform equivalents.
 
 | Claude Event | Cursor | Gemini | Codex | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| SessionStart | sessionStart | SessionStart | N/A | N/A | gateway:startup (plugin SDK) |
-| PreToolUse | preToolUse | BeforeTool | N/A | N/A | before_tool_call (plugin SDK) |
-| PostToolUse | postToolUse | AfterTool | N/A | N/A | tool_result_persist (plugin SDK) |
-| PostToolUseFailure | postToolUseFailure | (N/A) | N/A | N/A | N/A |
-| SubagentStart | subagentStart | (N/A) | N/A | N/A | N/A |
-| SubagentStop | subagentStop | (N/A) | N/A | N/A | N/A |
-| PreCompact | preCompact | PreCompress | N/A | N/A | session:compact:before (plugin SDK) |
-| Stop | stop | AfterAgent | N/A | N/A | N/A |
-| UserPromptSubmit | beforeSubmitPrompt | (N/A) | N/A | N/A | N/A |
+| SessionStart | sessionStart | SessionStart | SessionStart | N/A | gateway:startup (plugin SDK) |
+| PreToolUse | preToolUse | BeforeTool | PreToolUse | N/A | before_tool_call (plugin SDK) |
+| PostToolUse | postToolUse | AfterTool | PostToolUse | N/A | tool_result_persist (plugin SDK) |
+| PostToolUseFailure | postToolUseFailure | (N/A) | (N/A) | N/A | N/A |
+| SubagentStart | subagentStart | (N/A) | (N/A) | N/A | N/A |
+| SubagentStop | subagentStop | (N/A) | (N/A) | N/A | N/A |
+| PreCompact | preCompact | PreCompress | (N/A) | N/A | session:compact:before (plugin SDK) |
+| Stop | stop | AfterAgent | Stop | N/A | N/A |
+| UserPromptSubmit | beforeSubmitPrompt | (N/A) | UserPromptSubmit | N/A | N/A |
+| (N/A) | (N/A) | BeforeModel | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | AfterModel | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | BeforeToolSelection | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | Notification | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | (N/A) | PermissionRequest | N/A | N/A |
 
 **Rules**:
-- Codex and Antigravity have no hook systems.
-- Gemini hooks go in user `settings.json`, not repo files — generate guidance only.
+- Codex hooks require `codex_hooks = true` feature flag in `config.toml`.
+- Codex `PermissionRequest` has no Claude Code equivalent — it controls approval flow.
+- Antigravity has no hook system.
+- Gemini hooks go in user `settings.json` or the extension manifest `hooks` field.
+- Gemini has 4 platform-specific events not available on other platforms (BeforeModel, AfterModel, BeforeToolSelection, Notification).
 - OpenClaw hooks use TypeScript plugin SDK (`api.registerHook()`), not file-based config.
-- Cursor uses camelCase; Gemini uses PascalCase.
+- Cursor uses camelCase; Gemini and Codex use PascalCase.
 
 ---
 
