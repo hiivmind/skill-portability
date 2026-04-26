@@ -60,7 +60,7 @@ Assess the portability of /path/to/my-plugin
 ```
 
 ```
-Use the uplifting-a-plugin skill on /path/to/my-plugin
+Use the plugin-portability skill on /path/to/my-plugin
 ```
 
 ### Cursor
@@ -86,8 +86,7 @@ Open Cursor and check that skills from Skill Portability appear when typing `/` 
 In Cursor's chat, invoke skills with the `/` prefix:
 
 ```
-/assessing-plugin-portability
-/uplifting-a-plugin
+/plugin-portability
 ```
 
 ### Gemini CLI
@@ -117,84 +116,71 @@ Look for `skill-portability` in the output. Restart Gemini CLI if it was running
 Gemini CLI activates skills automatically when it determines they are relevant. You can also mention a skill by name:
 
 ```
-Assess the portability of /path/to/my-plugin using assessing-plugin-portability
+Assess the portability of /path/to/my-plugin using plugin-portability
 ```
 
 List available skills with `/skills list`.
 
-### OpenCode
+### Antigravity
 
-#### Local plugin install
+#### Skill-only install
 
-Copy `.opencode/plugins/skill-portability.js` to your project's `.opencode/plugins/` directory, or to `~/.config/opencode/plugins/` for global install.
+Copy skills to the Antigravity skills directory:
 
-#### npm install (if published)
+```bash
+cp -r skills/ .agents/skills/
+```
 
-Add to your `opencode.json`:
+Or for global install:
+
+```bash
+cp -r skills/ ~/.gemini/antigravity/skills/
+```
+
+#### Extension install
+
+```bash
+antigravity --install-extension hiivmind/skill-portability
+```
+
+#### Using the skills
+
+Antigravity discovers skills automatically. Mention a skill by name and the agent will activate it:
+
+```
+Run plugin-portability on /path/to/my-plugin
+```
+
+### OpenClaw
+
+#### ClawHub install
+
+```bash
+openclaw plugins install skill-portability
+```
+
+#### npm install
+
+```bash
+npm install skill-portability
+```
+
+#### Local install
+
+Add the plugin path to `openclaw.json`:
 
 ```json
 {
-  "plugin": ["skill-portability"]
+  "plugins.load.paths": ["/path/to/skill-portability"]
 }
 ```
 
-#### Context file
-
-OpenCode uses `AGENTS.md` as its primary context file. If both `AGENTS.md` and `CLAUDE.md` exist, only `AGENTS.md` is loaded.
-
-#### Verify
-
-Restart OpenCode and check that skills are listed when the agent invokes the `skill` tool.
-
-#### Requirements
-
-OpenCode requires [Bun](https://bun.sh) for plugin loading.
-
 #### Using the skills
 
-OpenCode discovers skills automatically. Mention a skill by name and the agent will activate it:
+OpenClaw discovers skills automatically. Mention a skill by name and the agent will activate it:
 
 ```
-Run assessing-plugin-portability on /path/to/my-plugin
-```
-
-### Copilot CLI
-
-#### Skill install
-
-Install skills via GitHub CLI:
-
-```bash
-gh skill install hiivmind/skill-portability
-```
-
-Or clone the repo — skills are auto-discovered from the `skills/` directory:
-
-```bash
-git clone https://github.com/hiivmind/skill-portability
-```
-
-#### Context
-
-Copilot reads `.github/copilot-instructions.md` for repo-wide context. It also reads `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` from the project root.
-
-#### Verify
-
-Start Copilot CLI in the repo directory and check that skills appear:
-
-```bash
-copilot
-```
-
-Type `/` to see available skills.
-
-#### Using the skills
-
-In Copilot CLI, invoke skills with the `/` prefix:
-
-```
-/assessing-plugin-portability
-/uplifting-a-plugin
+Run plugin-portability on /path/to/my-plugin
 ```
 
 ### Codex
@@ -249,15 +235,15 @@ Start a new Codex session and check one of:
 
 - `/plugins` shows `skill-portability` as installed
 - `~/.codex/config.toml` contains both the marketplace entry and the enabled plugin entry
-- `$assessing-plugin-portability` resolves in a fresh session
+- `$plugin-portability` resolves in a fresh session
 
 #### Using the skills
 
 In Codex, invoke skills with the `$` prefix:
 
 ```
-$assessing-plugin-portability
-$uplifting-a-plugin
+$plugin-portability
+$plugin-portability
 ```
 
 ## Adding Another Platform
@@ -305,30 +291,28 @@ Link Gemini to your existing checkout:
 gemini extensions link /path/to/existing/skill-portability
 ```
 
-### OpenCode
+### Antigravity
 
-Symlink the plugin entrypoint from your existing checkout (do not copy — it resolves paths relative to the repo root):
+Copy skills from your existing checkout:
 
 ```bash
-ln -s /path/to/existing/skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/skill-portability.js
+cp -r /path/to/existing/skill-portability/skills/ .agents/skills/
 ```
 
-Or add the checkout path to your `opencode.json`:
+Or install as an extension:
+
+```bash
+antigravity --install-extension /path/to/existing/skill-portability
+```
+
+### OpenClaw
+
+Add the checkout path to `openclaw.json`:
 
 ```json
 {
-  "plugin": ["/path/to/existing/skill-portability"]
+  "plugins.load.paths": ["/path/to/existing/skill-portability"]
 }
-```
-
-Requires [Bun](https://bun.sh).
-
-### Copilot CLI
-
-Work from the cloned directory — skills are auto-discovered from `skills/`. Or symlink into your project:
-
-```bash
-ln -s /path/to/existing/skill-portability/skills skills/skill-portability
 ```
 
 ### Codex
