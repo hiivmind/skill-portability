@@ -1,0 +1,258 @@
+platform: antigravity
+manifest_path: package.json  # optional for skill-only distribution
+context_files: [GEMINI.md, AGENTS.md, ".agent/rules/*.md"]
+hooks_path: null  # Antigravity has no hook system
+
+categories:
+  1_manifest:
+    conditions:
+      - id: antigravity.1_manifest.package_json.exists
+        type: checkable
+        component: package_json
+        critical: false
+        points: 1
+        check: |
+          file_exists("package.json")
+          # Not required for skill-only distribution — just drop into .agents/skills/
+
+      - id: antigravity.1_manifest.package_json.required_fields
+        type: checkable
+        component: package_json
+        critical: false
+        points: 1
+        check: |
+          if file_exists("package.json"):
+            json = read_json("package.json")
+            for field in LOOKUP["manifest_required_fields"]["antigravity"]:
+              assert field in json, f"Missing required field: {field}"
+            # Required: name, displayName, version, description, publisher
+
+      - id: antigravity.1_manifest.package_json.publisher
+        type: checkable
+        component: package_json
+        critical: false
+        points: 1
+        check: |
+          if file_exists("package.json"):
+            json = read_json("package.json")
+            assert json.get("publisher"), \
+              "publisher field required for OpenVSX extension distribution"
+
+  2_skills:
+    conditions:
+      - id: antigravity.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "name" in fm, f"{skill}: missing name"
+            assert "description" in fm, f"{skill}: missing description"
+
+      - id: antigravity.2_skills.frontmatter.no_claude_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["field_stripping"]["antigravity"]: strip both fields
+          for skill in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "disable-model-invocation" not in fm, \
+              f"{skill}: disable-model-invocation must be stripped for Antigravity"
+            assert "allowed-tools" not in fm, \
+              f"{skill}: allowed-tools must be stripped for Antigravity"
+
+      - id: antigravity.2_skills.frontmatter.model_stripped
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # Antigravity strips model field entirely (Table 1: "removed")
+          for skill in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "model" not in fm, \
+              f"{skill}: model field must be removed for Antigravity"
+
+      - id: antigravity.2_skills.discovery.preferred_path
+        type: checkable
+        component: discovery
+        critical: true
+        points: 1
+        check: |
+          skills = glob(".agents/skills/*/SKILL.md")
+          assert len(skills) > 0, \
+            "No skills found in .agents/skills/*/SKILL.md (preferred path)"
+
+      - id: antigravity.2_skills.discovery.legacy_path
+        type: checkable
+        component: discovery
+        critical: false
+        points: 1
+        check: |
+          # .agent/skills/*/SKILL.md also works as a legacy path
+          legacy = glob(".agent/skills/*/SKILL.md")
+          if len(legacy) > 0:
+            preferred = glob(".agents/skills/*/SKILL.md")
+            assert len(preferred) > 0, \
+              "Legacy .agent/skills/ detected — prefer .agents/skills/ (plural)"
+
+      - id: antigravity.2_skills.tool_refs.no_unresolved
+        type: judgement
+        component: tool_refs
+        critical: false
+        points: 1
+        check: |
+          Antigravity tools use the same names as Claude Code (Table 2: all
+          "(same)" except no Task/Agent distinction). Verify that tool references
+          in SKILL.md files resolve to known Claude built-in tool names.
+
+  3_context:
+    conditions:
+      - id: antigravity.3_context.agents_md.exists
+        type: checkable
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("AGENTS.md")
+
+      - id: antigravity.3_context.agents_md.skill_coverage
+        type: judgement
+        component: agents_md
+        critical: false
+        points: 1
+        check: |
+          AGENTS.md should list or reference all skills provided by the plugin.
+          Verify that every skill in .agents/skills/ is mentioned or documented.
+
+      - id: antigravity.3_context.gemini_md.exists
+        type: checkable
+        component: gemini_md
+        critical: false
+        points: 1
+        check: |
+          file_exists("GEMINI.md")
+          # GEMINI.md has higher priority than AGENTS.md in Antigravity
+
+      - id: antigravity.3_context.rules.exist
+        type: checkable
+        component: rules
+        critical: false
+        points: 1
+        check: |
+          rules = glob(".agent/rules/*.md")
+          # Optional: .agent/rules/*.md for platform-specific rules
+
+  4_hooks:
+    # N/A — Antigravity has no hook system
+    conditions: []
+
+  5_toolmap:
+    conditions:
+      - id: antigravity.5_toolmap.model_mapping.no_model_field
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          # Antigravity strips model field entirely (Table 1: "removed")
+          for md in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md") \
+                  + glob(".agent/rules/*.md"):
+            fm = parse_frontmatter(md)
+            assert "model" not in fm, \
+              f"{md}: model field must be removed for Antigravity (Table 1)"
+
+      - id: antigravity.5_toolmap.model_mapping.no_tools_field
+        type: checkable
+        component: model_mapping
+        critical: false
+        points: 1
+        check: |
+          # Agent frontmatter should not contain tools field (Table 9: "removed")
+          for md in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md") \
+                  + glob(".agent/rules/*.md"):
+            fm = parse_frontmatter(md)
+            assert "tools" not in fm, \
+              f"{md}: tools field must be removed for Antigravity (Table 9)"
+
+  6_install:
+    conditions:
+      - id: antigravity.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_first(["README.md", "INSTALL.md", "docs/install.md"])
+          assert readme is not None, "No README.md or INSTALL.md found"
+          content = read(readme)
+          assert "install" in content.lower(), "Install section missing from documentation"
+
+      - id: antigravity.6_install.install_docs.skill_copy
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Install documentation should explain copying skills to
+          .agents/skills/ (project-local) or ~/.gemini/antigravity/skills/
+          (global installation path).
+
+      - id: antigravity.6_install.install_docs.vsix_install
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          For extension distribution, documentation should mention
+          `antigravity --install-extension <file>.vsix` for OpenVSX
+          extension installation.
+
+      - id: antigravity.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          Install documentation should include verification steps to
+          confirm the plugin or skills loaded correctly.
+
+  7_runtime:
+    conditions:
+      - id: antigravity.7_runtime.rules.exist
+        type: checkable
+        component: rules
+        critical: false
+        points: 1
+        check: |
+          # .agent/rules/*.md for rule-based agent bodies
+          if dir_exists(".agent/rules/"):
+            rules = glob(".agent/rules/*.md")
+            assert len(rules) > 0, \
+              ".agent/rules/ directory exists but contains no .md files"
+
+      - id: antigravity.7_runtime.agents.in_agents_md
+        type: judgement
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          Antigravity combines agents into AGENTS.md rather than separate
+          agent files (Table 9). Verify that agent definitions are present
+          in AGENTS.md and/or .agent/rules/*.md.
+
+      - id: antigravity.7_runtime.workflows.exist
+        type: checkable
+        component: workflows
+        critical: false
+        points: 1
+        check: |
+          # .agents/workflows/ for slash commands (not .toml format)
+          if dir_exists(".agents/workflows/"):
+            workflows = glob(".agents/workflows/*")
+            assert len(workflows) > 0, \
+              ".agents/workflows/ directory exists but is empty"
