@@ -2,11 +2,12 @@
 name: uplifting-a-plugin
 description: >
   Use when you need to add multi-platform portability to any plugin. Accepts any
-  starting state — Claude Code, Cursor, Gemini CLI, Codex, Antigravity, OpenClaw, or bare
+  starting state — Claude, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare
   SKILL.md files. Detects what exists, infers canonical metadata, generates every
   missing platform artifact, ports hooks, produces install documentation, and
-  optionally configures session-start bootstrapping.
-allowed-tools: Read, Write, Edit, Bash(readonly), Glob, Grep
+  optionally configures session-start bootstrapping. Uses condition-linked generation
+  where every artifact maps to specific rubric conditions via fixes: annotations.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 # Uplifting a Plugin to Multi-Platform Portability
@@ -21,12 +22,15 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 **Output:** Summary of created, skipped, and flagged files.
 
 > **Detection Algorithm:** `lib/patterns/detection-algorithm.md`
+> **Rubric Framework:** `lib/patterns/rubric-framework.md`
+> **Platform Rubrics:** `lib/patterns/platforms/<platform>.yaml`
+> **Lookup Tables:** `lib/references/platform-mappings.md`
 > **Manifest Schemas:** `lib/patterns/manifest-generation.md`
 > **Manifest Templates:** `lib/templates/manifests/`
 > **Context File Templates:** `lib/templates/context-files/`
 > **Hook Merging:** `lib/patterns/hook-merging.md`
 > **Bootstrapping:** `lib/patterns/bootstrapping.md`
-> **Platform References:** `lib/references/copilot-tools.md`, `codex-tools.md`, `gemini-tools.md`
+> **Platform References:** `lib/references/codex-tools.md`, `gemini-tools.md`
 > **Hook Templates:** `lib/templates/hooks/session-start.sh`, `run-hook.cmd`
 > **Install Doc Templates:** `lib/templates/install-docs/`
 
@@ -36,9 +40,9 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 | ----- | ----------- |
 | **Phase 1: Detect** | Scan metadata, elect canonical, build model, classify shape |
 | **Phase 2: Inventory** | Discover assets, init tracking, check conflicts |
-| **Phase 3: Recommend** | Recommend uplift target, confirm with user, select target platforms |
-| **Phase 4: Generate** | Write missing manifests, context files, sidecars per platform |
-| **Phase 5: Port** | Adapt hooks across platforms |
+| **Phase 3: Recommend** | Recommend uplift target, optionally quick-assess, confirm with user |
+| **Phase 4: Generate** | Write missing manifests, context files, sidecars — every action carries `# fixes:` |
+| **Phase 5: Port** | Adapt hooks across platforms using lookup tables |
 | **Phase 6: Document** | Generate install docs per platform in target repo |
 | **Phase 7: Bootstrap** | Opt-in session-start injection |
 | **Phase 8: Report** | Summary of created, skipped, flagged files |
@@ -106,6 +110,8 @@ CHECK_CONFLICTS(computed):
     { path: "AGENTS.md",                                           platform: "cross"       },
     { path: "CLAUDE.md",                                           platform: "claude-code" },
     { path: "hooks/hooks-cursor.json",                             platform: "cursor"      },
+    { path: "package.json",                                        platform: "antigravity" },
+    { path: "openclaw.plugin.json",                                platform: "openclaw"    },
   ]
 
   FOR check IN conflict_checks:
@@ -116,63 +122,97 @@ CHECK_CONFLICTS(computed):
 ## 3. Phase 3: Recommend
 
 Interactive uplift target recommendation and platform selection. Uses `computed.shape`
-from Phase 1 to derive a recommendation, then asks the user to confirm and select
-target platforms.
+from Phase 1 to derive a recommendation, then optionally runs a quick rubric assessment
+to determine whether any platforms are already viable and only need incremental fixes.
 
-### 3.1 Recommend and Confirm Uplift Target
+### 3.1 Quick Assessment for Incremental Uplift
 
 ```pseudocode
-RECOMMEND_AND_CONFIRM(computed):
-  # Derive recommendation from shape
-  IF computed.shape == "bare-skill-repo":
-    IF len(computed.skills) <= 3:
-      recommended = "skill-first"
-      rationale = "This repo has " + len(computed.skills) + " skill(s) and no platform manifests. Skill-first generates sidecars and context files without full plugin packaging."
-    ELSE:
-      recommended = "full-portable-plugin"
-      rationale = "This repo has " + len(computed.skills) + " skills. Full plugin packaging gives each platform a native manifest for better discoverability."
+QUICK_ASSESS(computed, target_platforms):
+  # Load rubric framework from lib/patterns/rubric-framework.md
+  # Load per-platform rubrics from lib/patterns/platforms/<platform>.yaml
+  scores = {}
+  FOR platform IN target_platforms:
+    rubric = load_rubric("lib/patterns/platforms/" + platform + ".yaml")
+    result = quick_assess(rubric, computed.plugin_path)
+    scores[platform] = result  # { band: "strong"|"viable"|"partial"|"weak", failing: [...] }
+  RETURN scores
+```
+
+### 3.2 Recommend and Confirm Uplift Target
+
+```pseudocode
+RECOMMEND(computed, target_platforms):
+  # Optional quick assessment for incremental uplift
+  scores = QUICK_ASSESS(computed, target_platforms)
+
+  # Shape-based recommendation (existing logic)
+  IF computed.shape == "bare-skill-repo" AND len(computed.skills) <= 3:
+    recommendation = "skill-first"
+    rationale = "This repo has " + len(computed.skills) + " skill(s) and no platform manifests. Skill-first generates sidecars and context files without full plugin packaging."
 
   ELIF computed.shape == "single-platform-plugin":
-    recommended = "full-portable-plugin"
+    recommendation = "full-portable-plugin"
     rationale = "This repo already has one platform manifest. Full plugin packaging adds the remaining platforms."
 
   ELIF computed.shape == "multi-platform-source":
-    recommended = "full-portable-plugin"
+    recommendation = "full-portable-plugin"
     rationale = "This repo already targets multiple platforms. Full plugin packaging fills the remaining gaps."
 
   ELIF computed.shape == "curated-distribution":
-    recommended = "curated-note-only"
+    recommendation = "curated-note-only"
     rationale = "This repo is a marketplace distribution without upstream skills. Only install documentation and notes will be generated."
 
   ELSE:
-    recommended = "full-portable-plugin"
+    recommendation = "full-portable-plugin"
     rationale = "Repo shape could not be classified. Defaulting to full plugin packaging."
+
+  # Override: incremental uplift for already-viable platforms
+  recommendation_for = {}
+  FOR platform IN target_platforms:
+    IF platform IN scores AND scores[platform].band IN ["strong", "viable"]:
+      recommendation_for[platform] = "incremental"
+    ELSE:
+      recommendation_for[platform] = recommendation
 
   # If platforms input was provided, auto-confirm
   IF inputs.platforms IS PROVIDED:
-    computed.uplift_target = recommended
+    computed.uplift_target = recommendation
+    computed.recommendation_for = recommendation_for
     RETURN
 
   # Present to user
   DISPLAY "## Uplift Target"
   DISPLAY "Shape: " + computed.shape
-  DISPLAY "Recommendation: **" + recommended + "**"
+  DISPLAY "Recommendation: **" + recommendation + "**"
   DISPLAY rationale
+  DISPLAY ""
+  FOR platform IN target_platforms:
+    IF recommendation_for[platform] == "incremental":
+      DISPLAY "  " + platform + ": **incremental** (already " + scores[platform].band + ")"
+    ELSE:
+      DISPLAY "  " + platform + ": **" + recommendation + "**"
   DISPLAY ""
   DISPLAY "Options:"
   DISPLAY "  1. skill-first — sidecars, context files, AGENTS.md only (no platform manifests)"
   DISPLAY "  2. full-portable-plugin — all platform manifests + context files + sidecars + install docs"
   DISPLAY "  3. curated-note-only — install notes only"
 
-  response = ASK "Accept recommendation (" + recommended + "), or choose 1/2/3?"
+  response = ASK "Accept recommendation (" + recommendation + "), or choose 1/2/3?"
 
   IF response confirms recommendation:
-    computed.uplift_target = recommended
+    computed.uplift_target = recommendation
+    computed.recommendation_for = recommendation_for
   ELSE:
     computed.uplift_target = parse_choice(response)
+    # Reset incremental overrides if user chose differently
+    FOR platform IN target_platforms:
+      IF recommendation_for[platform] != "incremental":
+        recommendation_for[platform] = computed.uplift_target
+    computed.recommendation_for = recommendation_for
 ```
 
-### 3.2 Select Target Platforms
+### 3.3 Select Target Platforms
 
 ```pseudocode
 SELECT_PLATFORMS(computed):
@@ -220,7 +260,7 @@ SELECT_PLATFORMS(computed):
     GOTO SELECT_PLATFORMS
 ```
 
-### 3.3 Derive Codex Path
+### 3.4 Derive Codex Path
 
 ```pseudocode
 DERIVE_CODEX_PATH(computed):
@@ -236,7 +276,7 @@ DERIVE_CODEX_PATH(computed):
     computed.codex_rec = "native-plugin-packaging"
 ```
 
-### 3.4 Early Exit for Curated-Note-Only
+### 3.5 Early Exit for Curated-Note-Only
 
 ```pseudocode
 IF computed.uplift_target == "curated-note-only":
@@ -250,57 +290,91 @@ IF computed.uplift_target == "curated-note-only":
 
 ## 4. Phase 4: Generate
 
+Every generation action carries a `# fixes:` annotation linking it to the condition
+IDs it resolves from the platform rubrics in `lib/patterns/platforms/<platform>.yaml`.
+
 ### 4.1 Write Platform Manifests
 
 Table-driven generation. See `lib/patterns/manifest-generation.md` for all schemas.
 
 ```pseudocode
-GENERATE_MANIFESTS(computed):
-  manifests = [
-    { target: ".claude-plugin/plugin.json",      platform: "claude-code", schema: "claude-plugin"         },
-    { target: ".claude-plugin/marketplace.json", platform: "claude-code", schema: "claude-marketplace"    },
-    { target: "CLAUDE.md",                       platform: "claude-code", schema: "claude-context"        },
-    { target: ".cursor-plugin/plugin.json",      platform: "cursor",      schema: "cursor-plugin"         },
-    { target: ".cursor-plugin/marketplace.json", platform: "cursor",     schema: "cursor-marketplace",
-      condition: "is_multi_plugin_repo"                                                               },
-    { target: "gemini-extension.json",           platform: "gemini-cli",  schema: "gemini-extension"      },
-    { target: "GEMINI.md",                       platform: "gemini-cli",  schema: "gemini-context"        },
-    { target: ".codex-plugin/plugin.json",       platform: "codex",       schema: "codex-plugin",
-      condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
-    { target: ".agents/plugins/marketplace.json", platform: "codex",      schema: "codex-marketplace",
-      condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
-    { target: "AGENTS.md",                       platform: "cross",       schema: "agents-context"        },
-  ]
-
-  FOR manifest IN manifests:
-    # Skip if platform not targeted (cross-platform always included)
-    IF manifest.platform != "cross" AND manifest.platform NOT IN computed.target_platforms:
+GENERATE_MANIFESTS(computed, target_platforms):
+  FOR platform IN target_platforms:
+    IF computed.recommendation_for[platform] == "incremental":
+      # Only fix failing conditions from assessment
+      failing = get_failing_conditions(platform, "1_manifest")
+      FOR condition IN failing:
+        IF condition.template:
+          render(condition.template, computed.metadata)
+          # fixes: {condition.id}
       CONTINUE
 
-    IF manifest.condition AND NOT eval(manifest.condition):
-      CONTINUE
-
-    resolved = substitute(manifest.target, computed.metadata)
-    IF any(s.path == resolved FOR s IN computed.skipped):
-      CONTINUE
-
+    # Full generation — render all manifest templates for platform
     # Skill-first: skip platform manifests, only generate context files
-    IF computed.uplift_target == "skill-first" AND is_manifest(manifest.schema):
+    IF computed.uplift_target == "skill-first":
       CONTINUE
 
-    template_path = schema_to_template_path(manifest.schema)
-    mode = schema_to_mode(manifest.schema)
-    template = Read(template_path)
+    IF platform == "claude-code":
+      IF NOT file_exists(".claude-plugin/plugin.json"):
+        template_path = "lib/templates/manifests/claude-plugin.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: claude.1_manifest.plugin_json.exists
+        # fixes: claude.1_manifest.plugin_json.required_fields
+      IF is_multi_plugin_repo AND NOT file_exists(".claude-plugin/marketplace.json"):
+        template_path = "lib/templates/manifests/claude-marketplace.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: claude.1_manifest.marketplace_json.exists
+        # fixes: claude.1_manifest.marketplace_json.valid_entries
+        # fixes: claude.1_manifest.marketplace_json.source_paths
 
-    IF mode == "plain":
-      content = substitute(template, computed.metadata)
-    ELIF mode == "conditional":
-      content = render_with_conditionals(template, computed.metadata, computed)
-    ELIF mode == "builder":
-      content = render_with_builder(template, computed.metadata, computed)
+    ELIF platform == "cursor":
+      IF NOT file_exists(".cursor-plugin/plugin.json"):
+        template_path = "lib/templates/manifests/cursor-plugin.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: cursor.1_manifest.plugin_json.exists
+        # fixes: cursor.1_manifest.plugin_json.required_fields
+      IF is_multi_plugin_repo AND NOT file_exists(".cursor-plugin/marketplace.json"):
+        template_path = "lib/templates/manifests/cursor-marketplace.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: cursor.1_manifest.marketplace_json.exists
 
-    Write(resolved, content)
-    computed.created.append({ path: resolved, platform: manifest.platform })
+    ELIF platform == "gemini-cli":
+      IF NOT file_exists("gemini-extension.json"):
+        template_path = "lib/templates/manifests/gemini-extension.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: gemini.1_manifest.extension_json.exists
+        # fixes: gemini.1_manifest.extension_json.required_fields
+        # fixes: gemini.1_manifest.extension_json.context_filename
+
+    ELIF platform == "codex":
+      IF computed.codex_rec == "native-plugin-packaging":
+        IF NOT file_exists(".codex-plugin/plugin.json"):
+          template_path = "lib/templates/manifests/codex-plugin.json.tmpl"
+          render(template_path, computed.metadata)
+          # fixes: codex.1_manifest.plugin_json.exists
+          # fixes: codex.1_manifest.plugin_json.required_fields
+        IF NOT file_exists(".agents/plugins/marketplace.json"):
+          template_path = "lib/templates/manifests/codex-marketplace.json.tmpl"
+          render(template_path, computed.metadata)
+          # fixes: codex.1_manifest.marketplace_json.exists
+
+    ELIF platform == "antigravity":
+      IF NOT file_exists("package.json"):
+        template_path = "lib/templates/manifests/antigravity-package.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: antigravity.1_manifest.package_json.exists
+        # fixes: antigravity.1_manifest.package_json.required_fields
+        # fixes: antigravity.1_manifest.package_json.publisher
+
+    ELIF platform == "openclaw":
+      IF NOT file_exists("openclaw.plugin.json"):
+        template_path = "lib/templates/manifests/openclaw-plugin.json.tmpl"
+        render(template_path, computed.metadata)
+        # fixes: openclaw.1_manifest.openclaw_json.exists
+        # fixes: openclaw.1_manifest.openclaw_json.required_fields
+        # fixes: openclaw.1_manifest.openclaw_json.skills_array
+
+    computed.created.append({ path: target_path, platform: platform })
 ```
 
 The `is_manifest()` predicate classifies schemas as packaging vs context:
@@ -309,7 +383,7 @@ The `is_manifest()` predicate classifies schemas as packaging vs context:
 MANIFEST_SCHEMAS = [
   "claude-plugin", "claude-marketplace", "cursor-plugin",
   "gemini-extension", "codex-plugin",
-  "codex-marketplace"
+  "codex-marketplace", "antigravity-package", "openclaw-plugin"
 ]
 CONTEXT_SCHEMAS = [
   "claude-context", "gemini-context", "agents-context"
@@ -321,27 +395,77 @@ FUNCTION is_manifest(schema):
 
 Under `skill-first`, only context schemas are generated (plus sidecars). Under `full-portable-plugin`, both manifest and context schemas are generated.
 
-### 4.2 Seed Tool-Mapping Sidecars
+### 4.2 Generate Context Files
 
 ```pseudocode
-GENERATE_SIDECARS(computed):
-  sidecar_platform_map = {
-    "codex-tools.md":   "codex",
-    "gemini-tools.md":  "gemini-cli",
-  }
+GENERATE_CONTEXT_FILES(computed, target_platforms):
+  FOR platform IN target_platforms:
+    IF computed.recommendation_for[platform] == "incremental":
+      # Only fix failing conditions from assessment
+      failing = get_failing_conditions(platform, "3_context")
+      FOR condition IN failing:
+        IF condition.template:
+          render(condition.template, computed.metadata)
+          # fixes: {condition.id}
+      CONTINUE
 
-  FOR skill IN computed.skills:
-    FOR sidecar, platform IN sidecar_platform_map:
-      IF platform NOT IN computed.target_platforms:
-        CONTINUE
-      target = skill.dir + "/references/" + sidecar
-      IF NOT file_exists(target):
-        source = Read("lib/references/" + sidecar)
-        Write(target, source)
-        computed.created.append({ path: target, platform: platform })
+    # Full generation per platform
+    IF platform == "claude-code":
+      IF NOT file_exists("CLAUDE.md"):
+        render("lib/templates/context-files/CLAUDE.md.tmpl", computed.metadata)
+        # fixes: claude.3_context.claude_md.exists
+        computed.created.append({ path: "CLAUDE.md", platform: "claude-code" })
+
+    IF platform == "gemini-cli" OR platform == "antigravity":
+      IF NOT file_exists("GEMINI.md"):
+        render("lib/templates/context-files/GEMINI.md.tmpl", computed.metadata)
+        # fixes: gemini.3_context.gemini_md.exists
+        # fixes: gemini.3_context.gemini_md.at_includes_skills
+        # fixes: gemini.3_context.gemini_md.at_includes_sidecars
+        computed.created.append({ path: "GEMINI.md", platform: platform })
+
+    IF platform IN ["cursor", "codex", "antigravity", "openclaw"]:
+      IF NOT file_exists("AGENTS.md"):
+        render("lib/templates/context-files/AGENTS.md.tmpl", computed.metadata)
+        # fixes: cursor.3_context.agents_md.exists
+        # fixes: codex.1_manifest.agents_md.exists
+        # fixes: antigravity.3_context.agents_md.exists
+        # fixes: openclaw.3_context.agents_md.exists
+        computed.created.append({ path: "AGENTS.md", platform: "cross" })
 ```
 
-### 4.3 Validate npx Skills Frontmatter
+### 4.3 Seed Tool-Mapping Sidecars
+
+```pseudocode
+GENERATE_SIDECARS(computed, target_platforms):
+  sidecar_platform_map = {
+    "gemini-tools.md":  "gemini-cli",
+    "codex-tools.md":   "codex",
+  }
+
+  FOR platform IN ["gemini-cli", "codex"]:
+    IF platform NOT IN target_platforms:
+      CONTINUE
+    sidecar_name = "gemini-tools.md" IF platform == "gemini-cli" ELSE "codex-tools.md"
+    FOR skill IN computed.skills:
+      sidecar_path = skill.dir + "/references/" + sidecar_name
+      IF NOT file_exists(sidecar_path):
+        copy_from("lib/references/" + sidecar_name, sidecar_path)
+        IF platform == "gemini-cli":
+          # fixes: gemini.5_toolmap.sidecar.exists
+          # fixes: gemini.5_toolmap.sidecar.read_mapping
+          # fixes: gemini.5_toolmap.sidecar.edit_mapping
+          # fixes: gemini.5_toolmap.sidecar.bash_mapping
+          pass
+        ELIF platform == "codex":
+          # fixes: codex.5_toolmap.sidecar.exists
+          # fixes: codex.5_toolmap.sidecar.spawn_agent_mapped
+          # fixes: codex.5_toolmap.sidecar.update_plan_mapped
+          pass
+        computed.created.append({ path: sidecar_path, platform: platform })
+```
+
+### 4.4 Validate Skills Frontmatter
 
 ```pseudocode
 VALIDATE_FRONTMATTER(computed):
@@ -351,6 +475,12 @@ VALIDATE_FRONTMATTER(computed):
       computed.flagged.append(
         skill.path + " — missing frontmatter field(s). Add name: and description: in YAML frontmatter."
       )
+      # Would fix: claude.2_skills.frontmatter.required_fields
+      # Would fix: cursor.2_skills.frontmatter.required_fields
+      # Would fix: gemini.2_skills.frontmatter.required_fields
+      # Would fix: codex.2_skills.frontmatter.required_fields
+      # Would fix: antigravity.2_skills.frontmatter.required_fields
+      # Would fix: openclaw.2_skills.frontmatter.required_fields
 ```
 
 Do NOT auto-write — frontmatter descriptions require human authorship.
@@ -359,6 +489,7 @@ Do NOT auto-write — frontmatter descriptions require human authorship.
 
 Adapt hooks from any source platform to all target platforms.
 See `lib/patterns/hook-merging.md` for event mapping and merge logic.
+Uses `LOOKUP` tables from `lib/references/platform-mappings.md` for all mappings.
 
 Hook porting is filtered by `computed.target_platforms`. Each subsection only
 runs if its target platform is selected.
@@ -372,28 +503,68 @@ PORT_CURSOR_HOOKS(computed):
   IF any(s.path == "hooks/hooks-cursor.json" FOR s IN computed.skipped):
     RETURN
   IF computed.existing_hooks:
-    generate_cursor_hooks(computed.existing_hooks)
+    # Convert Claude hooks to Cursor format
+    # Uses LOOKUP["hook_events"]["cursor"] for event name mapping (Table 3)
+    #   PascalCase → camelCase (e.g. SessionStart → sessionStart)
+    # Uses LOOKUP["hook_format"]["cursor"] for structure flattening (Table 7)
+    #   Nested matcher → hooks[] becomes flat structure
+    # Uses LOOKUP["path_variables"]["cursor"] for path variable substitution (Table 4)
+    #   ${CLAUDE_PLUGIN_ROOT} → ${CURSOR_PLUGIN_ROOT}
+    claude_hooks = read_json("hooks/hooks.json")
+    cursor_hooks = convert_hooks(claude_hooks, "cursor")
+    write_json("hooks/hooks-cursor.json", cursor_hooks)
+    # fixes: cursor.4_hooks.hooks_json.exists
+    # fixes: cursor.4_hooks.event_names.camelcase
+    # fixes: cursor.4_hooks.hooks_json.flat_structure
   ELSE:
     Write("hooks/hooks-cursor.json", '{ "version": 1, "hooks": {} }')
+    # fixes: cursor.4_hooks.hooks_json.exists
   computed.created.append({ path: "hooks/hooks-cursor.json", platform: "cursor" })
 ```
 
 ### 5.2 Gemini Hook Guidance
 
-Gemini CLI hooks are configured interactively by users via `GEMINI.md` instructions —
-they cannot be written as files. Capture guidance text to include in install docs.
+Gemini CLI hooks are configured interactively by users via `settings.json` —
+they cannot be written as repo files. Capture guidance text to include in install docs.
 
 ```pseudocode
 GEMINI_HOOK_GUIDANCE(computed):
   IF "gemini-cli" NOT IN computed.target_platforms:
     RETURN
   IF computed.existing_hooks:
+    # Uses LOOKUP["hook_events"]["gemini"] for event name mapping (Table 3)
+    #   PascalCase stays PascalCase but some names differ
+    #   (e.g. PreToolUse → BeforeTool, PostToolUse → AfterTool)
     computed.gemini_hook_text = render_gemini_hook_instructions(computed.existing_hooks)
+    # fixes: gemini.4_hooks.hooks_json.guidance_present
   ELSE:
     computed.gemini_hook_text = NULL
 ```
 
-### 5.4 Windows Support
+### 5.3 OpenClaw Hook SDK Guidance
+
+OpenClaw hooks use TypeScript plugin SDK (`api.registerHook()`), not file-based config.
+
+```pseudocode
+OPENCLAW_HOOK_GUIDANCE(computed):
+  IF "openclaw" NOT IN computed.target_platforms:
+    RETURN
+  IF computed.existing_hooks:
+    # Uses LOOKUP["hook_events"]["openclaw"] for event name mapping (Table 3)
+    #   PascalCase → snake_case SDK names
+    #   (e.g. SessionStart → gateway:startup, PreToolUse → before_tool_call)
+    computed.openclaw_hook_text = render_openclaw_sdk_instructions(computed.existing_hooks)
+    # fixes: openclaw.4_hooks.hooks_json.sdk_guidance
+    # fixes: openclaw.4_hooks.hooks_json.typescript_wrapper
+  ELSE:
+    computed.openclaw_hook_text = NULL
+```
+
+### 5.4 Codex and Antigravity
+
+Codex and Antigravity have no hook systems. No hook porting is needed.
+
+### 5.5 Windows Support
 
 ```pseudocode
 PORT_WINDOWS_HOOKS(computed):
@@ -401,6 +572,23 @@ PORT_WINDOWS_HOOKS(computed):
     source = Read("lib/templates/hooks/run-hook.cmd")
     Write("hooks/run-hook.cmd", source)
     computed.created.append({ path: "hooks/run-hook.cmd", platform: "cross" })
+    # fixes: cursor.4_hooks.scripts.cross_platform
+```
+
+### 5.6 Hook Script Path Variables
+
+```pseudocode
+PORT_HOOK_SCRIPTS(computed):
+  FOR script IN Glob("hooks/scripts/*"):
+    content = Read(script)
+    IF "${CLAUDE_PLUGIN_ROOT}" IN content:
+      # Add env branching for all platforms with path variables
+      # Uses LOOKUP["path_variables"] (Table 4) for variable names
+      IF "${CURSOR_PLUGIN_ROOT}" NOT IN content:
+        add_env_branching(script, "CURSOR_PLUGIN_ROOT")
+        # fixes: cursor.4_hooks.scripts.no_claude_paths
+      IF "${extensionPath}" NOT IN content:
+        add_env_branching(script, "extensionPath")
 ```
 
 ## 6. Phase 6: Document
@@ -423,8 +611,15 @@ RENDER_INSTALL_SECTIONS(computed, platforms_with_artifacts):
   FOR platform IN platforms_with_artifacts:
     template = Read("lib/templates/install-docs/" + platform + ".md")
     sections[platform] = render(template, computed.metadata)
+    # fixes: {platform_prefix}.6_install.install_docs.exists
+    # where platform_prefix maps:
+    #   claude-code → claude, cursor → cursor, gemini-cli → gemini,
+    #   codex → codex, antigravity → antigravity, openclaw → openclaw
+
   IF computed.gemini_hook_text:
     sections["gemini-cli"] += "\n\n### Hook Setup\n\n" + computed.gemini_hook_text
+  IF computed.openclaw_hook_text:
+    sections["openclaw"] += "\n\n### Hook Setup (SDK)\n\n" + computed.openclaw_hook_text
   RETURN sections
 ```
 
@@ -464,6 +659,12 @@ WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
 
   Write("INSTALL.md", content)
   computed.created.append({ path: "INSTALL.md", platform: "cross" })
+  # fixes: claude.6_install.install_docs.exists
+  # fixes: cursor.6_install.install_docs.exists
+  # fixes: gemini.6_install.install_docs.exists
+  # fixes: codex.6_install.install_docs.exists
+  # fixes: antigravity.6_install.install_docs.exists
+  # fixes: openclaw.6_install.install_docs.exists
 
   # Platform-specific pointers (not full docs)
   IF "codex" IN platforms_with_artifacts:
@@ -519,19 +720,26 @@ BOOTSTRAP(computed):
     RETURN
 
   generate_using_skill(computed)
-  generate_using_sidecars(computed)        # filtered by target_platforms (same as Phase 4.2)
+  generate_using_sidecars(computed)        # filtered by target_platforms (same as Phase 4.3)
   generate_session_start(computed)
   generate_run_hook_cmd(computed)
 
   # Hook merging gated on platform targeting
   IF "claude-code" IN computed.target_platforms:
     merge_session_start_hooks_claude(computed)
+    # fixes: claude.4_hooks.hooks_json.exists
   IF "cursor" IN computed.target_platforms:
     merge_session_start_hooks_cursor(computed)
+    # fixes: cursor.4_hooks.hooks_json.exists
 
   # Platform-specific enhancements
   IF "gemini-cli" IN computed.target_platforms:
     update_gemini_md(computed)
+    # fixes: gemini.3_context.gemini_md.at_includes_skills
+
+  IF "antigravity" IN computed.target_platforms:
+    update_agents_md_for_antigravity(computed)
+    # fixes: antigravity.3_context.agents_md.skill_coverage
 
   computed.bootstrap_status = "configured"
 ```
@@ -539,6 +747,15 @@ BOOTSTRAP(computed):
 ## 8. Phase 8: Report
 
 Emit the final uplift report. See `lib/patterns/report-template.md` for the full report format and state flow diagram.
+
+The report includes:
+
+1. **Created files** — every file written, with platform and condition IDs fixed
+2. **Skipped files** — pre-existing files that were not overwritten
+3. **Flagged items** — issues requiring human attention (missing frontmatter, README gaps)
+4. **Incremental vs full** — which platforms got incremental uplift vs full generation
+5. **Bootstrap status** — configured, declined, or already-configured
+6. **Next steps** — remaining manual actions (frontmatter authorship, README updates)
 
 ## Related Skills
 
