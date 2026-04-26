@@ -9,14 +9,13 @@ This plugin provides the following skills:
 
 | Skill | Description |
 | ----- | ----------- |
-| `uplifting-a-plugin` | Add multi-platform portability to any plugin. Accepts any starting state — Claude Code, Cursor, Gemini CLI, Codex, Antigravity, OpenClaw, or bare SKILL.md files. Detects what exists, infers canonical metadata, generates every missing platform artifact, ports hooks, produces install documentation, and optionally configures session-start bootstrapping. |
-| `assessing-plugin-portability` | Assess a plugin for multi-platform portability. Classifies repo shape, scores readiness per platform using a 7-category rubric, detects structural blockers, and recommends an uplift target. Read-only — makes no changes. |
+| `plugin-portability` | Assess or uplift a plugin for multi-platform portability. Asks intent upfront (assess/uplift, platforms, uplift target), runs condition-driven scoring, and optionally generates missing artifacts. Platforms: Claude Code, Cursor, Gemini CLI, Codex, Antigravity, OpenClaw. |
 
-## How to Invoke Skills
+## How to Invoke
 
-**Claude Code / Cursor:** Use the `Skill` tool with the skill name.
+**Claude Code / Cursor:** Use the `Skill` tool with skill name `plugin-portability`.
 
-**Gemini CLI:** Use the `activate_skill` tool with the skill name.
+**Gemini CLI:** Use the `activate_skill` tool with skill name `plugin-portability`.
 
 **Antigravity / OpenClaw / Codex:** Skills are auto-discovered. Follow the SKILL.md instructions directly.
 
