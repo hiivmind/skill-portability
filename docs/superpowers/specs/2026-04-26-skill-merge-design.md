@@ -343,41 +343,93 @@ Generation is gated by TWO filters: the shape-based uplift target controls
 which categories of artifacts are in scope, and the per-platform depth
 controls whether to generate everything or only fix failing conditions.
 
+#### Template action types
+
+Each rubric condition's `template` field maps to one of three action types:
+
+```yaml
+template: manifests/cursor-plugin/plugin.json.tmpl          # action: create
+template: manifests/cursor-plugin/plugin.json.tmpl?merge     # action: merge (update existing)
+template: null                                                # action: none (assessment-only)
+```
+
+- **create**: Render template to target path. Only if file doesn't exist.
+- **merge**: Read existing file, apply template as structured update (add missing
+  fields, update stale values). Used for manifests with missing fields, context
+  files with missing skill references, etc.
+- **none** (no template): Assessment-only condition. Cannot be fixed by generation.
+  Emitted as a manual action item in the report.
+
+#### Allowed categories by uplift target
+
 ```pseudocode
-# Phase 5: Generate
-IF computed.uplift_target == "curated-note-only":
-  SKIP Phases 5-8 entirely (only docs in Phase 7)
+ALLOWED_CATEGORIES = {
+  "skill-first":          ["2_skills", "3_context", "5_toolmap", "6_install"],
+  "full-portable-plugin": ["1_manifest", "2_skills", "3_context", "4_hooks",
+                           "5_toolmap", "6_install", "7_runtime"],
+  "curated-note-only":    ["6_install"]
+}
+```
+
+#### Phase 5: Generate
+
+```pseudocode
+allowed = ALLOWED_CATEGORIES[computed.uplift_target]
 
 FOR platform IN intent.platforms:
   failing = computed.scores[platform].failing
-  
+
   FOR condition IN failing:
-    # Filter 1: Shape target
-    IF computed.uplift_target == "skill-first":
-      IF condition.category IN ["1_manifest", "4_hooks", "7_runtime"]:
-        SKIP  # skill-first doesn't generate manifests, hooks, or runtime adapters
-    
-    # Filter 2: Per-platform depth
-    IF computed.recommendation_for[platform] == "incremental":
-      # Only fix failing conditions that have a template
-      IF NOT condition.template:
-        SKIP  # Assessment-only condition, no artifact to generate
-      target_path = resolve_target_path(condition.template, platform)
-      IF target_path NOT IN computed.existing_files:
-        render(condition.template, computed.metadata)
-        # fixes: {condition.id}
+    # Filter 1: Shape target — enforced for ALL depths including full
+    IF condition.category NOT IN allowed:
+      SKIP
+
+    # Filter 2: Has fixable template?
+    IF NOT condition.template:
+      computed.manual_actions.append(condition)  # Report as manual item
+      CONTINUE
+
+    target_path = resolve_target_path(condition.template, platform)
+    action = parse_action(condition.template)  # "create" or "merge"
+
+    IF action == "create" AND target_path NOT IN computed.existing_files:
+      render(condition.template, computed.metadata)
+      # fixes: {condition.id}
+    ELIF action == "merge" AND target_path IN computed.existing_files:
+      merge_update(condition.template, target_path, computed.metadata)
+      # fixes: {condition.id}
+    ELIF action == "create" AND target_path IN computed.existing_files:
+      # File exists but condition fails — needs merge, not create
+      computed.manual_actions.append(condition)
+      # Report: "{target_path} exists but fails {condition.id} — manual review needed"
     ELSE:
-      # Full generation — render all templates for this platform
-      execute_full_generation(platform, computed)
-      BREAK  # full generation covers all conditions for this platform
+      render(condition.template, computed.metadata)
+      # fixes: {condition.id}
 
 # Phase 6: Port — see lib/patterns/hook-merging.md
-#   Skipped if uplift_target == "skill-first" (no hooks in scope)
+#   Skipped if "4_hooks" NOT IN allowed
 # Phase 7: Document — see lib/templates/install-docs/
-#   Always runs (all targets need install docs)
+#   Always runs ("6_install" is in all allowed sets)
 # Phase 8: Bootstrap — see lib/patterns/bootstrapping.md
 #   Skipped if uplift_target == "curated-note-only"
-# Phase 9: Summary — files created, skipped, flagged
+# Phase 9: Summary — files created, merged, skipped, manual actions
+```
+
+#### Phase 9: Summary
+
+```pseudocode
+SUMMARY(computed):
+  DISPLAY "## Files Created"
+  FOR file IN computed.created_files:
+    DISPLAY "- " + file
+
+  DISPLAY "## Files Merged/Updated"
+  FOR file IN computed.merged_files:
+    DISPLAY "- " + file
+
+  DISPLAY "## Manual Actions Required"
+  FOR condition IN computed.manual_actions:
+    DISPLAY "- " + condition.id + ": " + condition.check
 ```
 
 ### External File References
@@ -449,3 +501,17 @@ Restored two-layer decision: Layer 1 is shape-based uplift target
 user. Layer 2 is per-platform repair depth (`incremental` vs `full`) derived
 from scores. Phase 5 generation is gated by both filters — shape target
 controls which categories are in scope, depth controls how much.
+
+## Addendum: Codex Adversarial Review #2 Response (2026-04-26)
+
+**[high] Incremental uplift skips broken existing files** — Fixed.
+Added template action types: `create` (new files only) vs `merge` (update
+existing files with missing fields/entries). Conditions targeting existing
+files that fail use `merge` action. Files that exist and fail but have no
+merge template are reported as manual action items — never silently skipped.
+
+**[high] Skill-first full generation can still generate manifests** — Fixed.
+Replaced `execute_full_generation` with `ALLOWED_CATEGORIES` table keyed by
+uplift target. The category filter is enforced for ALL depths including full
+— `skill-first` can never create manifests (`1_manifest`), hooks (`4_hooks`),
+or runtime adapters (`7_runtime`) regardless of per-platform depth.
