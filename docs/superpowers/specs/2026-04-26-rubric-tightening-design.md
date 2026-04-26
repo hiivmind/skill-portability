@@ -1,7 +1,7 @@
 # Rubric Tightening & Condition-Linked Uplift
 
 **Date:** 2026-04-26
-**Status:** Approved
+**Status:** Approved design — implementation pending (current branch still has old platform set)
 **Scope:** Rubric framework, all platform rubrics, lookup tables, assessment skill, uplift skill, templates
 
 ## Problem
@@ -88,24 +88,50 @@ Each condition in a platform rubric YAML file:
 Per category, per platform:
 
 ```
-Score 3: ALL critical conditions pass AND >= 75% of optional conditions pass
-Score 2: ALL critical conditions pass
-Score 1: >= 50% of critical conditions pass
-Score 0: < 50% of critical conditions pass
+critical_count  = number of conditions where critical == true
+optional_count  = number of conditions where critical == false
+critical_pass   = number of critical conditions that pass
+optional_pass   = number of optional conditions that pass
+
+# Guard: every scored category MUST have at least 1 critical condition.
+# If a category has 0 critical conditions, it scores N/A (see Section 5).
+
+Score 3: critical_pass == critical_count
+         AND (optional_count == 0 OR optional_pass / optional_count >= 0.75)
+Score 2: critical_pass == critical_count
+         AND (optional_count == 0 OR optional_pass / optional_count < 0.75)
+Score 1: critical_pass / critical_count >= 0.50
+         AND critical_pass < critical_count
+Score 0: critical_pass / critical_count < 0.50
 ```
+
+**Edge case rules:**
+- A category with 0 critical conditions and >0 optional conditions scores **N/A** (not vacuously 3). This prevents score inflation from categories that have no real gates.
+- A category with 0 total conditions scores **N/A**.
+- When `optional_count == 0` and all critical conditions pass, the score is **3** (no optional bar to clear).
+- When `critical_count == 1`, Score 1 is impossible (50% of 1 rounds to 1, which is all-pass → Score 2). This is by design: a single-critical category is binary pass/fail.
 
 ### 5. N/A Category Handling
 
-If a platform has zero conditions in a category (e.g., Codex has no hooks):
+If a platform has zero conditions in a category, OR zero critical conditions in a category:
 
 ```
 Category scores N/A (not 0)
-Max possible score adjusts downward
-Bands recalculate as percentages:
+Max possible score adjusts downward (only scored categories count)
+Scored categories = categories with at least 1 critical condition
+
+Band calculation:
+  actual_score  = sum of scored category scores
+  max_score     = scored_category_count * 3
+  percentage    = actual_score / max_score
+
   Strong:  >= 85%
   Viable:  >= 60%
   Partial: >= 35%
   Weak:    < 35%
+
+Guard: if scored_category_count < 3, band is capped at PARTIAL
+       (too few categories to claim Strong/Viable readiness)
 ```
 
 ### 6. Seven Categories with Component Tags
@@ -126,16 +152,33 @@ Source of truth for which conditions exist per platform:
 
 | Component | Claude Code | Cursor | Gemini | Codex | Antigravity | OpenClaw |
 |-----------|------------|--------|--------|-------|-------------|----------|
-| Skills | `skills/*/SKILL.md` | `skills/*/SKILL.md` | `skills/*/SKILL.md` | `.agents/skills/*/SKILL.md` | `.agent/skills/*/SKILL.md` | `skills/*/SKILL.md` |
-| Agents | `agents/*.md` | `agents/*.md` | `agents/*.md` | `.codex/agents/*.toml` | combined in AGENTS.md | `agents.list[]` in manifest |
-| Commands | deprecated | optional `commands/` | `commands/*.toml` | none | none | TS handlers |
-| Rules | none | `.cursor/rules/*.mdc` | none | none | `.agent/rules/*.md` | none |
-| Hooks | `hooks/hooks.json` | `hooks/hooks-cursor.json` | user `settings.json` (guidance only) | none (scripts as utilities) | none | TS handlers |
+| Skills | `skills/*/SKILL.md` | `skills/*/SKILL.md` | `skills/*/SKILL.md` | `.agents/skills/*/SKILL.md` | `.agents/skills/*/SKILL.md` (preferred) or `.agent/skills/*/SKILL.md` (legacy) | `skills/*/SKILL.md` |
+| Agents | `agents/*.md` | `agents/*.md` | `agents/*.md` | `.codex/agents/*.toml` | combined in AGENTS.md | `agents.list[]` in config (not manifest) |
+| Commands | deprecated | optional `commands/` | `commands/*.toml` | none | `.agents/workflows/` (slash commands) | TS handlers |
+| Rules | none | `.cursor/rules/*.mdc` | none | none | `.agent/rules/*.md` + GEMINI.md (highest priority) | none |
+| Hooks | `hooks/hooks.json` | `hooks/hooks-cursor.json` | user `settings.json` (guidance only) | none (scripts as utilities) | none | plugin hooks via `api.registerHook()` (`before_tool_call`, `tool_result_persist`) |
 | MCP | `.mcp.json` | `mcp.json` (no Resources) | implicit | none | none | none |
 | Policies | none | none | `policies/*.toml` | none | none | none |
 | Subagents | `Task` tool | implicit | `@agent-name` | `spawn_agent` | implicit | `agents.list[]` |
-| Marketplace | `.claude-plugin/marketplace.json` | `.cursor-plugin/marketplace.json` | none | `.codex-plugin/marketplace.json` | `package.json` | `openclaw.plugin.json` |
-| Context file | `CLAUDE.md` | `AGENTS.md` + `.cursor/rules/` | `GEMINI.md` (`@` includes) | `AGENTS.md` | `AGENTS.md` | `AGENTS.md` |
+| Marketplace | `.claude-plugin/marketplace.json` | `.cursor-plugin/marketplace.json` | none | `.codex-plugin/marketplace.json` | `package.json` (OpenVSX/extension) | `openclaw.plugin.json` + `package.json` with `openclaw` block |
+| Context file | `CLAUDE.md` | `AGENTS.md` + `.cursor/rules/` | `GEMINI.md` (`@` includes) | `AGENTS.md` | GEMINI.md > AGENTS.md > `.agent/rules/` (priority order) | `AGENTS.md` |
+
+**Platform research notes (2026-04-26):**
+
+**Antigravity (Google):** VS Code fork using OpenVSX registry. Preferred skill
+path migrated from `.agent/` to `.agents/` (legacy still supported). Context
+priority: System Rules > GEMINI.md > AGENTS.md > `.agent/rules/`. For skill-only
+distribution, no package.json needed — drop skills into `.agents/skills/`.
+Supports `.agents/workflows/` for custom slash commands. No file-based hook system.
+
+**OpenClaw:** Open-source gateway platform (TypeScript). Requires BOTH
+`openclaw.plugin.json` (with `id` + `configSchema`) AND `package.json` with
+`openclaw` block (extensions, compat, build) for full native plugins. Skill-only
+plugins can omit the package.json. Has plugin-level hooks via `api.registerHook()`
+with `before_tool_call` and `tool_result_persist` events (corrects external
+converter's claim of "no tool-level hooks"). Auto-detects `.claude-plugin/`,
+`.codex-plugin/`, `.cursor-plugin/` bundle layouts — may work without conversion.
+Install via ClawHub, npm, or local `plugins.load.paths`.
 
 ### 8. Lookup Tables (`lib/references/platform-mappings.md`)
 
@@ -166,15 +209,19 @@ Single canonical file containing all tables referenced by condition pseudocode. 
 
 | Claude Event | Cursor | Gemini | Codex | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| SessionStart | sessionStart | SessionStart | N/A | N/A | N/A |
-| PreToolUse | preToolUse | BeforeTool | N/A | N/A | N/A |
-| PostToolUse | postToolUse | AfterTool | N/A | N/A | N/A |
+| SessionStart | sessionStart | SessionStart | N/A | N/A | gateway:startup (plugin SDK) |
+| PreToolUse | preToolUse | BeforeTool | N/A | N/A | before_tool_call (plugin SDK) |
+| PostToolUse | postToolUse | AfterTool | N/A | N/A | tool_result_persist (plugin SDK) |
 | PostToolUseFailure | postToolUseFailure | (N/A) | N/A | N/A | N/A |
 | SubagentStart | subagentStart | (N/A) | N/A | N/A | N/A |
 | SubagentStop | subagentStop | (N/A) | N/A | N/A | N/A |
-| PreCompact | preCompact | PreCompress | N/A | N/A | N/A |
+| PreCompact | preCompact | PreCompress | N/A | N/A | session:compact:before (plugin SDK) |
 | Stop | stop | AfterAgent | N/A | N/A | N/A |
 | UserPromptSubmit | beforeSubmitPrompt | (N/A) | N/A | N/A | N/A |
+
+Note: OpenClaw hooks use a plugin SDK (`api.registerHook()`), not file-based
+configuration. Portable hook scripts cannot be directly converted — they require
+a TypeScript wrapper that calls `api.registerHook()` with the appropriate event.
 
 #### 8.4 Path Variable Mapping
 
@@ -198,18 +245,20 @@ Single canonical file containing all tables referenced by condition pseudocode. 
 | Cursor | name, displayName, description, version, author |
 | Gemini | name, version, description, contextFileName |
 | Codex (native) | name, version, description |
-| Antigravity | name, displayName, version, description, publisher |
-| OpenClaw | id, configSchema |
+| Antigravity | name, displayName, version, description, publisher (for OpenVSX extension; skill-only needs no manifest) |
+| OpenClaw | id, configSchema (in `openclaw.plugin.json`); full plugins also need `package.json` with `openclaw.extensions`, `openclaw.compat` |
 
 #### 8.7 Hook Format Rules
 
-| Rule | Claude Code | Cursor | Gemini |
-|---|---|---|---|
-| Event name case | PascalCase | camelCase | PascalCase (BeforeTool/AfterTool) |
-| Timeout unit | seconds | seconds | milliseconds |
-| Async support | yes (optional field) | no (strip) | no (strip) |
-| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json (user-configured) |
-| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A |
+| Rule | Claude Code | Cursor | Gemini | OpenClaw |
+|---|---|---|---|---|
+| Event name case | PascalCase | camelCase | PascalCase (BeforeTool/AfterTool) | snake_case (plugin SDK) |
+| Timeout unit | seconds | seconds | milliseconds | N/A (SDK-managed) |
+| Async support | yes (optional field) | no (strip) | no (strip) | yes (async handlers) |
+| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json (user-configured) | `api.registerHook()` (TypeScript) |
+| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A | return value from handler |
+
+Note: Codex and Antigravity have no hook systems — omitted from this table.
 
 #### 8.8 Skill Output Directory
 
@@ -219,7 +268,7 @@ Single canonical file containing all tables referenced by condition pseudocode. 
 | Cursor | `skills/` | `agents/` |
 | Gemini | `skills/` | `agents/` |
 | Codex | `.agents/skills/` | `.codex/agents/` |
-| Antigravity | `.agent/skills/` | `.agent/rules/` |
+| Antigravity | `.agents/skills/` (preferred) or `.agent/skills/` (legacy) | `.agent/rules/` |
 | OpenClaw | `skills/` | in manifest `agents.list[]` |
 
 #### 8.9 Agent Output Format
@@ -296,7 +345,7 @@ The assessment skill includes this instruction for the evaluating LLM:
 ```
 When evaluating checkable conditions:
   1. Read the condition's pseudocode
-  2. Generate a bash or python script that implements the check
+  2. Generate a read-only bash or python script that implements the check
   3. Execute the script
   4. Record pass/fail from exit code
 
@@ -306,6 +355,14 @@ When evaluating judgement conditions:
   3. Apply your interpretation
   4. Record pass/fail with reasoning
 ```
+
+**Execution scope note:** This skill is used by plugin authors assessing and
+uplifting their own plugins. The target repo is always the author's own
+working directory. JIT-generated scripts are read-only checks (file existence,
+JSON field presence, pattern matching) — they do not modify files, execute
+target repo content, or access paths outside the plugin root. The pseudocode
+operations (`read_json`, `file_exists`, `parse_frontmatter`, `glob`) map to
+read-only filesystem queries, not arbitrary shell execution.
 
 ### 10. Platform Rubric Reference: Cursor (Full Example)
 
@@ -391,3 +448,20 @@ Design informed by analysis of `agentic-commerce-skills-plugins/scripts/` — a 
 - Manifest required fields per platform (manifest.py, validate.py)
 - Field stripping sets (frontmatter.py)
 - 50+ validation checks decomposed into our condition ID system
+
+## Addendum: Codex Adversarial Review Response (2026-04-26)
+
+**[high] JIT execution safety** — Acknowledged but accepted risk. This skill is
+used by plugin authors on their own repos, not on untrusted third-party code.
+JIT-generated scripts are read-only filesystem checks (file_exists, read_json,
+parse_frontmatter, glob). Added explicit scope note in Section 9.4.
+
+**[medium] Scoring formula edge cases** — Fixed. Section 4 now defines explicit
+behavior for zero-critical categories (→ N/A), zero-optional categories
+(→ Score 3 if all critical pass), single-critical categories (binary pass/fail),
+and adds a minimum-scored-categories guard for band calculation.
+
+**[medium] Platform set not reflected in branch** — Fixed. Status updated to
+"Approved design — implementation pending." The spec is the design document;
+implementation follows via the migration order in the spec. Old platform files
+will be removed and new platform files created during implementation phases 3-5.
