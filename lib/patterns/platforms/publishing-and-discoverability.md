@@ -204,4 +204,3 @@ OpenClaw auto-discovers skills from the `skills/` directory and context from `AG
 ### Local development
 
 `openclaw link <path>` for local development.
-

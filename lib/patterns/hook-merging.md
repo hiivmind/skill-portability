@@ -164,7 +164,10 @@ Both merge operations must preserve all other existing hooks. Only the session-s
 
 ## Antigravity / OpenClaw Hook Notes
 
-Antigravity and OpenClaw do not have a dedicated hooks file format. Both platforms auto-discover `hooks/session-start` and execute it at session start if present. No separate hook generation or merging step is needed for these platforms — the Claude Code `hooks/hooks.json` and the session-start script cover their needs.
+Antigravity and OpenClaw do not have a dedicated hooks file format. Both platforms
+auto-discover `hooks/session-start` and execute it at session start if present.
+No separate hook generation or merging step is needed for these platforms — the
+Claude Code `hooks/hooks.json` and the session-start script cover their needs.
 
 ---
 

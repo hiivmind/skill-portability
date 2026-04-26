@@ -175,4 +175,3 @@ Create `.agents/plugins/` directory if needed. Only generated when Codex recomme
 For single-plugin upstream repos, this manifest points to the repo root with `source.path: "./"`.
 
 > **Template:** `lib/templates/manifests/codex-plugin/marketplace.json.tmpl`
-
