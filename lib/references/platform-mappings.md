@@ -128,15 +128,15 @@ Maps Claude Code model shortnames to platform equivalents.
 
 ## Table 7: Hook Format Rules
 
-| Rule | Claude Code | Cursor | Gemini | OpenClaw |
-|---|---|---|---|---|
-| Event name case | PascalCase | camelCase | PascalCase | snake_case (SDK) |
-| Timeout unit | seconds | seconds | milliseconds | N/A (SDK-managed) |
-| Async support | yes (optional) | no (strip) | no (strip) | yes (async handlers) |
-| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json (user-configured) | `api.registerHook()` (TypeScript) |
-| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A | return value from handler |
+| Rule | Claude Code | Cursor | Gemini | Codex | OpenClaw |
+|---|---|---|---|---|---|
+| Event name case | PascalCase | camelCase | PascalCase | PascalCase | snake_case (SDK) |
+| Timeout unit | seconds | seconds | milliseconds | seconds | N/A (SDK-managed) |
+| Async support | yes (optional) | no (strip) | no (strip) | no (strip) | yes (async handlers) |
+| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json or extension manifest `hooks` field | nested (same as Claude Code) | `api.registerHook()` (TypeScript) |
+| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A | `permissionDecision` / `decision` (event-specific) | return value from handler |
 
-**Notes**: Codex and Antigravity have no hook systems — omitted from this table.
+**Notes**: Antigravity has no hook system — omitted from this table.
 
 ---
 
@@ -216,7 +216,7 @@ Maps Claude Code model shortnames to platform equivalents.
 |---|---|---|
 | Claude Code | `.mcp.json` | Dot-prefixed; supports resources and tools |
 | Cursor | `mcp.json` | No dot prefix; no MCP Resources support |
-| Gemini | — | MCP not supported via config file |
-| Codex | — | MCP not supported via config file |
+| Gemini | `gemini-extension.json` → `mcpServers` | Extension-bundled MCP servers |
+| Codex | `.mcp.json` or `config.toml [mcp]` | Supports stdio and SSE transports |
 | Antigravity | — | MCP not supported via config file |
 | OpenClaw | `openclaw.plugin.json` → `mcp` block | Embedded in manifest |
