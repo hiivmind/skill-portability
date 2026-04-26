@@ -15,9 +15,9 @@
 - [ ] Claude Code
 - [ ] Cursor
 - [ ] Gemini CLI
-- [ ] OpenCode
-- [ ] Copilot CLI
 - [ ] Codex
+- [ ] Antigravity
+- [ ] OpenClaw
 - [ ] None (docs/CI only)
 
 ## Testing Done

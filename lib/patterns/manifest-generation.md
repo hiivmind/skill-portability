@@ -35,7 +35,7 @@ RENDER_WITH_CONDITIONALS(template, metadata, computed):
 
 Template provides structure with `{{sectionPlaceholders}}`. Builder constructs dynamic sections from skill/agent/command inventory.
 
-Applies to: `gemini-context`, `agents-context`, `copilot-instructions`
+Applies to: `gemini-context`, `agents-context`
 
 ```pseudocode
 RENDER_WITH_BUILDER(template, metadata, computed):
@@ -73,11 +73,8 @@ RENDER_WITH_BUILDER(template, metadata, computed):
 | gemini-extension | Plain | `lib/templates/manifests/gemini-extension.json.tmpl` |
 | gemini-context | Builder | `lib/templates/context-files/GEMINI.md.tmpl` |
 | agents-context | Builder | `lib/templates/context-files/AGENTS.md.tmpl` |
-| opencode-package | Plain | `lib/templates/manifests/package.json.tmpl` |
-| opencode-shim | Plain | `lib/templates/manifests/opencode-plugin.js.tmpl` |
 | codex-plugin | Plain | `lib/templates/manifests/codex-plugin/plugin.json.tmpl` |
 | codex-marketplace | Plain | `lib/templates/manifests/codex-plugin/marketplace.json.tmpl` |
-| copilot-instructions | Plain | `lib/templates/context-files/copilot-instructions.md.tmpl` |
 
 ---
 
@@ -159,24 +156,6 @@ Build skill bullet list for `{{skillIncludes}}` and command bullet list for `{{c
 
 ---
 
-## opencode-package
-
-**Target:** `package.json`
-
-> **Template:** `lib/templates/manifests/package.json.tmpl`
-
----
-
-## opencode-shim
-
-**Target:** `.opencode/plugins/<name>.js`
-
-Create `.opencode/plugins/` directory if needed. This is the minimal non-bootstrap version of the OpenCode plugin shim.
-
-> **Template:** `lib/templates/manifests/opencode-plugin.js.tmpl`
-
----
-
 ## codex-plugin
 
 **Target:** `.codex-plugin/plugin.json`
@@ -196,13 +175,3 @@ Create `.agents/plugins/` directory if needed. Only generated when Codex recomme
 For single-plugin upstream repos, this manifest points to the repo root with `source.path: "./"`.
 
 > **Template:** `lib/templates/manifests/codex-plugin/marketplace.json.tmpl`
-
----
-
-## copilot-instructions
-
-**Target:** `.github/copilot-instructions.md`
-
-Create `.github/` directory if needed.
-
-> **Template:** `lib/templates/context-files/copilot-instructions.md.tmpl`

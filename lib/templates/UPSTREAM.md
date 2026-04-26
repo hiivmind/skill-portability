@@ -10,7 +10,6 @@ Templates in `lib/templates/` are seeded from [superpowers](https://github.com/o
 
    ```bash
    SP=~/.claude/plugins/cache/claude-plugins-official/superpowers/<new-version>
-   cp "$SP/skills/using-superpowers/references/copilot-tools.md" lib/references/
    cp "$SP/skills/using-superpowers/references/codex-tools.md" lib/references/
    cp "$SP/skills/using-superpowers/references/gemini-tools.md" lib/references/
    ```

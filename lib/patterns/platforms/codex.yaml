@@ -1,0 +1,295 @@
+platform: codex
+manifest_path: .codex-plugin/plugin.json  # native path; skill-discovery uses AGENTS.md
+context_files: [AGENTS.md]
+hooks_path: null  # Codex has no hook system
+
+categories:
+  1_manifest:
+    conditions:
+      - id: codex.1_manifest.agents_md.exists
+        type: checkable
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("AGENTS.md")
+          # Required for both skill-discovery and native plugin paths
+        template: context-files/AGENTS.md.tmpl
+
+      - id: codex.1_manifest.plugin_json.exists
+        type: checkable
+        component: plugin_json
+        critical: false
+        points: 1
+        check: |
+          # Native plugin path only — not required for skill-discovery
+          if dir_exists(".codex-plugin/"):
+            assert file_exists(".codex-plugin/plugin.json"), \
+              ".codex-plugin/ dir exists but plugin.json missing"
+        template: manifests/codex-plugin/plugin.json.tmpl
+
+      - id: codex.1_manifest.plugin_json.required_fields
+        type: checkable
+        component: plugin_json
+        critical: false
+        points: 1
+        check: |
+          if file_exists(".codex-plugin/plugin.json"):
+            json = read_json(".codex-plugin/plugin.json")
+            for field in LOOKUP["manifest_required_fields"]["codex"]:
+              assert field in json, f"Missing required field: {field}"
+            # Required: name, version, description (Table 6)
+        template: manifests/codex-plugin/plugin.json.tmpl?merge
+
+      - id: codex.1_manifest.marketplace_json.exists
+        type: checkable
+        component: marketplace_json
+        critical: false
+        points: 1
+        check: |
+          # Only for native plugin path with multiple plugins
+          if file_exists(".codex-plugin/plugin.json"):
+            if count(glob(".agents/skills/*/SKILL.md")) > 1:
+              assert file_exists(".codex-plugin/marketplace.json"), \
+                "Multi-skill native plugin missing marketplace.json"
+        template: manifests/codex-plugin/marketplace.json.tmpl
+
+      - id: codex.1_manifest.path_documented
+        type: judgement
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          Chosen consumption path (skill-discovery or native plugin) must be
+          explicitly documented. Skill-discovery uses AGENTS.md + .codex/INSTALL.md.
+          Native uses .codex-plugin/plugin.json + .codex-plugin/marketplace.json.
+          No ambiguity between the two paths.
+
+  2_skills:
+    conditions:
+      - id: codex.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob(".agents/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "name" in fm, f"{skill}: missing name"
+            assert "description" in fm, f"{skill}: missing description"
+
+      - id: codex.2_skills.frontmatter.no_claude_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["field_stripping"]["codex"]: strip disable-model-invocation, allowed-tools
+          for skill in glob(".agents/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "disable-model-invocation" not in fm, \
+              f"{skill}: disable-model-invocation must be stripped for Codex"
+            assert "allowed-tools" not in fm, \
+              f"{skill}: allowed-tools must be stripped for Codex"
+
+      - id: codex.2_skills.discovery.codex_path
+        type: checkable
+        component: discovery
+        critical: true
+        points: 1
+        check: |
+          assert dir_exists(".agents/skills/") and glob(".agents/skills/*/SKILL.md"), \
+            "No skills found in .agents/skills/ — Codex requires this path (Table 8)"
+
+      - id: codex.2_skills.tool_refs.spawn_agent
+        type: judgement
+        component: tool_refs
+        critical: true
+        points: 1
+        check: |
+          For each SKILL.md that references Task or Agent tools, verify that
+          the Codex equivalent (spawn_agent) is documented. Claude Code Task/Agent
+          maps to Codex spawn_agent (LOOKUP Table 2). A references/codex-tools.md
+          sidecar or inline note must explain this mapping.
+
+      - id: codex.2_skills.tool_refs.update_plan
+        type: judgement
+        component: tool_refs
+        critical: false
+        points: 1
+        check: |
+          For each SKILL.md that references TodoWrite, verify that the Codex
+          equivalent (update_plan) is documented. Claude Code TodoWrite maps to
+          Codex update_plan (LOOKUP Table 2).
+
+  3_context:
+    conditions:
+      - id: codex.3_context.agents_md.skill_coverage
+        type: judgement
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          AGENTS.md should list all skills and agents with names and descriptions.
+          Verify each skill in .agents/skills/*/SKILL.md is referenced in AGENTS.md.
+        template: context-files/AGENTS.md.tmpl?merge
+
+      - id: codex.3_context.agents_md.dispatch_documented
+        type: judgement
+        component: agents_md
+        critical: false
+        points: 1
+        check: |
+          AGENTS.md should document dispatch mechanisms — spawn_agent for
+          subagent invocation vs direct dispatch. Multi-agent coordination
+          patterns should be explained if the plugin uses subagents.
+
+  4_hooks:
+    # N/A — Codex has no hook system (LOOKUP Table 3: all events map to N/A).
+    # Hook scripts are copied as standalone utilities only.
+    conditions: []
+
+  5_toolmap:
+    conditions:
+      - id: codex.5_toolmap.sidecar.exists
+        type: checkable
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          file_exists("references/codex-tools.md")
+          # Per-skill or shared sidecar documenting Codex tool mappings
+
+      - id: codex.5_toolmap.sidecar.spawn_agent_mapped
+        type: checkable
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          content = read("references/codex-tools.md")
+          assert "spawn_agent" in content, \
+            "codex-tools.md must document Task/Agent → spawn_agent mapping (Table 2)"
+
+      - id: codex.5_toolmap.sidecar.update_plan_mapped
+        type: checkable
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          content = read("references/codex-tools.md")
+          assert "update_plan" in content, \
+            "codex-tools.md must document TodoWrite → update_plan mapping (Table 2)"
+
+      - id: codex.5_toolmap.model_mapping.no_claude_models
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["model_mapping"]["codex"]: opus→gpt-5.4, sonnet/haiku→gpt-5.4-mini
+          claude_models = ["opus", "sonnet", "haiku"]
+          for toml in glob(".codex/agents/*.toml"):
+            content = read(toml)
+            for model in claude_models:
+              assert model not in content.lower(), \
+                f"{toml}: Claude model name '{model}' leaked — use gpt-5.4 or gpt-5.4-mini"
+          for skill in glob(".agents/skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            if "model" in fm:
+              assert fm["model"].lower() not in claude_models, \
+                f"{skill}: Claude model name leaked — use gpt-5.4 or gpt-5.4-mini"
+
+      - id: codex.5_toolmap.model_mapping.codex_names
+        type: checkable
+        component: model_mapping
+        critical: false
+        points: 1
+        check: |
+          valid_models = ["gpt-5.4", "gpt-5.4-mini"]
+          for toml in glob(".codex/agents/*.toml"):
+            content = read(toml)
+            # model field in TOML: model = "gpt-5.4"
+            if 'model' in content:
+              model_val = parse_toml_field(toml, "model")
+              assert model_val in valid_models, \
+                f"{toml}: model '{model_val}' not in Codex model set {valid_models} (Table 1)"
+
+      - id: codex.5_toolmap.subagent_syntax.message_framing
+        type: judgement
+        component: subagent_syntax
+        critical: false
+        points: 1
+        check: |
+          If any skills or agents use spawn_agent for multi-agent communication,
+          verify that message framing conventions are documented — how to structure
+          the prompt passed to spawn_agent, worker role specification, and
+          result handling patterns.
+
+  6_install:
+    conditions:
+      - id: codex.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_file(["README.md", "INSTALL.md", ".codex/INSTALL.md"])
+          assert readme is not None, "No README.md, INSTALL.md, or .codex/INSTALL.md found"
+          content = read(readme)
+          assert "install" in content.lower(), "Install section missing from documentation"
+
+      - id: codex.6_install.install_docs.path_documented
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Install documentation should describe the chosen consumption path:
+          - Skill-discovery: symlink to ~/.agents/skills/<name> with step-by-step instructions
+          - Native plugin: marketplace install via .codex-plugin/ artifacts
+          Chosen path must match repository structure.
+
+      - id: codex.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          Install documentation should include verification steps to confirm
+          the plugin is loaded and working after install — e.g. checking that
+          skills appear in agent discovery or that AGENTS.md is picked up.
+
+  7_runtime:
+    conditions:
+      - id: codex.7_runtime.agents.toml_exists
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          # .codex/agents/*.toml only required if plugin defines agents
+          if dir_exists(".codex/agents/"):
+            assert glob(".codex/agents/*.toml"), \
+              ".codex/agents/ directory exists but contains no .toml files"
+
+      - id: codex.7_runtime.agents.toml_fields
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          for toml in glob(".codex/agents/*.toml"):
+            data = parse_toml(toml)
+            for field in ["name", "description", "model", "developer_instructions"]:
+              assert field in data, f"{toml}: missing required TOML field '{field}'"
+            # developer_instructions uses triple-quote multiline strings in TOML
+
+      - id: codex.7_runtime.subagents.worker_role
+        type: judgement
+        component: subagents
+        critical: false
+        points: 1
+        check: |
+          If agents use spawn_agent for subagent delegation, verify that
+          worker role specification is documented — what role each subagent
+          plays and how it reports results back to the orchestrator.

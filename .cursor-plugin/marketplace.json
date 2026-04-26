@@ -11,7 +11,7 @@
     {
       "name": "skill-portability",
       "source": "./",
-      "description": "Uplift any plugin to full multi-platform portability: Claude Code, Cursor, Gemini CLI, OpenCode, Copilot CLI, and Codex support"
+      "description": "Assess or uplift any plugin for multi-platform portability: Claude Code, Cursor, Gemini CLI, Codex, Antigravity, and OpenClaw"
     }
   ]
 }

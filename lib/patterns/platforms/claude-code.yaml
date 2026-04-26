@@ -1,0 +1,338 @@
+platform: claude-code
+manifest_path: .claude-plugin/plugin.json
+marketplace_path: .claude-plugin/marketplace.json
+context_files: [CLAUDE.md]
+hooks_path: hooks/hooks.json
+
+categories:
+  1_manifest:
+    conditions:
+      - id: claude.1_manifest.plugin_json.exists
+        type: checkable
+        component: plugin_json
+        critical: true
+        points: 1
+        check: |
+          file_exists(".claude-plugin/plugin.json")
+        template: manifests/claude-plugin/plugin.json.tmpl
+
+      - id: claude.1_manifest.plugin_json.required_fields
+        type: checkable
+        component: plugin_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json(".claude-plugin/plugin.json")
+          for field in LOOKUP["manifest_required_fields"]["claude-code"]:
+            assert field_present(json, field)
+          # Required: name, version, description, author.name, author.email
+        template: manifests/claude-plugin/plugin.json.tmpl?merge
+
+      - id: claude.1_manifest.plugin_json.keywords
+        type: checkable
+        component: plugin_json
+        critical: false
+        points: 1
+        check: |
+          json = read_json(".claude-plugin/plugin.json")
+          assert is_array(json["keywords"]) and len(json["keywords"]) > 0
+        template: manifests/claude-plugin/plugin.json.tmpl?merge
+
+      - id: claude.1_manifest.marketplace_json.exists
+        type: checkable
+        component: marketplace_json
+        critical: true
+        points: 1
+        check: |
+          file_exists(".claude-plugin/marketplace.json")
+        template: manifests/claude-plugin/marketplace.json.tmpl
+
+      - id: claude.1_manifest.marketplace_json.valid_entries
+        type: checkable
+        component: marketplace_json
+        critical: false
+        points: 1
+        check: |
+          entries = read_json(".claude-plugin/marketplace.json")
+          for entry in entries:
+            assert has_keys(entry, ["name", "source", "description"])
+        template: manifests/claude-plugin/marketplace.json.tmpl?merge
+
+      - id: claude.1_manifest.marketplace_json.source_paths
+        type: checkable
+        component: marketplace_json
+        critical: false
+        points: 1
+        check: |
+          entries = read_json(".claude-plugin/marketplace.json")
+          for entry in entries:
+            assert dir_exists(entry["source"])
+        template: manifests/claude-plugin/marketplace.json.tmpl?merge
+
+  2_skills:
+    conditions:
+      - id: claude.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert has_keys(fm, ["name", "description"])
+
+      - id: claude.2_skills.frontmatter.no_undocumented_fields
+        type: checkable
+        component: frontmatter
+        critical: false
+        points: 1
+        check: |
+          known_fields = ["name", "description", "when_to_use",
+                          "disable-model-invocation", "allowed-tools"]
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            for key in fm.keys():
+              assert key in known_fields
+
+      - id: claude.2_skills.discovery.standard_path
+        type: checkable
+        component: discovery
+        critical: true
+        points: 1
+        check: |
+          skills = glob("skills/*/SKILL.md")
+          assert len(skills) > 0
+          # Every SKILL.md must live at skills/<name>/SKILL.md
+
+      - id: claude.2_skills.tool_refs.builtin_only
+        type: judgement
+        component: tool_refs
+        critical: true
+        points: 1
+        check: |
+          builtin = LOOKUP["tool_names"]["claude-code"]
+          # [Read, Write, Edit, Bash, Grep, Glob, Task, Agent,
+          #  TodoWrite, Skill, WebSearch, WebFetch]
+          for skill in glob("skills/*/SKILL.md"):
+            tool_refs = extract_tool_references(skill)
+            for ref in tool_refs:
+              assert ref in builtin
+
+  3_context:
+    conditions:
+      - id: claude.3_context.claude_md.exists
+        type: checkable
+        component: claude_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("CLAUDE.md")
+        template: context-files/CLAUDE.md.tmpl
+
+      - id: claude.3_context.claude_md.skill_coverage
+        type: judgement
+        component: claude_md
+        critical: false
+        points: 1
+        check: |
+          skills = glob("skills/*/SKILL.md")
+          content = read("CLAUDE.md")
+          for skill in skills:
+            assert skill_name_referenced(content, skill)
+          # CLAUDE.md should list or reference every skill
+        template: context-files/CLAUDE.md.tmpl?merge
+
+      - id: claude.3_context.claude_md.accurate
+        type: judgement
+        component: claude_md
+        critical: false
+        points: 1
+        check: |
+          content = read("CLAUDE.md")
+          structure = scan_plugin_structure(".")
+          assert content_matches_structure(content, structure)
+          # CLAUDE.md describes the actual plugin layout accurately
+
+  4_hooks:
+    conditions:
+      - id: claude.4_hooks.hooks_json.exists
+        type: checkable
+        component: hooks_json
+        critical: true
+        points: 1
+        check: |
+          file_exists("hooks/hooks.json")
+        template: hooks/hooks.json.tmpl
+
+      - id: claude.4_hooks.event_names.pascal_case
+        type: checkable
+        component: event_names
+        critical: true
+        points: 1
+        check: |
+          hooks = read_json("hooks/hooks.json")
+          valid_events = LOOKUP["hook_events"]["claude-code"]
+          # [SessionStart, PreToolUse, PostToolUse, PostToolUseFailure,
+          #  SubagentStart, SubagentStop, PreCompact, Stop, UserPromptSubmit]
+          for event in hooks.keys():
+            assert event in valid_events
+
+      - id: claude.4_hooks.hooks_json.nested_structure
+        type: checkable
+        component: hooks_json
+        critical: false
+        points: 1
+        check: |
+          hooks = read_json("hooks/hooks.json")
+          # Structure: { "EventName": { "matcher": ..., "hooks": [...] } }
+          # or array of { "matcher": ..., "hooks": [...] }
+          for event, config in hooks.items():
+            if is_array(config):
+              for entry in config:
+                assert has_keys(entry, ["hooks"])
+            else:
+              assert has_key(config, "hooks")
+
+      - id: claude.4_hooks.scripts.cross_platform
+        type: checkable
+        component: scripts
+        critical: false
+        points: 1
+        check: |
+          bash_scripts = glob("hooks/scripts/*.sh") + glob("scripts/*.sh")
+          if len(bash_scripts) > 0:
+            assert file_exists("hooks/scripts/run-hook.cmd") \
+                or file_exists("scripts/run-hook.cmd")
+          # Windows polyglot wrapper should exist if bash scripts are present
+
+      - id: claude.4_hooks.scripts.no_hardcoded_paths
+        type: checkable
+        component: scripts
+        critical: true
+        points: 1
+        check: |
+          scripts = glob("hooks/scripts/*") + glob("scripts/*")
+          for script in scripts:
+            content = read(script)
+            assert no_bare_absolute_paths(content)
+            # Paths should use ${CLAUDE_PLUGIN_ROOT} or equivalent
+            # env variable branching, not hardcoded /home/... or C:\...
+
+  5_toolmap:
+    conditions:
+      - id: claude.5_toolmap.model_mapping.valid_names
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          valid_models = ["opus", "sonnet", "haiku"]
+          for agent in glob("agents/*.md"):
+            fm = parse_frontmatter(agent)
+            if "model" in fm:
+              assert fm["model"] in valid_models
+
+      - id: claude.5_toolmap.sidecar.not_needed
+        type: checkable
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          # Claude Code is the reference platform — no sidecar should
+          # remap Claude tools to anything else. Always passes for
+          # well-formed plugins; flag if a sidecar exists that rewrites
+          # Claude-native tool names.
+          sidecars = glob("**/tool-sidecar.*") + glob("**/toolmap.*")
+          if len(sidecars) > 0:
+            for s in sidecars:
+              content = read(s)
+              assert not remaps_claude_tools(content)
+
+  6_install:
+    conditions:
+      - id: claude.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_first(["README.md", "INSTALL.md", "docs/install.md"])
+          assert readme is not None
+          content = read(readme)
+          assert contains_section(content, "install")
+
+      - id: claude.6_install.install_docs.marketplace_path
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          readme = find_first(["README.md", "INSTALL.md", "docs/install.md"])
+          content = read(readme)
+          assert mentions(content, "/plugin install")
+          # Should document marketplace install path
+
+      - id: claude.6_install.install_docs.local_path
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          readme = find_first(["README.md", "INSTALL.md", "docs/install.md"])
+          content = read(readme)
+          assert mentions(content, "claude --plugin-dir") \
+              or mentions(content, "--plugin-dir")
+          # Should document local development install path
+
+      - id: claude.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          readme = find_first(["README.md", "INSTALL.md", "docs/install.md"])
+          content = read(readme)
+          assert contains_verification_guidance(content)
+          # Should include steps to verify the plugin loaded correctly
+
+  7_runtime:
+    conditions:
+      - id: claude.7_runtime.mcp.exists
+        type: checkable
+        component: mcp
+        critical: false
+        points: 1
+        check: |
+          # Only required if plugin uses MCP servers
+          if uses_mcp_servers("."):
+            assert file_exists(".mcp.json")
+
+      - id: claude.7_runtime.agents.exists
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          # Only required if plugin defines agents
+          if has_agent_definitions("."):
+            agents = glob("agents/*.md")
+            assert len(agents) > 0
+
+      - id: claude.7_runtime.agents.frontmatter
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          for agent in glob("agents/*.md"):
+            fm = parse_frontmatter(agent)
+            assert has_keys(fm, ["name", "description"])
+
+      - id: claude.7_runtime.commands.no_legacy
+        type: checkable
+        component: commands
+        critical: false
+        points: 1
+        check: |
+          assert not dir_exists("commands/")
+          # commands/ is a deprecated format; skills/ should be used instead

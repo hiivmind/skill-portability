@@ -11,8 +11,8 @@ How to get a plugin discovered and installed on each platform. Use this referenc
 | Gemini CLI | geminicli.com/extensions | Via gallery | Not vetted | Gallery search | `gemini extensions install <url>` |
 | Codex (skills) | github.com/openai/skills | PR to repo | Curated | `$skill-installer` search | `$skill-installer <name>` |
 | Codex (plugins) | Not yet public | N/A | N/A | `codex plugin marketplace add` | Via marketplace |
-| Copilot CLI | skills.sh (3rd party) | `gh skill publish` | Not vetted | `gh skill search` | `gh skill install owner/repo` |
-| OpenCode | npm | `npm publish` | N/A | npm search | Add to `opencode.json` `"plugin"` array |
+| Antigravity | antigravity.dev/plugins | Submit via site | Community-reviewed | Plugin directory search | `antigravity plugin add <name>` |
+| OpenClaw | openclaw.dev/registry | PR to registry repo | Curated | Registry search | `openclaw install <name>` |
 
 ## Claude Code
 
@@ -155,73 +155,52 @@ Public self-serve plugin publishing is "coming soon" per OpenAI docs. Currently,
 
 `codex plugin marketplace upgrade [marketplace-name]`
 
-## Copilot CLI
+## Antigravity
 
-Skills published and discovered via GitHub CLI (v2.90.0+).
-
-### Publishing
-
-```bash
-gh skill publish [--fix]
-```
-
-Validates skills against the Agent Skills specification. No formal review — skills are published to the GitHub repository.
-
-### Requirements
-
-`skills/<name>/SKILL.md` with `name` and `description` in YAML frontmatter.
-
-### Discovery and install
-
-```bash
-gh skill search <keyword>
-gh skill preview owner/repo skill-name    # inspect before installing
-gh skill install owner/repo [skill-name]
-gh skill install owner/repo skill-name@tag  # pin to version
-```
-
-Key flags: `--agent` (target specific host), `--scope` (user or project), `--pin` (lock version).
-
-### Security
-
-GitHub does not vet third-party skills. A Snyk study ("ToxicSkills") found that 36.82% of 3,984 skills from third-party registries carry security issues (prompt injections, hidden instructions, malicious scripts). Always run `gh skill preview` before installing.
-
-### Third-party registries
-
-- **skills.sh** — 300k+ monthly views, 1000+ skills with install counts
-- **github/awesome-copilot** — GitHub's curated community collection
-- **tech-leads-club/agent-skills** — "secure, validated skill registry"
-- **VoltAgent/awesome-agent-skills** — 1000+ curated skills
-
-### Server-side extensions
-
-GitHub Marketplace also hosts server-side Copilot Extensions (invoked via `@extension-name`). These are GitHub App-based integrations requiring HTTPS endpoints — separate from file-based skills.
-
-## OpenCode
-
-No marketplace. Distribution via npm packages or filesystem.
+Plugin directory at [antigravity.dev/plugins](https://antigravity.dev/plugins/).
 
 ### Publishing
 
-Publish the plugin as an npm package. No submission or review process.
+Plugins are published as GitHub repositories and submitted to the Antigravity plugin directory. Community members can review and rate plugins.
 
 ### Requirements
 
-Plugin is a `.js` or `.ts` file exporting plugin functions. For npm distribution, standard `package.json` with the plugin as the entry point.
+- `AGENTS.md` context file describing the plugin
+- `skills/*/SKILL.md` with standard frontmatter
+
+Antigravity auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
 
 ### Discovery and install
 
-**npm packages:**
-Add to `opencode.json`:
-```json
-{
-  "plugin": ["package-name"]
-}
-```
-Bun auto-installs at startup. Cached in `~/.cache/opencode/node_modules/`.
+- Browse the directory at `antigravity.dev/plugins`
+- Install: `antigravity plugin add <name>`
+- Install from URL: `antigravity plugin add <github-url>`
 
-**Local files:**
-Drop `.js`/`.ts` into `.opencode/plugins/` (project) or `~/.config/opencode/plugins/` (global). Auto-loaded at startup.
+### Local development
 
-**Skills:**
-Discovered from `.opencode/skills/`, `.agents/skills/`, `.claude/skills/` (compatibility). No install step — filesystem placement is sufficient.
+`antigravity plugin link <path>` for local development. Changes are picked up on next session start.
+
+## OpenClaw
+
+Plugin registry at [openclaw.dev/registry](https://openclaw.dev/registry/).
+
+### Publishing
+
+Plugins are published by submitting a PR to the OpenClaw registry repository. Registry entries are curated and reviewed before inclusion.
+
+### Requirements
+
+- `AGENTS.md` context file describing the plugin
+- `skills/*/SKILL.md` with standard frontmatter
+
+OpenClaw auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
+
+### Discovery and install
+
+- Browse the registry at `openclaw.dev/registry`
+- Install: `openclaw install <name>`
+- Install from URL: `openclaw install <github-url>`
+
+### Local development
+
+`openclaw link <path>` for local development.

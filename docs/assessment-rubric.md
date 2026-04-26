@@ -62,7 +62,6 @@ Look for:
 - `.codex-plugin/plugin.json`
 - `gemini-extension.json`
 - `package.json`
-- `.opencode/plugins/*.js`
 
 Record:
 

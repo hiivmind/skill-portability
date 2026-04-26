@@ -59,8 +59,6 @@ jobs:
           check_json .claude-plugin/marketplace.json
           check_json .cursor-plugin/plugin.json
           check_file GEMINI.md
-          check_file .opencode/plugins/skill-portability.js
-          check_file .github/copilot-instructions.md
           check_file AGENTS.md
 
           echo ""
@@ -86,7 +84,7 @@ jobs:
           echo ""
           echo "=== Per-Skill Sidecars ==="
           for skill_dir in skills/*/; do
-            for sidecar in codex-tools.md copilot-tools.md gemini-tools.md; do
+            for sidecar in codex-tools.md gemini-tools.md; do
               check_file "${skill_dir}references/${sidecar}"
             done
           done

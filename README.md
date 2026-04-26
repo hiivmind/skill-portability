@@ -1,5 +1,5 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)
 ![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)
 
 # Skill Portability
@@ -28,26 +28,23 @@ Starting from whatever platform manifests already exist, it detects plugin metad
 
 | Platform | Artifacts |
 | -------- | --------- |
-| **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `CLAUDE.md` |
+| **Claude Code** | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` |
 | **Cursor** | `.cursor-plugin/plugin.json` |
 | **Gemini CLI** | `gemini-extension.json`, `GEMINI.md` |
-| **Codex** | `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.codex/INSTALL.md`, `AGENTS.md` |
-| **OpenCode** | `package.json`, `.opencode/plugins/<name>.js` |
-| **Copilot CLI** | `AGENTS.md` |
-| **Per-skill tool mapping** | `references/{copilot,codex,gemini}-tools.md` |
-| **Hook portability** | `hooks-cursor.json` derived from `hooks.json` |
+| **Codex** | `.codex-plugin/plugin.json` |
+| **Antigravity** | `package.json`, `.agents/skills/` |
+| **OpenClaw** | `openclaw.plugin.json` |
 
 ## Skills
 
-- **`assessing-plugin-portability`** — Report portability gaps without making changes
-- **`uplifting-a-plugin`** — Write all missing platform manifests for a target plugin
+- **`plugin-portability`** — Assess or uplift a plugin for multi-platform portability. Asks intent upfront (assess/uplift, platforms, uplift target), runs condition-driven scoring, and optionally generates missing artifacts.
 
 ## Ecosystem landscape
 
 Cross-platform portability has real structural limits — but the ecosystem is maturing fast.
 For consumers and single-skill authors, tools like `npx skills`, `gh skill`, and platform-native CLIs make distribution easy.
 The friction appears when delivering cross-platform plugins with shared resources (hooks, manifests, context files).
-The `uplifting-a-plugin` skill generates everything that *can* be generated.
+The `plugin-portability` skill generates everything that *can* be generated.
 For the full picture — what works, what doesn't, and what needs platform-level changes — see [`docs/ecosystem-landscape.md`](docs/ecosystem-landscape.md).
 
 ## Acknowledgements
@@ -85,12 +82,6 @@ Full details for all platforms in [INSTALL.md](INSTALL.md).
 gemini extensions install https://github.com/hiivmind/skill-portability
 ```
 
-**Copilot CLI:**
-
-```bash
-gh skill install hiivmind/skill-portability
-```
-
 **Codex:**
 
 ```bash
@@ -99,20 +90,25 @@ codex marketplace add hiivmind/skill-portability
 
 Then open `/plugins` in Codex and install `skill-portability`.
 
-**OpenCode** — clone and copy the plugin entrypoint:
+**Antigravity:**
 
 ```bash
-git clone https://github.com/hiivmind/skill-portability
-cp skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/
+antigravity --install-extension hiivmind/skill-portability
+```
+
+**OpenClaw:**
+
+```bash
+openclaw plugins install skill-portability
 ```
 
 ## Usage
 
-| Platform | Assess portability | Uplift a plugin |
-| -------- | ------------------ | --------------- |
-| **Claude Code** | `Assess the portability of /path/to/plugin` | `Use the uplifting-a-plugin skill on /path/to/plugin` |
-| **Cursor** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
-| **Copilot CLI** | `/assessing-plugin-portability` | `/uplifting-a-plugin` |
-| **Codex** | `$assessing-plugin-portability` | `$uplifting-a-plugin` |
-| **Gemini CLI** | Mention skill by name — auto-activated | Same |
-| **OpenCode** | Mention skill by name — auto-activated | Same |
+| Platform | Invocation |
+| -------- | ---------- |
+| **Claude Code** | `Use the plugin-portability skill on /path/to/plugin` |
+| **Cursor** | `Skill: plugin-portability` |
+| **Gemini CLI** | `activate_skill: plugin-portability` |
+| **Codex** | `$plugin-portability` |
+| **Antigravity** | Auto-discovered |
+| **OpenClaw** | Auto-discovered |

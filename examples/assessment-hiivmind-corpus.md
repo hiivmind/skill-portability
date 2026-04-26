@@ -1,6 +1,6 @@
 # Example: Assessing hiivmind-corpus
 
-This is sample output from running the `assessing-plugin-portability` skill against
+This is sample output from running the `plugin-portability` skill against
 [hiivmind-corpus](https://github.com/hiivmind/hiivmind-corpus), a Claude Code plugin
 for documentation corpus management.
 
@@ -18,9 +18,9 @@ it as a candidate for full portable plugin uplift.
 │ claude-code │ 18/21 │ Strong  │ No action required (Native)           │
 │ cursor      │ 6/21  │ Partial │ Significant gaps — uplift recommended │
 │ gemini-cli  │ 6/21  │ Partial │ Significant gaps — uplift recommended │
-│ opencode    │ 3/21  │ Weak    │ Full uplift required                  │
-│ copilot-cli │ 6/21  │ Partial │ Significant gaps — uplift recommended │
 │ codex       │ 6/21  │ Partial │ Significant gaps — uplift recommended │
+│ antigravity │  N/A  │  —      │ Not yet assessed                      │
+│ openclaw    │  N/A  │  —      │ Not yet assessed                      │
 └─────────────┴───────┴─────────┴───────────────────────────────────────┘
 ```
 
@@ -127,16 +127,6 @@ or `GEMINI.md` context file.
 - `GEMINI.md`
 - `skills/*/references/gemini-tools.md`
 
-### opencode — Weak
-
-- `package.json`
-- `.opencode/plugins/hiivmind-corpus.js`
-
-### copilot-cli — Partial
-
-- `.github/copilot-instructions.md`
-- `skills/*/references/copilot-tools.md`
-
 ### codex — Partial
 
 - `.codex-plugin/plugin.json`
@@ -152,6 +142,6 @@ or `GEMINI.md` context file.
 
 ## Summary
 
-Run the `uplifting-a-plugin` skill to generate all missing artifacts automatically.
+Run the `plugin-portability` skill to generate all missing artifacts automatically.
 This will transform hiivmind-corpus from a Claude-first plugin into a fully portable
 multi-platform plugin with native manifests, tool mappings, and unified documentation.

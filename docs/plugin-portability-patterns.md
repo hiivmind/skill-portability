@@ -29,7 +29,7 @@ Typical signals:
 
 - `skills/<name>/SKILL.md`
 - optional `references/` beside skills
-- no `.claude-plugin/`, `.cursor-plugin/`, `.codex-plugin/`, `gemini-extension.json`, or OpenCode plugin files
+- no `.claude-plugin/`, `.cursor-plugin/`, `.codex-plugin/`, or `gemini-extension.json` files
 
 This is the easiest shape to uplift. The repo already contains the core behavior, but it lacks distribution and platform metadata.
 
@@ -170,7 +170,6 @@ Check for these categories.
 - `.codex-plugin/plugin.json`
 - `gemini-extension.json`
 - `package.json`
-- `.opencode/plugins/*.js`
 
 #### Context and instruction files
 
@@ -267,15 +266,11 @@ A practical uplift target looks like this:
     plugin.json
   .codex/
     INSTALL.md
-  .opencode/
-    plugins/
-      <name>.js
   skills/
     <skill-a>/
       SKILL.md
       references/
         codex-tools.md
-        copilot-tools.md
         gemini-tools.md
   rules/                       # Cursor .mdc rules (optional)
   agents/                      # Cursor/Codex agent definitions (optional)
@@ -319,7 +314,6 @@ Typical uplift outputs:
 - Cursor: `.cursor-plugin/plugin.json`
 - Codex: `.codex-plugin/plugin.json` if packaging as a native Codex plugin
 - Gemini: `gemini-extension.json`
-- OpenCode: `package.json` and `.opencode/plugins/<name>.js`
 
 #### 3. Add platform context files
 
@@ -335,7 +329,6 @@ These files explain or inject the plugin behavior at session start or load time:
 Where skills speak in one platform’s tool vocabulary, add sidecars such as:
 
 - `references/codex-tools.md`
-- `references/copilot-tools.md`
 - `references/gemini-tools.md`
 
 This is essential for portable skills that refer to tools like `Skill`, `Task`, `Read`, `Edit`, or hook mechanisms.
@@ -497,15 +490,6 @@ The uplifted repo should provide:
 - `GEMINI.md`
 
 Install instructions should mention any required clone or extension install command and should verify that the context file is being loaded.
-
-### OpenCode install pattern
-
-The uplifted repo should provide:
-
-- `package.json`
-- `.opencode/plugins/<name>.js`
-
-Install instructions should clearly state whether OpenCode consumes the repo directly or expects package metadata plus a plugin entrypoint.
 
 ## Recommended documentation set for an uplifted plugin
 

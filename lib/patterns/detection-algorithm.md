@@ -1,6 +1,6 @@
 # Detection Algorithm
 
-Shared by `uplifting-a-plugin` and `assessing-plugin-portability`. Run once at start.
+Shared by `plugin-portability`. Run once at start (Phase 1).
 
 ---
 
@@ -129,7 +129,6 @@ FUNCTION BUILD_METADATA_MODEL(canonical, remaining):
 
   # Always derived — never read from any source
   model["marketplaceName"] = model["name"] + "-dev"
-  model["opencodeMain"]    = ".opencode/plugins/" + model["name"] + ".js"
 
   RETURN model
 ```
@@ -191,12 +190,8 @@ FUNCTION CLASSIFY_SHAPE(found_sources):
 
   has_skills = ANY source.path MATCHES "skills/*/SKILL.md"
   has_marketplace = ANY source.path MATCHES "*marketplace.json"
-  has_package_json = ANY source.path == "package.json"
-  has_opencode_shim = ANY source.path MATCHES ".opencode/plugins/*.js"
 
   manifest_count = len(platform_manifests)
-  IF has_package_json OR has_opencode_shim:
-    manifest_count += 1
 
   IF manifest_count == 0 AND has_skills:
     RETURN "bare-skill-repo"

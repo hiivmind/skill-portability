@@ -1,0 +1,306 @@
+platform: openclaw
+manifest_path: openclaw.plugin.json
+context_files: [AGENTS.md]
+hooks_path: null  # OpenClaw uses TypeScript plugin SDK, not file-based hooks
+
+categories:
+  1_manifest:
+    conditions:
+      - id: openclaw.1_manifest.openclaw_json.exists
+        type: checkable
+        component: openclaw_json
+        critical: true
+        points: 1
+        check: |
+          file_exists("openclaw.plugin.json")
+        template: manifests/openclaw/openclaw.plugin.json.tmpl
+
+      - id: openclaw.1_manifest.openclaw_json.required_fields
+        type: checkable
+        component: openclaw_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json("openclaw.plugin.json")
+          for field in LOOKUP["manifest_required_fields"]["openclaw"]:
+            assert field in json, f"Missing required field: {field}"
+          # Required: id, configSchema
+        template: manifests/openclaw/openclaw.plugin.json.tmpl?merge
+
+      - id: openclaw.1_manifest.openclaw_json.skills_array
+        type: checkable
+        component: openclaw_json
+        critical: false
+        points: 1
+        check: |
+          json = read_json("openclaw.plugin.json")
+          if glob("skills/*/SKILL.md"):
+            skills = json.get("skills", [])
+            assert len(skills) > 0, \
+              "skills[] array should be populated with skill directory paths"
+        template: manifests/openclaw/openclaw.plugin.json.tmpl?merge
+
+      - id: openclaw.1_manifest.package_json.openclaw_block
+        type: checkable
+        component: package_json
+        critical: false
+        points: 1
+        check: |
+          if file_exists("package.json"):
+            pkg = read_json("package.json")
+            oc = pkg.get("openclaw", {})
+            assert "extensions" in oc, \
+              "package.json openclaw block missing extensions field"
+            assert "compat" in oc, \
+              "package.json openclaw block missing compat field"
+
+  2_skills:
+    conditions:
+      - id: openclaw.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "name" in fm, f"{skill}: missing name"
+            assert "description" in fm, f"{skill}: missing description"
+
+      - id: openclaw.2_skills.frontmatter.no_claude_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["field_stripping"]["openclaw"]: strip both fields
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "disable-model-invocation" not in fm, \
+              f"{skill}: disable-model-invocation must be stripped for OpenClaw"
+            assert "allowed-tools" not in fm, \
+              f"{skill}: allowed-tools must be stripped for OpenClaw"
+
+      - id: openclaw.2_skills.discovery.standard_path
+        type: checkable
+        component: discovery
+        critical: true
+        points: 1
+        check: |
+          assert dir_exists("skills/") and glob("skills/*/SKILL.md"), \
+            "No skills in skills/*/SKILL.md"
+
+      - id: openclaw.2_skills.tool_refs.no_unresolved
+        type: judgement
+        component: tool_refs
+        critical: false
+        points: 1
+        check: |
+          For each SKILL.md, verify tool references are resolvable on OpenClaw.
+          OpenClaw uses (same) for most tools but has no Task/Agent tool — it uses
+          agents.list[] in runtime config instead (LOOKUP["tool_mapping"]["openclaw"]).
+          Also has no TodoWrite or Skill tool (mapped to N/A).
+          Flag any unresolvable tool references.
+
+  3_context:
+    conditions:
+      - id: openclaw.3_context.agents_md.exists
+        type: checkable
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("AGENTS.md")
+        template: context-files/AGENTS.md.tmpl
+
+      - id: openclaw.3_context.agents_md.skill_coverage
+        type: judgement
+        component: agents_md
+        critical: false
+        points: 1
+        check: |
+          Verify AGENTS.md lists all skills defined in skills/*/SKILL.md.
+          Each skill should be mentioned with its name and a brief description
+          so the agent can discover available capabilities.
+        template: context-files/AGENTS.md.tmpl?merge
+
+      - id: openclaw.3_context.agents_md.accurate
+        type: judgement
+        component: agents_md
+        critical: false
+        points: 1
+        check: |
+          Verify AGENTS.md content is up-to-date and accurately reflects the
+          plugin structure. Descriptions should match current functionality.
+          No stale references to removed or renamed skills.
+
+  4_hooks:
+    conditions:
+      - id: openclaw.4_hooks.hooks_json.sdk_guidance
+        type: judgement
+        component: hooks_json
+        critical: true
+        points: 1
+        check: |
+          Documentation or guidance exists for implementing hooks via the
+          OpenClaw TypeScript plugin SDK using api.registerHook(). OpenClaw
+          hooks are SDK-based, not file-based — there is no hooks config file
+          in the repo. The plugin should document how to register handlers
+          for supported events.
+
+      - id: openclaw.4_hooks.event_names.openclaw_names
+        type: judgement
+        component: event_names
+        critical: false
+        points: 1
+        check: |
+          If hook guidance exists, verify it uses correct OpenClaw snake_case
+          event names from LOOKUP["hook_events"]["openclaw"]:
+          before_tool_call, tool_result_persist, gateway:startup,
+          session:compact:before.
+          Not Claude's PascalCase or Cursor's camelCase variants.
+
+      - id: openclaw.4_hooks.hooks_json.typescript_wrapper
+        type: judgement
+        component: hooks_json
+        critical: false
+        points: 1
+        check: |
+          If the source plugin has file-based hooks (e.g. Claude Code hooks/
+          directory), verify guidance exists for wrapping them as TypeScript
+          handlers using api.registerHook(). OpenClaw does not support
+          file-based hook execution — all hooks must be SDK-registered.
+
+  5_toolmap:
+    conditions:
+      - id: openclaw.5_toolmap.model_mapping.no_claude_models
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["model_mapping"]["openclaw"]: opus→anthropic/claude-opus-4-6, etc.
+          claude_models = ["opus", "sonnet", "haiku"]
+          for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"].lower() not in claude_models, \
+                f"{md}: Claude model shortname '{fm['model']}' leaked — use provider/model format"
+
+      - id: openclaw.5_toolmap.model_mapping.provider_format
+        type: checkable
+        component: model_mapping
+        critical: false
+        points: 1
+        check: |
+          # OpenClaw uses provider/model format: anthropic/claude-opus-4-6, etc.
+          openclaw_models = [
+            "anthropic/claude-opus-4-6",
+            "anthropic/claude-sonnet-4-5",
+            "anthropic/claude-haiku-4-5"
+          ]
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert "/" in fm["model"], \
+                f"{md}: model '{fm['model']}' should use provider/model format (e.g. anthropic/claude-opus-4-6)"
+
+      - id: openclaw.5_toolmap.subagent_syntax.agents_list
+        type: judgement
+        component: subagent_syntax
+        critical: false
+        points: 1
+        check: |
+          If any skills reference Task or Agent tool usage, verify that the
+          OpenClaw equivalent (agents.list[] in runtime config) is documented.
+          OpenClaw manages agents via manifest configuration, not a tool —
+          LOOKUP["tool_mapping"]["openclaw"]["Task"] = "agents.list[]".
+
+  6_install:
+    conditions:
+      - id: openclaw.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_file(["README.md", "INSTALL.md"])
+          assert readme is not None, "No README.md or INSTALL.md found"
+          content = read(readme)
+          assert "install" in content.lower(), "Install section missing from documentation"
+
+      - id: openclaw.6_install.install_docs.clawhub
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should mention ClawHub installation via
+          `openclaw plugins install <name>` as the primary distribution path.
+
+      - id: openclaw.6_install.install_docs.npm
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should mention npm as an alternative publishing and
+          installation path for OpenClaw plugins.
+
+      - id: openclaw.6_install.install_docs.bundle_detection
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should note that OpenClaw auto-detects Claude, Codex,
+          and Cursor bundle layouts. If the plugin originated from one of these
+          platforms, mention that OpenClaw can discover it automatically.
+
+      - id: openclaw.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          Install documentation should include verification steps to confirm
+          the plugin loaded correctly after installation.
+
+  7_runtime:
+    conditions:
+      - id: openclaw.7_runtime.agents.in_manifest
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          # OpenClaw agents are listed in runtime config agents.list[], not in agents/*.md
+          if dir_exists("agents/") and glob("agents/*.md"):
+            json = read_json("openclaw.plugin.json")
+            agents_cfg = json.get("agents", {}).get("list", [])
+            assert len(agents_cfg) > 0, \
+              "agents/ directory exists but agents.list[] not configured in manifest"
+
+      - id: openclaw.7_runtime.agents.model_format
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          # Agent model references should use provider/model format
+          json = read_json("openclaw.plugin.json")
+          for agent in json.get("agents", {}).get("list", []):
+            model = agent.get("model", "")
+            if model:
+              assert "/" in model, \
+                f"Agent model '{model}' should use provider/model format"
+
+      - id: openclaw.7_runtime.subagents.documented
+        type: judgement
+        component: subagents
+        critical: false
+        points: 1
+        check: |
+          If the plugin defines multiple agents, verify that subagent
+          communication patterns are documented. OpenClaw uses agents.list[]
+          in runtime config — inter-agent delegation should be explained.

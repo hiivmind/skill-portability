@@ -21,7 +21,7 @@ This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). Please read
 2. Add a manifest template in `lib/templates/manifests/`
 3. Add install doc templates in `lib/templates/install-docs/`
 4. Add a platform detection pattern in `lib/patterns/platforms/`
-5. Update the uplift skill (`skills/uplifting-a-plugin/SKILL.md`) to handle the new platform
+5. Update the portability skill (`skills/plugin-portability/SKILL.md`) to handle the new platform
 6. Update the assessment rubric (`docs/assessment-rubric.md`) with scoring criteria
 
 ## Authoring Skills
@@ -37,7 +37,7 @@ allowed-tools: Read, Write, Edit
 ---
 ```
 
-See existing skills in `skills/` for examples. Each skill should also have a `references/` subdirectory containing platform-specific tool mappings (`codex-tools.md`, `copilot-tools.md`, `gemini-tools.md`).
+See existing skills in `skills/` for examples. Each skill should also have a `references/` subdirectory containing platform-specific tool mappings (`codex-tools.md`, `gemini-tools.md`, `antigravity-tools.md`, `openclaw-tools.md`).
 
 ## Pull Request Process
 
