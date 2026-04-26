@@ -20,11 +20,11 @@ Track every platform-specific claim in the plugin against researched facts in
 | Codex / WebFetch | `(N/A — use MCP)` | No direct equivalent (use MCP) | Fixed |
 | Codex / TodoWrite | `update_plan` | `update_plan` | Correct |
 | Codex / Task | `spawn_agent` | `spawn_agent` | Correct |
-| Codex / Skill | `(N/A)` | Native loading via `$skill-name` | Needs review |
-| Gemini / Task | `@agent-name` | `dispatch_agent` or `@agent-name` | Needs review |
-| Gemini / all others | Various | Verify against tool-names.ts source | Needs review |
-| OpenClaw / all | Various | Verify against research | Needs review |
-| Antigravity / all | Same as Claude | Verify against research | Needs review |
+| Codex / Skill | `(N/A)` | Native loading via `$skill-name` | Correct |
+| Gemini / Task | `@agent-name` | `@agent-name` or automatic routing | Correct |
+| Gemini / all others | Various | All 11 mappings verified against research | Correct |
+| OpenClaw / all | Various | All mappings verified against research | Correct |
+| Antigravity / all | Same as Claude | 6 of 13 tools confirmed (Read, Write, Edit, Bash, WebSearch, WebFetch); rest unverifiable from research | Correct (partial) |
 
 ### platform-mappings.md — Table 3: Hook Event Mapping
 
@@ -39,7 +39,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Codex / PermissionRequest | Listed | New event, no Claude equivalent | Fixed |
 | All Antigravity events | `N/A` | Confirmed no hooks | Correct |
 | Gemini / mapped events | 7 mapped | 7 events exist (BeforeModel, AfterModel, BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification) | Fixed |
-| Gemini / SubagentStart | `(N/A)` | Verify | Needs review |
+| Gemini / SubagentStart | `(N/A)` | No SubagentStart in Gemini's 11 hook events | Correct |
 | Table 3 notes | Updated | Reflects Codex hooks behind feature flag | Fixed |
 
 ### platform-mappings.md — Table 7: Hook Format Rules
@@ -58,8 +58,8 @@ Track every platform-specific claim in the plugin against researched facts in
 | Cell | Current value | Research says | Status |
 |------|--------------|---------------|--------|
 | Gemini / Agents Path | `agents/` | `agents/` (confirmed) | Correct |
-| Codex / Skills Path | `.agents/skills/` | Verify against research | Needs review |
-| All others | Various | Verify | Needs review |
+| Codex / Skills Path | `.agents/skills/` | `.agents/skills/` confirmed | Correct |
+| All others | Various | All paths verified against research | Correct |
 
 ### platform-mappings.md — Table 13: MCP Configuration
 
@@ -67,24 +67,24 @@ Track every platform-specific claim in the plugin against researched facts in
 |------|--------------|---------------|--------|
 | Codex | `.mcp.json` or `config.toml [mcp]` | Supported via `config.toml` and `.mcp.json` | Fixed |
 | Gemini | `gemini-extension.json` → `mcpServers` | Supported via extensions | Fixed |
-| Antigravity | "MCP not supported via config file" | Verify | Needs review |
+| Antigravity | "MCP not supported via config file" | UI-based, not file-based — claim correct | Correct |
 
 ### gemini-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | Subagent support | Full subagent support documented | Full subagent support (generalist, cli_help, codebase_investigator + custom agents) | Fixed |
-| Tool names | Listed mappings | Verify each against tool-names.ts | Needs review |
-| Additional tools | 5 listed | Research may show more | Needs review |
+| Tool names | Listed mappings | All 11 mappings verified against research | Correct |
+| Additional tools | 7 listed | All 7 tools verified against research | Correct |
 
 ### codex-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | Edit mapping | `apply_patch` | `apply_patch` | Fixed |
-| WebSearch | `WebSearch` | Verify | Needs review |
+| WebSearch | `WebSearch` | `WebSearch` (live or cached) | Correct |
 | WebFetch | No direct equivalent | "Not directly equivalent — use MCP" | Fixed |
-| spawn_agent details | Documented | Verify accuracy | Needs review |
+| spawn_agent details | Documented | Built-in roles, message framing verified | Correct |
 | Hooks section | Added | Documents hook availability and feature flag | Fixed |
 
 ### cursor-tools.md
@@ -92,24 +92,24 @@ Track every platform-specific claim in the plugin against researched facts in
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | All tool names | Same as Claude Code | Confirmed same | Correct |
-| Hook format | Documented | Verify against cursor.com/docs/hooks | Needs review |
+| Hook format | Documented | camelCase, flat structure, output key all verified | Correct |
 | Subagent support | Not documented | Has full subagent support with model/readonly/background config | Missing |
 
 ### antigravity-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| All tool names | Same as Claude Code | Verify against research | Needs review |
+| All tool names | Same as Claude Code | 6 of 13 confirmed (Read, Write, Edit, Bash, WebSearch, WebFetch); rest unverifiable | Correct (partial) |
 | No hooks | Documented | Confirmed no hooks | Correct |
-| Frontmatter stripping | model, tools, disable-model-invocation, allowed-tools | Verify completeness | Needs review |
+| Frontmatter stripping | model, tools, disable-model-invocation, allowed-tools | Missing `user-invocable` | Fixed |
 
 ### openclaw-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| No Task/Agent tool | Documented | Verify against research | Needs review |
-| No TodoWrite | Documented | Verify | Needs review |
-| Hook SDK details | Documented | Verify event names and API | Needs review |
+| No Task/Agent tool | Documented | Confirmed — agents via `agents.list[]` manifest config | Correct |
+| No TodoWrite | Documented | Confirmed — no equivalent | Correct |
+| Hook SDK details | Documented | Was listing 4 events; research shows 15 | Fixed |
 | Bundle auto-detection | Documented | Confirmed: loads .claude-plugin/, .codex-plugin/, .cursor-plugin/ | Correct |
 
 ---
@@ -289,10 +289,20 @@ These are tracked under GitHub issues #11 and #12, not this matrix.
 14. ~~**Table 13**: Gemini MCP claim~~ Fixed
 15. ~~**manifest-generation.md**: Gemini manifest fields incomplete~~ Fixed
 
-### Needs Systematic Verification
+### Fixed (Tier 1 — reference verification)
 
-16. All remaining tool name mappings (Table 2) against source code refs
-17. All manifest template schemas against researched schemas
-18. All install doc commands against researched install methods
-19. All rubric conditions against researched platform capabilities
-20. All context file templates against researched context file formats
+16. ~~**antigravity-tools.md**: Frontmatter stripping missing `user-invocable`~~ Fixed
+17. ~~**openclaw-tools.md**: Hook SDK listed only 4 events~~ Fixed — expanded to 15
+
+### Remaining after Tier 1
+
+- **cursor-tools.md**: Subagent support not documented (Missing — needs separate fix)
+- **Table 2 Antigravity**: 7 of 13 tool names unverifiable from current research
+
+### Needs Systematic Verification (Tier 2 & 3)
+
+18. All rubric conditions against researched platform capabilities (Tier 2)
+19. All pattern docs against researched platform details (Tier 2)
+20. All manifest template schemas against researched schemas (Tier 3)
+21. All install doc commands against researched install methods (Tier 3)
+22. All context file templates against researched context file formats (Tier 3)
