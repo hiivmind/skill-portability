@@ -68,11 +68,8 @@ INVENTORY_MANIFESTS(computed):
     { platform: "cursor",       path: ".cursor-plugin/plugin.json" },
     { platform: "gemini-cli",   path: "gemini-extension.json" },
     { platform: "gemini-cli",   path: "GEMINI.md" },
-    { platform: "opencode",     path: ".opencode/plugins/" + computed.metadata.name + ".js" },
     { platform: "codex",        path: ".codex-plugin/plugin.json" },
-    { platform: "codex",        path: ".agents/plugins/marketplace.json" },
-    { platform: "copilot-cli",  path: "package.json" },
-    { platform: "copilot-cli",  path: ".github/copilot-instructions.md" }
+    { platform: "codex",        path: ".agents/plugins/marketplace.json" }
   ]
 
   computed.manifest_results = []
@@ -89,7 +86,6 @@ INVENTORY_CONTEXT_FILES(computed):
     "CLAUDE.md",
     "AGENTS.md",
     "GEMINI.md",
-    ".github/copilot-instructions.md",
     ".codex/INSTALL.md"
   ]
 
@@ -215,7 +211,7 @@ See `lib/patterns/rubric-framework.md` for category definitions and scoring scal
 
 ```pseudocode
 SCORE(computed):
-  platforms = ["claude-code", "cursor", "gemini-cli", "opencode", "copilot-cli", "codex"]
+  platforms = ["claude-code", "cursor", "gemini-cli", "codex", "antigravity", "openclaw"]
 
   FOR platform IN platforms:
     rules = load_platform_rules(platform)  # from lib/patterns/platforms/
@@ -352,9 +348,9 @@ Metadata inferred from: {canonical.path}
 | claude-code | X/21  | {band}  | {action}                           |
 | cursor      | X/21  | {band}  | {action}                           |
 | gemini-cli  | X/21  | {band}  | {action}                           |
-| opencode    | X/21  | {band}  | {action}                           |
-| copilot-cli | X/21  | {band}  | {action}                           |
 | codex       | X/21  | {band}  | {action}                           |
+| antigravity | X/21  | {band}  | {action}                           |
+| openclaw    | X/21  | {band}  | {action}                           |
 
 ### Per-Platform Detail
 
@@ -430,9 +426,9 @@ computed              Report
 - **Platform Rules:** `lib/patterns/platforms/claude-code.md`
 - **Platform Rules:** `lib/patterns/platforms/cursor.md`
 - **Platform Rules:** `lib/patterns/platforms/gemini-cli.md`
-- **Platform Rules:** `lib/patterns/platforms/opencode.md`
-- **Platform Rules:** `lib/patterns/platforms/copilot-cli.md`
 - **Platform Rules:** `lib/patterns/platforms/codex.md`
+- **Platform Rules:** `lib/patterns/platforms/antigravity.md`
+- **Platform Rules:** `lib/patterns/platforms/openclaw.md`
 - **Injection Checks:** `lib/patterns/injection-checks.md`
 
 ---

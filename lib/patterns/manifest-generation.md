@@ -73,11 +73,8 @@ RENDER_WITH_BUILDER(template, metadata, computed):
 | gemini-extension | Plain | `lib/templates/manifests/gemini-extension.json.tmpl` |
 | gemini-context | Builder | `lib/templates/context-files/GEMINI.md.tmpl` |
 | agents-context | Builder | `lib/templates/context-files/AGENTS.md.tmpl` |
-| opencode-package | Plain | `lib/templates/manifests/package.json.tmpl` |
-| opencode-shim | Plain | `lib/templates/manifests/opencode-plugin.js.tmpl` |
 | codex-plugin | Plain | `lib/templates/manifests/codex-plugin/plugin.json.tmpl` |
 | codex-marketplace | Plain | `lib/templates/manifests/codex-plugin/marketplace.json.tmpl` |
-| copilot-instructions | Plain | `lib/templates/context-files/copilot-instructions.md.tmpl` |
 
 ---
 
@@ -156,24 +153,6 @@ Build the include blocks from the skills/agents/commands lists inventoried durin
 Build skill bullet list for `{{skillIncludes}}` and command bullet list for `{{commandIncludes}}` (omit the entire Commands section if no commands exist).
 
 > **Template:** `lib/templates/context-files/AGENTS.md.tmpl`
-
----
-
-## opencode-package
-
-**Target:** `package.json`
-
-> **Template:** `lib/templates/manifests/package.json.tmpl`
-
----
-
-## opencode-shim
-
-**Target:** `.opencode/plugins/<name>.js`
-
-Create `.opencode/plugins/` directory if needed. This is the minimal non-bootstrap version of the OpenCode plugin shim.
-
-> **Template:** `lib/templates/manifests/opencode-plugin.js.tmpl`
 
 ---
 

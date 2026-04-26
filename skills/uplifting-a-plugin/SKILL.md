@@ -2,7 +2,7 @@
 name: uplifting-a-plugin
 description: >
   Use when you need to add multi-platform portability to any plugin. Accepts any
-  starting state — Claude, Cursor, Gemini, OpenCode, Copilot, Codex, or bare
+  starting state — Claude Code, Cursor, Gemini CLI, Codex, Antigravity, OpenClaw, or bare
   SKILL.md files. Detects what exists, infers canonical metadata, generates every
   missing platform artifact, ports hooks, produces install documentation, and
   optionally configures session-start bootstrapping.
@@ -16,7 +16,7 @@ Transform any plugin into a fully portable plugin. No platform is assumed.
 **Inputs:**
 
 - `plugin_path` (string, required) — Path to the plugin root directory.
-- `platforms` (string, optional) — Comma-separated list of target platforms. If omitted, presents an interactive checklist. Valid: claude-code, cursor, gemini-cli, opencode, copilot-cli, codex, all.
+- `platforms` (string, optional) — Comma-separated list of target platforms. If omitted, presents an interactive checklist. Valid: claude-code, cursor, gemini-cli, codex, antigravity, openclaw, all.
 
 **Output:** Summary of created, skipped, and flagged files.
 
@@ -105,9 +105,6 @@ CHECK_CONFLICTS(computed):
     { path: "GEMINI.md",                                           platform: "gemini-cli"  },
     { path: "AGENTS.md",                                           platform: "cross"       },
     { path: "CLAUDE.md",                                           platform: "claude-code" },
-    { path: "package.json",                                        platform: "opencode"    },
-    { path: ".opencode/plugins/" + computed.metadata.name + ".js", platform: "opencode"    },
-    { path: ".github/copilot-instructions.md",                     platform: "copilot-cli" },
     { path: "hooks/hooks-cursor.json",                             platform: "cursor"      },
   ]
 
@@ -179,7 +176,7 @@ RECOMMEND_AND_CONFIRM(computed):
 
 ```pseudocode
 SELECT_PLATFORMS(computed):
-  all_platforms = ["claude-code", "cursor", "gemini-cli", "opencode", "copilot-cli", "codex"]
+  all_platforms = ["claude-code", "cursor", "gemini-cli", "codex", "antigravity", "openclaw"]
 
   # If platforms input was provided, use it directly
   IF inputs.platforms IS PROVIDED:
@@ -268,14 +265,11 @@ GENERATE_MANIFESTS(computed):
       condition: "is_multi_plugin_repo"                                                               },
     { target: "gemini-extension.json",           platform: "gemini-cli",  schema: "gemini-extension"      },
     { target: "GEMINI.md",                       platform: "gemini-cli",  schema: "gemini-context"        },
-    { target: "package.json",                    platform: "opencode",    schema: "opencode-package"      },
-    { target: ".opencode/plugins/{{name}}.js",   platform: "opencode",    schema: "opencode-shim"         },
     { target: ".codex-plugin/plugin.json",       platform: "codex",       schema: "codex-plugin",
       condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
     { target: ".agents/plugins/marketplace.json", platform: "codex",      schema: "codex-marketplace",
       condition: "computed.codex_rec == 'native-plugin-packaging'"                                        },
     { target: "AGENTS.md",                       platform: "cross",       schema: "agents-context"        },
-    { target: ".github/copilot-instructions.md", platform: "copilot-cli", schema: "copilot-instructions"  },
   ]
 
   FOR manifest IN manifests:
@@ -314,11 +308,11 @@ The `is_manifest()` predicate classifies schemas as packaging vs context:
 ```pseudocode
 MANIFEST_SCHEMAS = [
   "claude-plugin", "claude-marketplace", "cursor-plugin",
-  "gemini-extension", "opencode-package", "opencode-shim", "codex-plugin",
+  "gemini-extension", "codex-plugin",
   "codex-marketplace"
 ]
 CONTEXT_SCHEMAS = [
-  "claude-context", "gemini-context", "agents-context", "copilot-instructions"
+  "claude-context", "gemini-context", "agents-context"
 ]
 
 FUNCTION is_manifest(schema):
@@ -332,7 +326,6 @@ Under `skill-first`, only context schemas are generated (plus sidecars). Under `
 ```pseudocode
 GENERATE_SIDECARS(computed):
   sidecar_platform_map = {
-    "copilot-tools.md": "copilot-cli",
     "codex-tools.md":   "codex",
     "gemini-tools.md":  "gemini-cli",
   }
@@ -385,29 +378,7 @@ PORT_CURSOR_HOOKS(computed):
   computed.created.append({ path: "hooks/hooks-cursor.json", platform: "cursor" })
 ```
 
-### 5.2 Claude Code → Copilot Hooks
-
-Copilot uses separate `bash` / `powershell` fields, no `matcher`, stored under `.github/hooks/`.
-
-```pseudocode
-PORT_COPILOT_HOOKS(computed):
-  IF "copilot-cli" NOT IN computed.target_platforms:
-    RETURN
-  IF NOT computed.existing_hooks:
-    RETURN
-  copilot_hooks = adapt_hooks_copilot(computed.existing_hooks)  # see hook-merging.md
-  FOR hook IN copilot_hooks:
-    target = ".github/hooks/" + hook.event + ".sh"
-    IF NOT file_exists(target):
-      Write(target, hook.bash)
-      computed.created.append({ path: target, platform: "copilot-cli" })
-    win_target = ".github/hooks/" + hook.event + ".ps1"
-    IF NOT file_exists(win_target):
-      Write(win_target, hook.powershell)
-      computed.created.append({ path: win_target, platform: "copilot-cli" })
-```
-
-### 5.3 Gemini Hook Guidance
+### 5.2 Gemini Hook Guidance
 
 Gemini CLI hooks are configured interactively by users via `GEMINI.md` instructions —
 they cannot be written as files. Capture guidance text to include in install docs.
@@ -495,10 +466,6 @@ WRITE_INSTALL_DOCS(computed, sections, platforms_with_artifacts):
   computed.created.append({ path: "INSTALL.md", platform: "cross" })
 
   # Platform-specific pointers (not full docs)
-  IF "copilot-cli" IN platforms_with_artifacts:
-    Write(".github/INSTALL.md", "See [INSTALL.md](../INSTALL.md) for installation instructions.\n")
-    computed.created.append({ path: ".github/INSTALL.md", platform: "copilot-cli" })
-
   IF "codex" IN platforms_with_artifacts:
     Write(".codex/INSTALL.md", "See [INSTALL.md](../INSTALL.md) for installation instructions.\n")
     computed.created.append({ path: ".codex/INSTALL.md", platform: "codex" })
@@ -563,8 +530,6 @@ BOOTSTRAP(computed):
     merge_session_start_hooks_cursor(computed)
 
   # Platform-specific enhancements
-  IF "opencode" IN computed.target_platforms:
-    enhance_opencode_plugin(computed)
   IF "gemini-cli" IN computed.target_platforms:
     update_gemini_md(computed)
 

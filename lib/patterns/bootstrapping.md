@@ -15,7 +15,7 @@ END
 
 ask: "Would you like to generate session-start bootstrapping hooks?
 This creates a `using-{{name}}` skill that gets force-injected at session
-start on Claude Code, Cursor, Copilot CLI, OpenCode, and Gemini CLI. (y/n)"
+start on Claude Code, Cursor, Gemini CLI, Antigravity, Codex, and OpenClaw. (y/n)"
 
 IF user declines THEN
   skip_bootstrapping = true
@@ -62,11 +62,9 @@ This plugin provides the following skills:
 
 **Claude Code / Cursor:** Use the `Skill` tool with the skill name.
 
-**Copilot CLI:** Use the `skill` tool with the skill name.
-
 **Gemini CLI:** Use the `activate_skill` tool with the skill name.
 
-**Codex / Other:** Skills are auto-discovered. Follow the SKILL.md instructions directly.
+**Antigravity / OpenClaw / Codex:** Skills are auto-discovered. Follow the SKILL.md instructions directly.
 
 ## Tool Name Mapping
 
@@ -134,10 +132,10 @@ session_context="<IMPORTANT>\nThis plugin uses the superpowers portability patte
 # Output context injection as JSON.
 # Cursor hooks expect additional_context (snake_case).
 # Claude Code hooks expect hookSpecificOutput.additionalContext (nested).
-# Copilot CLI and others expect additionalContext (top-level, SDK standard).
+# Other platforms expect additionalContext (top-level, SDK standard).
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
-elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
   printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
 else
   printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
@@ -261,58 +259,7 @@ New file structure:
 
 ---
 
-## Step 4.7: Enhance OpenCode Plugin (Step 23)
-
-```
-IF <plugin-path>/.opencode/plugins/{{name}}.js exists THEN
-  warn: "Bootstrapping will regenerate `.opencode/plugins/{{name}}.js`
-         with session-start injection. Existing content will be replaced.
-         Continue? (y/n)"
-  IF user declines THEN skip this step END
-END
-
-Write <plugin-path>/.opencode/plugins/{{name}}.js with the template below,
-substituting {{name}}, {{description}}.
-```
-
-### opencode-bootstrap Template
-
-```javascript
-// OpenCode plugin for {{name}} with session-start bootstrapping
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const pluginRoot = join(__dirname, '../..');
-const bootstrapContent = readFileSync(
-  join(pluginRoot, 'skills/using-{{name}}/SKILL.md'), 'utf8'
-);
-
-export default {
-  name: "{{name}}",
-  description: "{{description}}",
-  skills: "./skills/",
-  experimental: {
-    chat: {
-      messages: {
-        transform: (messages) => {
-          if (messages.length > 0 && messages[0].role === 'user') {
-            messages[0].content = bootstrapContent + '\n\n' + messages[0].content;
-          }
-          return messages;
-        }
-      }
-    }
-  }
-};
-```
-
-This replaces the minimal shim from the OpenCode plugin generation step with a version that injects the `using-{{name}}` skill at session start.
-
----
-
-## Step 4.8: Update GEMINI.md (Step 24)
+## Step 4.7: Update GEMINI.md (Step 23)
 
 ```
 IF GEMINI.md exists THEN
@@ -339,7 +286,7 @@ Where:
 
 ---
 
-## Step 4.9: Final Report Note (Step 25 contribution)
+## Step 4.8: Final Report Note (Step 24 contribution)
 
 Append to the final report's "Session-start bootstrapping" section:
 
@@ -358,7 +305,6 @@ ELSE
     - hooks/run-hook.cmd
     - hooks/hooks.json (SessionStart entry merged)
     - hooks/hooks-cursor.json (sessionStart entry merged)
-    - .opencode/plugins/{{name}}.js (message transform)
     - GEMINI.md (updated with using-{{name}} first)"
 END
 ```

@@ -15,8 +15,7 @@ Only runs when `skills/using-<name>/SKILL.md` exists.
 | 4 | `hooks/run-hook.cmd` | File exists and is executable | PRESENT / MISSING |
 | 5 | `hooks/hooks.json` | Contains `SessionStart` entry with command containing `session-start` | PRESENT / MISSING |
 | 6 | `hooks/hooks-cursor.json` | Contains `sessionStart` entry with command containing `session-start` | PRESENT / MISSING |
-| 7 | `.opencode/plugins/{{name}}.js` | Contains `experimental.chat.messages.transform` | PRESENT / MISSING / NO_TRANSFORM |
-| 8 | `GEMINI.md` | First `@./skills/` include is `using-{{name}}` | PRESENT / MISSING / NOT_FIRST |
+| 7 | `GEMINI.md` | First `@./skills/` include is `using-{{name}}` | PRESENT / MISSING / NOT_FIRST |
 
 ---
 
@@ -67,18 +66,7 @@ CHECK_INJECTION_COMPONENTS(computed):
   ELSE:
     results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "MISSING" })
 
-  # 7. OpenCode plugin with transform
-  oc_path = ".opencode/plugins/" + name + ".js"
-  IF file_exists(oc_path):
-    content = Read(oc_path)
-    IF "experimental" IN content AND "transform" IN content:
-      results.append({ component: oc_path + " (transform)", status: "PRESENT" })
-    ELSE:
-      results.append({ component: oc_path + " (transform)", status: "NO_TRANSFORM" })
-  ELSE:
-    results.append({ component: oc_path + " (transform)", status: "MISSING" })
-
-  # 8. GEMINI.md ordering
+  # 7. GEMINI.md ordering
   IF file_exists("GEMINI.md"):
     content = Read("GEMINI.md")
     first_skill_include = first_line_matching(content, /^@\.\/skills\//)

@@ -162,18 +162,18 @@ Both merge operations must preserve all other existing hooks. Only the session-s
 
 ---
 
-## Claude Code → Copilot Event Mapping
+## Claude Code → Copilot VS Code Event Mapping
 
-| Claude Code | Copilot CLI | Copilot VS Code |
-|-------------|-------------|-----------------|
-| `SessionStart` | `sessionStart` | `SessionStart` |
-| `PreToolUse` | `preToolUse` | `PreToolUse` |
-| `PostToolUse` | `postToolUse` | `PostToolUse` |
-| `SubagentStart` | N/A | `SubagentStart` |
-| `SubagentStop` | `subagentStop` | `SubagentStop` |
-| `Stop` | `agentStop` | `Stop` |
-| `PreCompact` | N/A | `PreCompact` |
-| `UserPromptSubmit` | `userPromptSubmitted` | `UserPromptSubmit` |
+| Claude Code | Copilot VS Code |
+|-------------|-----------------|
+| `SessionStart` | `SessionStart` |
+| `PreToolUse` | `PreToolUse` |
+| `PostToolUse` | `PostToolUse` |
+| `SubagentStart` | `SubagentStart` |
+| `SubagentStop` | `SubagentStop` |
+| `Stop` | `Stop` |
+| `PreCompact` | `PreCompact` |
+| `UserPromptSubmit` | `UserPromptSubmit` |
 
 ---
 
