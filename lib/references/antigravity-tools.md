@@ -29,6 +29,7 @@ All skill and agent frontmatter must have these fields **removed**:
 - `tools` — Antigravity does not support per-agent tool restrictions; strip entirely
 - `disable-model-invocation` — not supported; strip
 - `allowed-tools` — not supported; strip
+- `user-invocable` — Antigravity uses Workflows for slash-command invocation, not skills; strip
 
 ### Skill discovery paths
 

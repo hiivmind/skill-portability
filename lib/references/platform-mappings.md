@@ -101,10 +101,12 @@ Maps Claude Code model shortnames to platform equivalents.
 |---|---|---|---|---|---|
 | `disable-model-invocation` | strip | strip | strip | **keep** | strip |
 | `allowed-tools` | strip | strip | strip | strip | strip |
+| `user-invocable` | strip | strip | strip | strip | strip |
 
 **Rules**:
 - Cursor keeps `disable-model-invocation` (supported natively).
 - All platforms strip `allowed-tools` (Claude-specific).
+- All platforms strip `user-invocable` — Antigravity uses Workflows for slash-command invocation instead.
 
 ---
 
