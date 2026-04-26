@@ -51,10 +51,29 @@ All skill and agent frontmatter must have these fields **removed**:
 ### Hooks via TypeScript SDK
 
 OpenClaw hooks are **not file-based**. They use the TypeScript plugin SDK:
-- Register handlers via `api.registerHook(eventName, handler)`
-- Event names are **snake_case**: `before_tool_call`, `tool_result_persist`,
-  `gateway:startup`, `session:compact:before`
+- Register handlers via `api.registerHook(eventName, handler)` or `api.on(eventName, handler)`
 - Async handlers are supported
+- Can register to multiple events: `api.registerHook(["event_a", "event_b"], handler)`
+
+Event names are **snake_case**:
+
+| Event | Description | Notes |
+| ----- | ----------- | ----- |
+| `before_tool_call` | Before agent tool executes | `{ block: true }` stops lower-priority handlers |
+| `after_tool_call` | After tool execution | Observational |
+| `tool_result_persist` | When tool result is persisted | — |
+| `llm_input` | Before LLM call | Requires `allowConversationAccess` |
+| `llm_output` | After LLM produces output | Requires `allowConversationAccess` |
+| `message_received` | Inbound message | Typed `threadId` for routing |
+| `message_sent` | Outbound message | — |
+| `before_agent_finalize` | Before agent finalizes | Requires `allowConversationAccess` |
+| `agent_end` | Agent run ends | Requires `allowConversationAccess` |
+| `before_model_resolve` | Before model resolution | Model switching |
+| `before_compaction` | Before context compaction | — |
+| `after_compaction` | After context compaction | — |
+| `before_install` | Before plugin install | `{ block: true }` is terminal |
+| `command` | Slash command issued | — |
+| `gateway:startup` | Plugin startup | — |
 
 If the source plugin has file-based hooks (e.g. Claude Code `hooks/` directory),
 they must be wrapped as TypeScript handlers.
