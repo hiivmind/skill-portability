@@ -44,6 +44,18 @@ Use this path when the repo does not ship Codex plugin manifests, or when you in
 
 Codex uses `AGENTS.md` as its primary context file.
 
+### Hooks
+
+If this plugin includes hooks (`hooks/hooks.json`), enable the Codex hooks feature flag:
+
+```toml
+# ~/.codex/config.toml
+[features]
+codex_hooks = true
+```
+
+Without this flag, hooks are silently ignored. Codex uses the same `hooks/hooks.json` format as Claude Code — no separate hook file is needed.
+
 ### Multi-agent support
 
 If this plugin's skills use subagent dispatch, confirm multi-agent mode is enabled:
