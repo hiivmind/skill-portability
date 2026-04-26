@@ -6,20 +6,24 @@ Event name mapping and merge logic for porting hooks across platforms.
 
 ## Event Name Mapping
 
-| Claude Code event | Cursor event | Notes |
-|---|---|---|
-| `SessionStart` | `sessionStart` | |
-| `PreToolUse` | `preToolUse` | |
-| `PostToolUse` | `postToolUse` | |
-| `PostToolUseFailure` | `postToolUseFailure` | |
-| `SubagentStart` | `subagentStart` | |
-| `SubagentStop` | `subagentStop` | |
-| `PreCompact` | `preCompact` | |
-| `Stop` | `stop` | |
-| `UserPromptSubmit` | `beforeSubmitPrompt` | |
+| Claude Code event | Cursor event | Codex event | Notes |
+|---|---|---|---|
+| `SessionStart` | `sessionStart` | `SessionStart` | |
+| `PreToolUse` | `preToolUse` | `PreToolUse` | |
+| `PostToolUse` | `postToolUse` | `PostToolUse` | |
+| `PostToolUseFailure` | `postToolUseFailure` | (N/A) | |
+| `SubagentStart` | `subagentStart` | (N/A) | |
+| `SubagentStop` | `subagentStop` | (N/A) | |
+| `PreCompact` | `preCompact` | (N/A) | |
+| `Stop` | `stop` | `Stop` | |
+| `UserPromptSubmit` | `beforeSubmitPrompt` | `UserPromptSubmit` | |
+| (N/A) | (N/A) | `PermissionRequest` | Codex-only |
 
 Cursor-only events (no Claude Code equivalent):
 `sessionEnd`, `beforeShellExecution`, `afterShellExecution`, `beforeMCPExecution`, `afterMCPExecution`, `beforeReadFile`, `afterFileEdit`, `afterAgentResponse`, `afterAgentThought`
+
+Codex-only events (no Claude Code equivalent):
+`PermissionRequest`
 
 ---
 
@@ -69,6 +73,50 @@ If no hooks exist, write empty `hooks/hooks-cursor.json`:
   "hooks": {}
 }
 ```
+
+---
+
+## Generate Codex Hooks from Claude Hooks
+
+Codex uses the same JSON protocol, same PascalCase event names, and same nested
+structure as Claude Code. The hooks.json file is identical — no event remapping
+needed.
+
+```
+GENERATE_CODEX_HOOKS(plugin_path):
+  source = read_json(plugin_path / "hooks/hooks.json")
+
+  if source is missing or source.hooks is empty:
+    return  // No hooks to port — Codex can use the Claude hooks.json directly
+
+  // Claude Code hooks.json IS the Codex hooks.json — same format.
+  // Only difference: Codex requires a feature flag to enable hooks.
+  // The install docs handle that (see lib/templates/install-docs/codex.md).
+
+  // Check for unmapped events
+  codex_events = ["SessionStart", "PreToolUse", "PostToolUse",
+                   "UserPromptSubmit", "Stop", "PermissionRequest"]
+  flags = []
+
+  for event in source.hooks:
+    if event not in codex_events:
+      flags.append(event)
+
+  if flags:
+    report: "These Claude Code hook events have no Codex equivalent and will
+             be ignored: " + ", ".join(flags)
+
+  // Check for Claude-specific path variables
+  for event, entries in source.hooks:
+    for entry in entries:
+      if entry.command contains "$CLAUDE_PLUGIN_ROOT":
+        report: "Hook command references $CLAUDE_PLUGIN_ROOT — Codex has no
+                 plugin root variable. Use relative paths or self-location."
+```
+
+**Key difference from Cursor generation:** No file is created. Codex reads the
+same `hooks/hooks.json` as Claude Code. The only action is to verify
+compatibility and flag unmapped events.
 
 ---
 
@@ -173,7 +221,12 @@ Claude Code `hooks/hooks.json` and the session-start script cover their needs.
 
 ## Gemini Hook Guidance
 
-Gemini CLI hooks are configured in user `settings.json`, not in the repo. The uplift skill generates guidance text for install docs instead of writing a hooks file.
+Gemini CLI hooks can be configured in two places:
+1. **User `settings.json`** — for standalone use (user configures manually)
+2. **Extension manifest** — `hooks` field in `gemini-extension.json` (for extension distribution)
+
+For extension distribution, the uplift skill should add hooks to the manifest.
+For standalone use, it generates guidance text for install docs.
 
 ```pseudocode
 GENERATE_GEMINI_HOOK_GUIDANCE(claude_hooks):
