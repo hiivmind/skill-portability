@@ -158,16 +158,58 @@ SCORE(computed, platforms):
   computed.blockers = detect_blockers(computed)
 ```
 
-Auto-derives uplift strategy from scores:
+Auto-derives uplift strategy from shape AND scores (two-layer decision):
 
 ```pseudocode
   IF intent.mode == "uplift":
+    # Layer 1: Shape-based uplift target (what CLASS of artifacts to generate)
+    IF computed.shape == "bare-skill-repo" AND len(computed.skills) <= 3:
+      computed.uplift_target = "skill-first"
+    ELIF computed.shape == "curated-distribution":
+      computed.uplift_target = "curated-note-only"
+    ELSE:
+      computed.uplift_target = "full-portable-plugin"
+
+    CONFIRM uplift_target with user before proceeding
+
+    # Layer 2: Per-platform repair depth (WITHIN the chosen target)
     FOR platform IN platforms:
       IF computed.scores[platform].band IN ["strong", "viable"]:
         computed.recommendation_for[platform] = "incremental"
       ELSE:
         computed.recommendation_for[platform] = "full"
 ```
+
+**Shape-based target controls WHAT gets generated:**
+- `skill-first`: only sidecars, tool mapping, context files. No platform manifests.
+- `full-portable-plugin`: manifests, context, hooks, install docs — everything.
+- `curated-note-only`: documentation only, no generated artifacts.
+
+**Per-platform depth controls HOW MUCH within that target:**
+- `incremental`: only fix failing conditions (for viable+ platforms)
+- `full`: generate all missing artifacts for that platform
+
+### Condition-to-Artifact Index
+
+The `fixes:` annotations in templates are the source of truth for which
+conditions map to which artifacts. At scoring time, build a reverse index:
+
+```pseudocode
+  # Build condition → artifact mapping from template annotations
+  computed.artifact_index = {}
+  FOR template_file IN glob("lib/templates/**/*.tmpl", "lib/templates/**/*.md"):
+    content = read(template_file)
+    FOR line IN content:
+      IF line matches "{{! fixes: {condition_id} }}":
+        computed.artifact_index[condition_id] = template_file
+
+  # Also index fixes: from the uplift skill pseudocode itself
+  # (for generated artifacts not backed by templates, e.g., hook porting)
+```
+
+This index is used by:
+- Phase 4 (Report): to show which artifacts would be generated
+- Phase 5 (Generate): to find the template for each failing condition
 
 ### Phase 4: Report
 
@@ -204,27 +246,47 @@ REPORT(computed, intent):
     STOP
 ```
 
-### Phases 5-9: Uplift (unchanged logic, filtered by scores)
+### Phases 5-9: Uplift (filtered by shape target + per-platform depth)
 
-These phases are identical to the current uplift skill's Phases 4-8, with one
-change: instead of their own recommendation logic, they use the strategy
-derived in Phase 3.
+Generation is gated by TWO filters: the shape-based uplift target controls
+which categories of artifacts are in scope, and the per-platform depth
+controls whether to generate everything or only fix failing conditions.
 
 ```pseudocode
 # Phase 5: Generate
+IF computed.uplift_target == "curated-note-only":
+  SKIP Phases 5-8 entirely (only docs in Phase 7)
+
 FOR platform IN intent.platforms:
-  IF computed.recommendation_for[platform] == "incremental":
-    failing = computed.scores[platform].failing
-    FOR condition IN failing:
-      IF condition.template AND condition.target_path NOT IN computed.existing_files:
-        render(condition.template, computed.metadata)
+  failing = computed.scores[platform].failing
+  
+  FOR condition IN failing:
+    # Filter 1: Shape target
+    IF computed.uplift_target == "skill-first":
+      IF condition.category IN ["1_manifest", "4_hooks", "7_runtime"]:
+        SKIP  # skill-first doesn't generate manifests, hooks, or runtime adapters
+    
+    # Filter 2: Per-platform depth
+    IF computed.recommendation_for[platform] == "incremental":
+      # Only fix failing conditions
+      IF condition.id NOT IN computed.artifact_index:
+        SKIP  # No template to fix this condition
+      template = computed.artifact_index[condition.id]
+      target_path = resolve_target_path(template, platform)
+      IF target_path NOT IN computed.existing_files:
+        render(template, computed.metadata)
         # fixes: {condition.id}
-  ELSE:
-    execute_full_generation(platform, computed)
+    ELSE:
+      # Full generation — render all templates for this platform
+      execute_full_generation(platform, computed)
+      BREAK  # full generation covers all conditions for this platform
 
 # Phase 6: Port — see lib/patterns/hook-merging.md
+#   Skipped if uplift_target == "skill-first" (no hooks in scope)
 # Phase 7: Document — see lib/templates/install-docs/
+#   Always runs (all targets need install docs)
 # Phase 8: Bootstrap — see lib/patterns/bootstrapping.md
+#   Skipped if uplift_target == "curated-note-only"
 # Phase 9: Summary — files created, skipped, flagged
 ```
 
@@ -280,3 +342,18 @@ Phases 0, 4, 9 are inline (short, skill-specific interaction).
 4. Update `skills/using-skill-portability/SKILL.md`
 5. Remove old skill directories
 6. Validate: no remaining references to old skill names
+
+## Addendum: Codex Adversarial Review Response (2026-04-26)
+
+**[high] Incremental uplift has no condition-to-template mapping** — Fixed.
+Added explicit condition-to-artifact index step in Phase 3 that builds a
+reverse lookup from template `{{! fixes: }}` annotations. Phase 5 uses this
+index to find the template for each failing condition. Conditions with no
+mapped artifact are skipped with a note in the report.
+
+**[high] Score-only strategy removes shape-based safe modes** — Fixed.
+Restored two-layer decision: Layer 1 is shape-based uplift target
+(`skill-first`, `full-portable-plugin`, `curated-note-only`) confirmed with
+user. Layer 2 is per-platform repair depth (`incremental` vs `full`) derived
+from scores. Phase 5 generation is gated by both filters — shape target
+controls which categories are in scope, depth controls how much.
