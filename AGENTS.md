@@ -1,6 +1,6 @@
 # Skill Portability
 
-Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gemini, OpenCode, or bare SKILL.md repos as input. Emits every missing platform artifact.
+Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare SKILL.md repos as input. Emits every missing platform artifact.
 
 ## Project Context
 
@@ -10,8 +10,7 @@ Skill Portability is a Claude Code plugin that provides skills and commands for 
 
 This plugin provides the following skills. Read the SKILL.md files listed to understand how to invoke each skill:
 
-- skills/uplifting-a-plugin/SKILL.md
-- skills/assessing-plugin-portability/SKILL.md
+- skills/plugin-portability/SKILL.md
 
 ## Tool Name Mapping
 
@@ -26,4 +25,4 @@ Skills use Claude Code tool names. Platform equivalents:
 - `Skill` → your platform's skill-invoke tool
 - `Task` → your platform's subagent-dispatch tool (if supported)
 
-See `lib/references/` for platform-specific tool mapping tables (copilot-tools.md, codex-tools.md, gemini-tools.md).
+See `lib/references/` for platform-specific tool mapping tables (codex-tools.md, gemini-tools.md).

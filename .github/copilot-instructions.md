@@ -1,6 +1,6 @@
 # Skill Portability
 
-Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gemini, OpenCode, or bare SKILL.md repos as input. Emits every missing platform artifact.
+Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare SKILL.md repos as input. Emits every missing platform artifact.
 
 ## Skills
 
@@ -19,4 +19,4 @@ Skills use Claude Code tool names. Copilot CLI equivalents:
 - `Skill` → `skill`
 - `Task` / `Agent` → subagent dispatch
 
-See each skill's `references/copilot-tools.md` for detailed mapping.
+See `lib/references/` for platform-specific tool mapping tables.
