@@ -36,39 +36,124 @@ cleaner flow: assess always runs, then optionally uplift.
 ### Phase Structure
 
 ```
-Phase 0: Intent          — 2 upfront questions before any file scanning
-Phase 1: Detect          — shared detection algorithm
-Phase 2: Inventory       — unified inventory (new consolidated file)
-Phase 3: Score           — full condition-driven assessment (always runs)
-Phase 4: Report          — detailed assessment report (always emitted)
+Phase 0a: Intent         — Q1 (mode) + Q2 (platforms) before any file scanning
+Phase 1:  Detect         — shared detection algorithm
+Phase 2:  Inventory      — unified inventory (merges both skills' Phase 2)
+Phase 0b: Uplift Target  — Q3 (uplift target, shape-informed) — uplift mode only
+Phase 3:  Score          — full condition-driven assessment (always runs)
+Phase 4:  Report         — detailed assessment report (always emitted)
                           — IF mode == "assess": STOP
-Phase 5: Generate        — uplift only: manifests, context files, sidecars
-Phase 6: Port            — uplift only: hook adaptation
-Phase 7: Document        — uplift only: install docs
-Phase 8: Bootstrap       — uplift only: session-start injection
-Phase 9: Summary         — uplift only: files created/skipped/flagged
+Phase 5:  Generate       — uplift only: manifests, context files, sidecars
+Phase 6:  Port           — uplift only: hook adaptation
+Phase 7:  Document       — uplift only: install docs
+Phase 8:  Bootstrap      — uplift only: session-start injection
+Phase 9:  Summary        — uplift only: files created/skipped/flagged
 ```
 
-### Phase 0: Intent
+### Phase 0a: Intent (before file scanning)
 
-Two questions, asked before any file scanning:
+Two questions via structured UI. On Claude Code, use `AskUserQuestion` tool
+for structured multi-select. On other platforms, use the platform-equivalent
+structured input (Gemini CLI prompts, Cursor input, etc.). Fall back to text
+prompts only if structured input is unavailable.
 
 ```pseudocode
-INTENT():
-  mode = ASK "Assess only (diagnostic, read-only) or Uplift (generate missing artifacts)?"
-    OPTIONS: ["assess", "uplift"]
+INTENT_UPFRONT():
+  # Q1: Mode
+  mode = AskUserQuestion(
+    question: "Assess only (diagnostic, read-only) or Uplift (generate missing artifacts)?",
+    header: "Mode",
+    options: [
+      { label: "Assess", description: "Score portability across platforms. Read-only, no changes." },
+      { label: "Uplift", description: "Generate missing platform artifacts to close portability gaps." }
+    ],
+    multiSelect: false
+  )
 
-  platforms = ASK "Which platforms?"
-    OPTIONS: multi-select from [claude-code, cursor, gemini-cli, codex, antigravity, openclaw, all]
-    DEFAULT: all
+  # Q2: Platforms
+  platforms = AskUserQuestion(
+    question: "Which platforms to target?",
+    header: "Platforms",
+    options: [
+      { label: "All platforms", description: "Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw" },
+      { label: "Select platforms", description: "Choose specific platforms to assess or uplift" }
+    ],
+    multiSelect: false
+  )
+
+  IF platforms == "Select platforms":
+    platforms = AskUserQuestion(
+      question: "Select target platforms:",
+      header: "Platforms",
+      options: [
+        { label: "Claude Code",  description: "Reference platform" },
+        { label: "Cursor",       description: "VS Code fork with rules, hooks, MCP" },
+        { label: "Gemini CLI",   description: "Google CLI with @ includes and settings-based hooks" },
+        { label: "Codex",        description: "OpenAI CLI with TOML agents and spawn_agent" },
+        { label: "Antigravity",  description: "Google VS Code fork, OpenVSX, .agents/skills/" },
+        { label: "OpenClaw",     description: "TypeScript gateway with plugin SDK hooks" }
+      ],
+      multiSelect: true
+    )
+  ELSE:
+    platforms = ["claude-code", "cursor", "gemini-cli", "codex", "antigravity", "openclaw"]
 
   RETURN { mode, platforms }
 ```
 
-Everything else is auto-derived:
-- Incremental vs full: from band scores (viable+ → incremental, partial/weak → full)
-- Which artifacts to generate: from failing condition IDs
-- Codex path: from repo shape (skill-discovery vs native-plugin)
+### Phase 0b: Uplift Target (after detection, uplift mode only)
+
+Q3 runs AFTER Phase 1 (Detect) and Phase 2 (Inventory) because it needs
+shape classification to make a recommendation. Uses structured UI with the
+shape-derived recommendation marked as "(Recommended)".
+
+```pseudocode
+INTENT_UPLIFT_TARGET(computed):
+  IF intent.mode != "uplift":
+    RETURN  # assess mode skips this
+
+  # Derive recommendation from shape
+  IF computed.shape == "bare-skill-repo" AND len(computed.skills) <= 3:
+    recommended = "skill-first"
+    reason = "Bare skill repo with " + str(len(computed.skills)) + " skills"
+  ELIF computed.shape == "curated-distribution":
+    recommended = "curated-note-only"
+    reason = "Curated distribution (marketplace, no source skills)"
+  ELSE:
+    recommended = "full-portable-plugin"
+    reason = computed.shape + " with " + str(len(computed.skills)) + " skills"
+
+  # Q3: Confirm or override shape-derived recommendation
+  # Place recommended option first with "(Recommended)" suffix
+  options = [
+    { label: "Skill-first",          description: "Sidecars, tool mapping, context files only. No platform manifests." },
+    { label: "Full portable plugin", description: "Manifests, context, hooks, install docs — everything." },
+    { label: "Curated note only",    description: "Documentation only. No generated artifacts." }
+  ]
+
+  # Mark recommended option
+  FOR opt IN options:
+    IF opt.label.lower().startswith(recommended.replace("-", " ")):
+      opt.label = opt.label + " (Recommended)"
+      # Move to first position
+      options = [opt] + [o for o in options if o != opt]
+
+  uplift_target = AskUserQuestion(
+    question: "Repo detected as: " + reason + ". What level of uplift?",
+    header: "Uplift target",
+    options: options,
+    multiSelect: false
+  )
+
+  computed.uplift_target = uplift_target
+```
+
+### Auto-derived (no user questions needed)
+
+These are determined by the system from scores and shape:
+- **Incremental vs full per-platform:** from band scores (viable+ → incremental)
+- **Which specific artifacts to generate:** from failing condition IDs + rubric `template` field
+- **Codex path:** from repo shape (bare-skill-repo → skill-discovery, else → native-plugin)
 
 ### Phase 1: Detect
 
@@ -158,21 +243,12 @@ SCORE(computed, platforms):
   computed.blockers = detect_blockers(computed)
 ```
 
-Auto-derives uplift strategy from shape AND scores (two-layer decision):
+Auto-derives per-platform repair depth from scores:
 
 ```pseudocode
   IF intent.mode == "uplift":
-    # Layer 1: Shape-based uplift target (what CLASS of artifacts to generate)
-    IF computed.shape == "bare-skill-repo" AND len(computed.skills) <= 3:
-      computed.uplift_target = "skill-first"
-    ELIF computed.shape == "curated-distribution":
-      computed.uplift_target = "curated-note-only"
-    ELSE:
-      computed.uplift_target = "full-portable-plugin"
-
-    CONFIRM uplift_target with user before proceeding
-
-    # Layer 2: Per-platform repair depth (WITHIN the chosen target)
+    # Shape-based uplift target already set in Phase 0b (user confirmed)
+    # Now derive per-platform depth from scores
     FOR platform IN platforms:
       IF computed.scores[platform].band IN ["strong", "viable"]:
         computed.recommendation_for[platform] = "incremental"
@@ -180,14 +256,16 @@ Auto-derives uplift strategy from shape AND scores (two-layer decision):
         computed.recommendation_for[platform] = "full"
 ```
 
-**Shape-based target controls WHAT gets generated:**
-- `skill-first`: only sidecars, tool mapping, context files. No platform manifests.
-- `full-portable-plugin`: manifests, context, hooks, install docs — everything.
-- `curated-note-only`: documentation only, no generated artifacts.
-
-**Per-platform depth controls HOW MUCH within that target:**
-- `incremental`: only fix failing conditions (for viable+ platforms)
-- `full`: generate all missing artifacts for that platform
+**Two-layer uplift strategy:**
+- **Layer 1 (Phase 0b):** Shape-based uplift target — user-confirmed via
+  AskUserQuestion. Controls WHAT CLASS of artifacts are in scope.
+  - `skill-first`: sidecars, tool mapping, context files only. No manifests.
+  - `full-portable-plugin`: manifests, context, hooks, install docs — everything.
+  - `curated-note-only`: documentation only, no generated artifacts.
+- **Layer 2 (Phase 3):** Per-platform repair depth — auto-derived from scores.
+  Controls HOW MUCH within the chosen target.
+  - `incremental`: only fix failing conditions (for viable+ platforms)
+  - `full`: generate all missing artifacts for that platform
 
 ### Condition-to-Artifact Mapping
 
