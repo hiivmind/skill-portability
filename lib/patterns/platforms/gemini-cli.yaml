@@ -1,0 +1,360 @@
+platform: gemini-cli
+manifest_path: gemini-extension.json
+context_files: [GEMINI.md]
+hooks_path: null  # settings.json (user-configured, not file-based)
+
+categories:
+  1_manifest:
+    conditions:
+      - id: gemini.1_manifest.extension_json.exists
+        type: checkable
+        component: extension_json
+        critical: true
+        points: 1
+        check: |
+          file_exists("gemini-extension.json")
+
+      - id: gemini.1_manifest.extension_json.required_fields
+        type: checkable
+        component: extension_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json("gemini-extension.json")
+          for field in LOOKUP["manifest_required_fields"]["gemini"]:
+            assert field in json, f"Missing required field: {field}"
+          # Required: name, version, description, contextFileName
+
+      - id: gemini.1_manifest.extension_json.name_format
+        type: checkable
+        component: extension_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json("gemini-extension.json")
+          name = json.get("name", "")
+          assert re.match(r"^[a-z][a-z0-9-]*$", name), \
+            f"name '{name}' must be lowercase-dashes-only"
+          dir_name = basename(project_root())
+          assert name == dir_name, \
+            f"name '{name}' must match directory name '{dir_name}'"
+
+      - id: gemini.1_manifest.extension_json.context_filename
+        type: checkable
+        component: extension_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json("gemini-extension.json")
+          assert json.get("contextFileName") == "GEMINI.md", \
+            f"contextFileName must be 'GEMINI.md', got '{json.get('contextFileName')}'"
+
+      - id: gemini.1_manifest.extension_json.author
+        type: checkable
+        component: extension_json
+        critical: false
+        points: 1
+        check: |
+          json = read_json("gemini-extension.json")
+          assert json.get("author"), "author field not populated"
+          assert json.get("homepage"), "homepage field not populated"
+
+  2_skills:
+    conditions:
+      - id: gemini.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "name" in fm, f"{skill}: missing name"
+            assert "description" in fm, f"{skill}: missing description"
+
+      - id: gemini.2_skills.frontmatter.no_claude_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["field_stripping"]["gemini"]: strip both fields
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "disable-model-invocation" not in fm, \
+              f"{skill}: disable-model-invocation must be stripped for Gemini"
+            assert "allowed-tools" not in fm, \
+              f"{skill}: allowed-tools must be stripped for Gemini"
+
+      - id: gemini.2_skills.discovery.standard_path
+        type: checkable
+        component: discovery
+        critical: true
+        points: 1
+        check: |
+          assert dir_exists("skills/") and glob("skills/*/SKILL.md"), \
+            "No skills in skills/*/SKILL.md"
+
+      - id: gemini.2_skills.tool_refs.no_task_tool
+        type: judgement
+        component: tool_refs
+        critical: true
+        points: 1
+        check: |
+          For each SKILL.md, verify there are no references to Task or Agent
+          tools. Gemini does not have a Task tool — it uses @agent-name syntax
+          instead (LOOKUP["tool_mapping"]["gemini"]["Task"] = "@agent-name").
+          Flag any raw Task/Agent tool invocations.
+
+  3_context:
+    conditions:
+      - id: gemini.3_context.gemini_md.exists
+        type: checkable
+        component: gemini_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("GEMINI.md")
+
+      - id: gemini.3_context.gemini_md.at_includes_skills
+        type: checkable
+        component: gemini_md
+        critical: true
+        points: 1
+        check: |
+          content = read("GEMINI.md")
+          for skill_dir in glob_dirs("skills/*/"):
+            name = basename(skill_dir)
+            expected = f"@./skills/{name}/SKILL.md"
+            assert expected in content, \
+              f"GEMINI.md missing @ include for {expected}"
+
+      - id: gemini.3_context.gemini_md.at_includes_sidecars
+        type: checkable
+        component: gemini_md
+        critical: true
+        points: 1
+        check: |
+          content = read("GEMINI.md")
+          for skill_dir in glob_dirs("skills/*/"):
+            name = basename(skill_dir)
+            expected = f"@./skills/{name}/references/gemini-tools.md"
+            assert expected in content, \
+              f"GEMINI.md missing @ include for sidecar {expected}"
+
+      - id: gemini.3_context.gemini_md.accurate
+        type: judgement
+        component: gemini_md
+        critical: false
+        points: 1
+        check: |
+          Verify GEMINI.md content is up-to-date and complete.
+          All @ includes should reference existing files.
+          Description and usage guidance should match current functionality.
+
+  4_hooks:
+    conditions:
+      - id: gemini.4_hooks.hooks_json.guidance_present
+        type: judgement
+        component: hooks_json
+        critical: true
+        points: 1
+        check: |
+          Documentation or guidance exists for configuring hooks in the user's
+          settings.json. Gemini hooks are settings-based, not file-based — there
+          is no hooks config file in the repo. The plugin should document how to
+          set up BeforeTool/AfterTool hooks in settings.json.
+
+      - id: gemini.4_hooks.event_names.gemini_names
+        type: judgement
+        component: event_names
+        critical: false
+        points: 1
+        check: |
+          If hook guidance exists, verify it uses correct Gemini PascalCase event
+          names from LOOKUP["hook_events"]["gemini"]:
+          SessionStart, BeforeTool, AfterTool, PreCompress, AfterAgent.
+          Not Claude's PascalCase variants or Cursor's camelCase.
+
+  5_toolmap:
+    conditions:
+      - id: gemini.5_toolmap.sidecar.exists
+        type: checkable
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          for skill_dir in glob_dirs("skills/*/"):
+            name = basename(skill_dir)
+            assert file_exists(f"skills/{name}/references/gemini-tools.md"), \
+              f"skills/{name}/references/gemini-tools.md sidecar missing"
+
+      - id: gemini.5_toolmap.sidecar.read_mapping
+        type: checkable
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          # LOOKUP["tool_mapping"]["gemini"]["Read"] = "read_file"
+          for sidecar in glob("skills/*/references/gemini-tools.md"):
+            content = read(sidecar)
+            assert "read_file" in content, \
+              f"{sidecar}: missing Read → read_file mapping"
+
+      - id: gemini.5_toolmap.sidecar.edit_mapping
+        type: checkable
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          # LOOKUP["tool_mapping"]["gemini"]["Edit"] = "replace"
+          for sidecar in glob("skills/*/references/gemini-tools.md"):
+            content = read(sidecar)
+            assert "replace" in content, \
+              f"{sidecar}: missing Edit → replace mapping"
+
+      - id: gemini.5_toolmap.sidecar.bash_mapping
+        type: checkable
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          # LOOKUP["tool_mapping"]["gemini"]["Bash"] = "run_shell_command"
+          for sidecar in glob("skills/*/references/gemini-tools.md"):
+            content = read(sidecar)
+            assert "run_shell_command" in content, \
+              f"{sidecar}: missing Bash → run_shell_command mapping"
+
+      - id: gemini.5_toolmap.model_mapping.no_claude_models
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["model_mapping"]["gemini"]: opus→gemini-2.5-pro, etc.
+          claude_models = ["opus", "sonnet", "haiku"]
+          for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"].lower() not in claude_models, \
+                f"{md}: Claude model name '{fm['model']}' leaked — use Gemini equivalent"
+
+      - id: gemini.5_toolmap.model_mapping.gemini_names
+        type: checkable
+        component: model_mapping
+        critical: false
+        points: 1
+        check: |
+          gemini_models = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash-lite"]
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"] in gemini_models, \
+                f"{md}: model '{fm['model']}' not a known Gemini model (Table 1)"
+
+      - id: gemini.5_toolmap.subagent_syntax.at_agent
+        type: judgement
+        component: subagent_syntax
+        critical: true
+        points: 1
+        check: |
+          If any skills reference Task or Agent tool usage, verify that the
+          Gemini equivalent (@agent-name syntax) is documented. Gemini has no
+          Task tool — subagent delegation uses @agent-name in prompts.
+          Agent tools field should be ["*"] (wildcard).
+
+  6_install:
+    conditions:
+      - id: gemini.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_file(["README.md", "INSTALL.md"])
+          assert readme is not None, "No README.md or INSTALL.md found"
+          content = read(readme)
+          assert "install" in content.lower(), "Install section missing from documentation"
+
+      - id: gemini.6_install.install_docs.extensions_install
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should mention `gemini extensions install` from GitHub
+          (e.g. gemini extensions install owner/repo) and local filesystem
+          install path.
+
+      - id: gemini.6_install.install_docs.scope_tiers
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should explain the three scope tiers:
+          system, user, and project scope for extension installation.
+
+      - id: gemini.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          Install documentation should include verification steps and note
+          that a Gemini CLI restart may be required after installation.
+
+  7_runtime:
+    conditions:
+      - id: gemini.7_runtime.agents.exists
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          if dir_exists("agents/"):
+            assert glob("agents/*.md"), "agents/ directory exists but contains no .md files"
+
+      - id: gemini.7_runtime.agents.frontmatter
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            assert "description" in fm, \
+              f"{md}: missing mandatory description field in frontmatter"
+
+      - id: gemini.7_runtime.agents.tools_wildcard
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          # LOOKUP["agent_output_format"]["gemini"]: tools = ["*"]
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            if "tools" in fm:
+              assert fm["tools"] == ["*"], \
+                f"{md}: agent tools should be [\"*\"] (wildcard) for Gemini"
+
+      - id: gemini.7_runtime.commands.toml_format
+        type: checkable
+        component: commands
+        critical: false
+        points: 1
+        check: |
+          if dir_exists("commands/"):
+            assert glob("commands/*.toml"), \
+              "commands/ directory exists but no .toml files — Gemini uses TOML for commands"
+
+      - id: gemini.7_runtime.policies.toml_format
+        type: checkable
+        component: policies
+        critical: false
+        points: 1
+        check: |
+          if dir_exists("policies/"):
+            assert glob("policies/*.toml"), \
+              "policies/ directory exists but no .toml files — Gemini uses TOML for policies"
