@@ -14,6 +14,7 @@ categories:
         points: 1
         check: |
           file_exists(".claude-plugin/plugin.json")
+        template: manifests/claude-plugin/plugin.json.tmpl
 
       - id: claude.1_manifest.plugin_json.required_fields
         type: checkable
@@ -25,6 +26,7 @@ categories:
           for field in LOOKUP["manifest_required_fields"]["claude-code"]:
             assert field_present(json, field)
           # Required: name, version, description, author.name, author.email
+        template: manifests/claude-plugin/plugin.json.tmpl?merge
 
       - id: claude.1_manifest.plugin_json.keywords
         type: checkable
@@ -34,6 +36,7 @@ categories:
         check: |
           json = read_json(".claude-plugin/plugin.json")
           assert is_array(json["keywords"]) and len(json["keywords"]) > 0
+        template: manifests/claude-plugin/plugin.json.tmpl?merge
 
       - id: claude.1_manifest.marketplace_json.exists
         type: checkable
@@ -42,6 +45,7 @@ categories:
         points: 1
         check: |
           file_exists(".claude-plugin/marketplace.json")
+        template: manifests/claude-plugin/marketplace.json.tmpl
 
       - id: claude.1_manifest.marketplace_json.valid_entries
         type: checkable
@@ -52,6 +56,7 @@ categories:
           entries = read_json(".claude-plugin/marketplace.json")
           for entry in entries:
             assert has_keys(entry, ["name", "source", "description"])
+        template: manifests/claude-plugin/marketplace.json.tmpl?merge
 
       - id: claude.1_manifest.marketplace_json.source_paths
         type: checkable
@@ -62,6 +67,7 @@ categories:
           entries = read_json(".claude-plugin/marketplace.json")
           for entry in entries:
             assert dir_exists(entry["source"])
+        template: manifests/claude-plugin/marketplace.json.tmpl?merge
 
   2_skills:
     conditions:
@@ -121,6 +127,7 @@ categories:
         points: 1
         check: |
           file_exists("CLAUDE.md")
+        template: context-files/CLAUDE.md.tmpl
 
       - id: claude.3_context.claude_md.skill_coverage
         type: judgement
@@ -133,6 +140,7 @@ categories:
           for skill in skills:
             assert skill_name_referenced(content, skill)
           # CLAUDE.md should list or reference every skill
+        template: context-files/CLAUDE.md.tmpl?merge
 
       - id: claude.3_context.claude_md.accurate
         type: judgement
@@ -154,6 +162,7 @@ categories:
         points: 1
         check: |
           file_exists("hooks/hooks.json")
+        template: hooks/hooks.json.tmpl
 
       - id: claude.4_hooks.event_names.pascal_case
         type: checkable

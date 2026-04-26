@@ -13,6 +13,7 @@ categories:
         points: 1
         check: |
           file_exists("openclaw.plugin.json")
+        template: manifests/openclaw/openclaw.plugin.json.tmpl
 
       - id: openclaw.1_manifest.openclaw_json.required_fields
         type: checkable
@@ -24,6 +25,7 @@ categories:
           for field in LOOKUP["manifest_required_fields"]["openclaw"]:
             assert field in json, f"Missing required field: {field}"
           # Required: id, configSchema
+        template: manifests/openclaw/openclaw.plugin.json.tmpl?merge
 
       - id: openclaw.1_manifest.openclaw_json.skills_array
         type: checkable
@@ -36,6 +38,7 @@ categories:
             skills = json.get("skills", [])
             assert len(skills) > 0, \
               "skills[] array should be populated with skill directory paths"
+        template: manifests/openclaw/openclaw.plugin.json.tmpl?merge
 
       - id: openclaw.1_manifest.package_json.openclaw_block
         type: checkable
@@ -108,6 +111,7 @@ categories:
         points: 1
         check: |
           file_exists("AGENTS.md")
+        template: context-files/AGENTS.md.tmpl
 
       - id: openclaw.3_context.agents_md.skill_coverage
         type: judgement
@@ -118,6 +122,7 @@ categories:
           Verify AGENTS.md lists all skills defined in skills/*/SKILL.md.
           Each skill should be mentioned with its name and a brief description
           so the agent can discover available capabilities.
+        template: context-files/AGENTS.md.tmpl?merge
 
       - id: openclaw.3_context.agents_md.accurate
         type: judgement

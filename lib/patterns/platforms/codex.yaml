@@ -14,6 +14,7 @@ categories:
         check: |
           file_exists("AGENTS.md")
           # Required for both skill-discovery and native plugin paths
+        template: context-files/AGENTS.md.tmpl
 
       - id: codex.1_manifest.plugin_json.exists
         type: checkable
@@ -25,6 +26,7 @@ categories:
           if dir_exists(".codex-plugin/"):
             assert file_exists(".codex-plugin/plugin.json"), \
               ".codex-plugin/ dir exists but plugin.json missing"
+        template: manifests/codex-plugin/plugin.json.tmpl
 
       - id: codex.1_manifest.plugin_json.required_fields
         type: checkable
@@ -37,6 +39,7 @@ categories:
             for field in LOOKUP["manifest_required_fields"]["codex"]:
               assert field in json, f"Missing required field: {field}"
             # Required: name, version, description (Table 6)
+        template: manifests/codex-plugin/plugin.json.tmpl?merge
 
       - id: codex.1_manifest.marketplace_json.exists
         type: checkable
@@ -49,6 +52,7 @@ categories:
             if count(glob(".agents/skills/*/SKILL.md")) > 1:
               assert file_exists(".codex-plugin/marketplace.json"), \
                 "Multi-skill native plugin missing marketplace.json"
+        template: manifests/codex-plugin/marketplace.json.tmpl
 
       - id: codex.1_manifest.path_documented
         type: judgement
@@ -128,6 +132,7 @@ categories:
         check: |
           AGENTS.md should list all skills and agents with names and descriptions.
           Verify each skill in .agents/skills/*/SKILL.md is referenced in AGENTS.md.
+        template: context-files/AGENTS.md.tmpl?merge
 
       - id: codex.3_context.agents_md.dispatch_documented
         type: judgement

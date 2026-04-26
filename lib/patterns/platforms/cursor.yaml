@@ -14,6 +14,7 @@ categories:
         points: 1
         check: |
           file_exists(".cursor-plugin/plugin.json")
+        template: manifests/cursor-plugin/plugin.json.tmpl
 
       - id: cursor.1_manifest.plugin_json.required_fields
         type: checkable
@@ -25,6 +26,7 @@ categories:
           for field in LOOKUP["manifest_required_fields"]["cursor"]:
             assert field in json, f"Missing required field: {field}"
           # Required: name, displayName, description, version, author
+        template: manifests/cursor-plugin/plugin.json.tmpl?merge
 
       - id: cursor.1_manifest.plugin_json.conditional_keys
         type: checkable
@@ -39,6 +41,7 @@ categories:
             assert dir_exists("commands/"), "commands key present but commands/ dir missing"
           if "hooks" in json:
             assert file_exists("hooks/hooks-cursor.json"), "hooks key present but hooks file missing"
+        template: manifests/cursor-plugin/plugin.json.tmpl?merge
 
       - id: cursor.1_manifest.plugin_json.logo
         type: checkable
@@ -49,6 +52,7 @@ categories:
           json = read_json(".cursor-plugin/plugin.json")
           if "logo" in json:
             assert file_exists(json["logo"]), "logo field references non-existent file"
+        template: manifests/cursor-plugin/plugin.json.tmpl?merge
 
       - id: cursor.1_manifest.marketplace_json.exists
         type: checkable
@@ -59,6 +63,7 @@ categories:
           # Only required for multi-plugin repos
           if count(glob("skills/*/SKILL.md")) > 1 or dir_exists(".cursor-plugin/plugins/"):
             assert file_exists(".cursor-plugin/marketplace.json"), "Multi-plugin repo missing marketplace.json"
+        template: manifests/cursor-plugin/marketplace.json.tmpl
 
   2_skills:
     conditions:
@@ -114,6 +119,7 @@ categories:
         points: 1
         check: |
           file_exists("AGENTS.md")
+        template: context-files/AGENTS.md.tmpl
 
       - id: cursor.3_context.agents_md.skill_coverage
         type: judgement
@@ -123,6 +129,7 @@ categories:
         check: |
           AGENTS.md should list all skills with their name and description.
           Verify each skill in skills/*/SKILL.md is referenced in AGENTS.md.
+        template: context-files/AGENTS.md.tmpl?merge
 
       - id: cursor.3_context.rules_mdc.exists
         type: checkable
@@ -152,6 +159,7 @@ categories:
         points: 1
         check: |
           file_exists("hooks/hooks-cursor.json")
+        template: hooks/hooks-cursor.json.tmpl
 
       - id: cursor.4_hooks.event_names.camelcase
         type: checkable

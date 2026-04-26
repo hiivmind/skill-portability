@@ -14,6 +14,7 @@ categories:
         check: |
           file_exists("package.json")
           # Not required for skill-only distribution — just drop into .agents/skills/
+        template: manifests/antigravity/package.json.tmpl
 
       - id: antigravity.1_manifest.package_json.required_fields
         type: checkable
@@ -26,6 +27,7 @@ categories:
             for field in LOOKUP["manifest_required_fields"]["antigravity"]:
               assert field in json, f"Missing required field: {field}"
             # Required: name, displayName, version, description, publisher
+        template: manifests/antigravity/package.json.tmpl?merge
 
       - id: antigravity.1_manifest.package_json.publisher
         type: checkable
@@ -37,6 +39,7 @@ categories:
             json = read_json("package.json")
             assert json.get("publisher"), \
               "publisher field required for OpenVSX extension distribution"
+        template: manifests/antigravity/package.json.tmpl?merge
 
   2_skills:
     conditions:
@@ -119,6 +122,7 @@ categories:
         points: 1
         check: |
           file_exists("AGENTS.md")
+        template: context-files/AGENTS.md.tmpl
 
       - id: antigravity.3_context.agents_md.skill_coverage
         type: judgement
@@ -128,6 +132,7 @@ categories:
         check: |
           AGENTS.md should list or reference all skills provided by the plugin.
           Verify that every skill in .agents/skills/ is mentioned or documented.
+        template: context-files/AGENTS.md.tmpl?merge
 
       - id: antigravity.3_context.gemini_md.exists
         type: checkable
@@ -137,6 +142,7 @@ categories:
         check: |
           file_exists("GEMINI.md")
           # GEMINI.md has higher priority than AGENTS.md in Antigravity
+        template: context-files/GEMINI.md.tmpl
 
       - id: antigravity.3_context.rules.exist
         type: checkable
