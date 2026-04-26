@@ -1,0 +1,348 @@
+platform: cursor
+manifest_path: .cursor-plugin/plugin.json
+marketplace_path: .cursor-plugin/marketplace.json
+context_files: [AGENTS.md, ".cursor/rules/*.mdc"]
+hooks_path: hooks/hooks-cursor.json
+
+categories:
+  1_manifest:
+    conditions:
+      - id: cursor.1_manifest.plugin_json.exists
+        type: checkable
+        component: plugin_json
+        critical: true
+        points: 1
+        check: |
+          file_exists(".cursor-plugin/plugin.json")
+
+      - id: cursor.1_manifest.plugin_json.required_fields
+        type: checkable
+        component: plugin_json
+        critical: true
+        points: 1
+        check: |
+          json = read_json(".cursor-plugin/plugin.json")
+          for field in LOOKUP["manifest_required_fields"]["cursor"]:
+            assert field in json, f"Missing required field: {field}"
+          # Required: name, displayName, description, version, author
+
+      - id: cursor.1_manifest.plugin_json.conditional_keys
+        type: checkable
+        component: plugin_json
+        critical: false
+        points: 1
+        check: |
+          json = read_json(".cursor-plugin/plugin.json")
+          if "agents" in json:
+            assert dir_exists("agents/"), "agents key present but agents/ dir missing"
+          if "commands" in json:
+            assert dir_exists("commands/"), "commands key present but commands/ dir missing"
+          if "hooks" in json:
+            assert file_exists("hooks/hooks-cursor.json"), "hooks key present but hooks file missing"
+
+      - id: cursor.1_manifest.plugin_json.logo
+        type: checkable
+        component: plugin_json
+        critical: false
+        points: 1
+        check: |
+          json = read_json(".cursor-plugin/plugin.json")
+          if "logo" in json:
+            assert file_exists(json["logo"]), "logo field references non-existent file"
+
+      - id: cursor.1_manifest.marketplace_json.exists
+        type: checkable
+        component: marketplace_json
+        critical: false
+        points: 1
+        check: |
+          # Only required for multi-plugin repos
+          if count(glob("skills/*/SKILL.md")) > 1 or dir_exists(".cursor-plugin/plugins/"):
+            assert file_exists(".cursor-plugin/marketplace.json"), "Multi-plugin repo missing marketplace.json"
+
+  2_skills:
+    conditions:
+      - id: cursor.2_skills.frontmatter.required_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "name" in fm, f"{skill}: missing name"
+            assert "description" in fm, f"{skill}: missing description"
+
+      - id: cursor.2_skills.frontmatter.no_claude_fields
+        type: checkable
+        component: frontmatter
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["field_stripping"]["cursor"]: strip allowed-tools, keep disable-model-invocation
+          for skill in glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(skill)
+            assert "allowed-tools" not in fm, f"{skill}: allowed-tools must be stripped for Cursor"
+            # disable-model-invocation is OK — Cursor supports it natively
+
+      - id: cursor.2_skills.discovery.multi_path
+        type: checkable
+        component: discovery
+        critical: false
+        points: 1
+        check: |
+          assert dir_exists("skills/") and glob("skills/*/SKILL.md"), "No skills in skills/ directory"
+          # Bonus: compat paths like .cursor/skills/ or .agents/skills/ also discoverable
+
+      - id: cursor.2_skills.tool_refs.no_unresolved
+        type: judgement
+        component: tool_refs
+        critical: true
+        points: 1
+        check: |
+          For each SKILL.md, verify that tool references match Cursor built-ins
+          (Read, Write, Edit, Bash, Grep, Glob, Task, Agent, TodoWrite, Skill)
+          or have a sidecar MCP server providing the tool.
+          Flag any unresolved tool names that assume Claude-only tools.
+
+  3_context:
+    conditions:
+      - id: cursor.3_context.agents_md.exists
+        type: checkable
+        component: agents_md
+        critical: true
+        points: 1
+        check: |
+          file_exists("AGENTS.md")
+
+      - id: cursor.3_context.agents_md.skill_coverage
+        type: judgement
+        component: agents_md
+        critical: false
+        points: 1
+        check: |
+          AGENTS.md should list all skills with their name and description.
+          Verify each skill in skills/*/SKILL.md is referenced in AGENTS.md.
+
+      - id: cursor.3_context.rules_mdc.exists
+        type: checkable
+        component: rules_mdc
+        critical: false
+        points: 1
+        check: |
+          glob(".cursor/rules/*.mdc") is non-empty
+
+      - id: cursor.3_context.rules_mdc.frontmatter
+        type: checkable
+        component: rules_mdc
+        critical: false
+        points: 1
+        check: |
+          for mdc in glob(".cursor/rules/*.mdc"):
+            fm = parse_frontmatter(mdc)
+            assert "description" in fm, f"{mdc}: missing description in frontmatter"
+            assert fm.get("alwaysApply") == true, f"{mdc}: alwaysApply should be true"
+
+  4_hooks:
+    conditions:
+      - id: cursor.4_hooks.hooks_json.exists
+        type: checkable
+        component: hooks_json
+        critical: true
+        points: 1
+        check: |
+          file_exists("hooks/hooks-cursor.json")
+
+      - id: cursor.4_hooks.event_names.camelcase
+        type: checkable
+        component: event_names
+        critical: true
+        points: 1
+        check: |
+          hooks = read_json("hooks/hooks-cursor.json")
+          valid_events = LOOKUP["hook_events"]["cursor"]
+          # Valid: sessionStart, preToolUse, postToolUse, postToolUseFailure,
+          #        subagentStart, subagentStop, preCompact, stop, beforeSubmitPrompt
+          for entry in hooks:
+            assert entry["event"] in valid_events, f"Invalid event: {entry['event']} — must be camelCase"
+
+      - id: cursor.4_hooks.hooks_json.flat_structure
+        type: checkable
+        component: hooks_json
+        critical: true
+        points: 1
+        check: |
+          hooks = read_json("hooks/hooks-cursor.json")
+          for entry in hooks:
+            assert "hooks" not in entry, "Nested hooks[] array found — Cursor uses flat structure"
+            # Each entry should have event, matcher, command at top level
+
+      - id: cursor.4_hooks.scripts.no_claude_paths
+        type: checkable
+        component: scripts
+        critical: true
+        points: 1
+        check: |
+          for script in glob("hooks/scripts/*"):
+            content = read(script)
+            if "${CLAUDE_PLUGIN_ROOT}" in content:
+              assert "${CURSOR_PLUGIN_ROOT}" in content, \
+                f"{script}: bare ${{CLAUDE_PLUGIN_ROOT}} without ${{CURSOR_PLUGIN_ROOT}} branching"
+              # LOOKUP["path_variables"]["cursor"]: ${CURSOR_PLUGIN_ROOT}
+
+      - id: cursor.4_hooks.scripts.cross_platform
+        type: checkable
+        component: scripts
+        critical: false
+        points: 1
+        check: |
+          # Windows support: run-hook.cmd exists alongside shell scripts
+          if glob("hooks/scripts/*.sh"):
+            assert glob("hooks/scripts/*.cmd") or glob("hooks/scripts/*.ps1"), \
+              "No Windows hook scripts (run-hook.cmd) found"
+
+      - id: cursor.4_hooks.output_format.snake_case
+        type: checkable
+        component: output_format
+        critical: false
+        points: 1
+        check: |
+          # LOOKUP["hook_format_rules"]["cursor"]: output key is additional_context
+          for script in glob("hooks/scripts/*"):
+            content = read(script)
+            if "hookSpecificOutput" in content or "additionalContext" in content:
+              fail(f"{script}: use additional_context (snake_case) not hookSpecificOutput.additionalContext")
+
+  5_toolmap:
+    conditions:
+      - id: cursor.5_toolmap.model_mapping.no_claude_models
+        type: checkable
+        component: model_mapping
+        critical: true
+        points: 1
+        check: |
+          # LOOKUP["model_mapping"]["cursor"]: all models map to "inherit"
+          claude_models = ["opus", "sonnet", "haiku"]
+          for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"].lower() not in claude_models, \
+                f"{md}: Claude model name '{fm['model']}' leaked — use 'inherit'"
+
+      - id: cursor.5_toolmap.model_mapping.inherit
+        type: checkable
+        component: model_mapping
+        critical: false
+        points: 1
+        check: |
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"] == "inherit", \
+                f"{md}: model should be 'inherit' for Cursor (LOOKUP Table 1)"
+
+      - id: cursor.5_toolmap.subagent_syntax.documented
+        type: judgement
+        component: subagent_syntax
+        critical: false
+        points: 1
+        check: |
+          If any skills use Task or Agent tool invocations, verify that
+          Cursor-compatible invocation patterns are documented.
+          Cursor uses the same Task/Agent syntax as Claude Code (Table 2).
+
+  6_install:
+    conditions:
+      - id: cursor.6_install.install_docs.exists
+        type: checkable
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          readme = find_file(["README.md", "INSTALL.md"])
+          assert readme is not None, "No README.md or INSTALL.md found"
+          content = read(readme)
+          assert "install" in content.lower(), "Install section missing from documentation"
+
+      - id: cursor.6_install.install_docs.marketplace_path
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should mention Cursor marketplace install via
+          /add-plugin owner/repo command.
+
+      - id: cursor.6_install.install_docs.local_path
+        type: judgement
+        component: install_docs
+        critical: false
+        points: 1
+        check: |
+          Documentation should mention local install path:
+          ~/.cursor/plugins/local/<name>/
+          and note that Cursor restart is required.
+
+      - id: cursor.6_install.verification.steps
+        type: judgement
+        component: verification
+        critical: false
+        points: 1
+        check: |
+          Install documentation should include verification steps
+          to confirm the plugin is loaded and working after install.
+
+  7_runtime:
+    conditions:
+      - id: cursor.7_runtime.mcp.exists
+        type: checkable
+        component: mcp
+        critical: false
+        points: 1
+        check: |
+          # Cursor uses mcp.json (no dot prefix)
+          if file_exists(".mcp.json"):
+            assert file_exists("mcp.json"), \
+              ".mcp.json exists but mcp.json (no dot prefix) missing for Cursor"
+
+      - id: cursor.7_runtime.mcp.no_resources
+        type: checkable
+        component: mcp
+        critical: false
+        points: 1
+        check: |
+          if file_exists("mcp.json"):
+            config = read_json("mcp.json")
+            for server_name, server in config.get("mcpServers", {}).items():
+              assert "resources" not in server, \
+                f"MCP server '{server_name}': Cursor does not support MCP Resources"
+
+      - id: cursor.7_runtime.agents.exists
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          if dir_exists("agents/"):
+            assert glob("agents/*.md"), "agents/ directory exists but contains no .md files"
+
+      - id: cursor.7_runtime.agents.model_inherit
+        type: checkable
+        component: agents
+        critical: false
+        points: 1
+        check: |
+          for md in glob("agents/*.md"):
+            fm = parse_frontmatter(md)
+            if "model" in fm:
+              assert fm["model"] == "inherit", \
+                f"{md}: agent model should be 'inherit' for Cursor"
+
+      - id: cursor.7_runtime.commands.optional
+        type: checkable
+        component: commands
+        critical: false
+        points: 1
+        check: |
+          if dir_exists("commands/"):
+            assert glob("commands/*"), "commands/ directory exists but is empty"
