@@ -25,4 +25,9 @@ Skills use Claude Code tool names. Platform equivalents:
 - `Skill` → your platform's skill-invoke tool
 - `Task` → your platform's subagent-dispatch tool (if supported)
 
-See `lib/references/` for platform-specific tool mapping tables (codex-tools.md, gemini-tools.md).
+See `lib/references/` for platform-specific tool mapping tables:
+- `codex-tools.md` — Codex (spawn_agent, update_plan, message framing)
+- `gemini-tools.md` — Gemini CLI (read_file, replace, run_shell_command, etc.)
+- `cursor-tools.md` — Cursor (same names, different hooks/model/context)
+- `antigravity-tools.md` — Antigravity (same names, stripped frontmatter)
+- `openclaw-tools.md` — OpenClaw (agents.list[], no TodoWrite/Skill, SDK hooks)

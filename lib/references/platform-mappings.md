@@ -33,22 +33,26 @@ Maps Claude Code model shortnames to platform equivalents.
 
 | Claude Tool | Gemini | Codex | Cursor | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| Read | read_file | (same) | (same) | (same) | (same) |
-| Write | write_file | (same) | (same) | (same) | (same) |
-| Edit | replace | (same) | (same) | (same) | (same) |
-| Bash | run_shell_command | (same) | (same) | (same) | (same) |
-| Grep | grep_search | (same) | (same) | (same) | (same) |
-| Glob | list_files | (same) | (same) | (same) | (same) |
-| Task | @agent-name | spawn_agent | (same) | (same) | agents.list[] |
-| Agent | @agent-name | spawn_agent | (same) | (same) | agents.list[] |
-| TodoWrite | (N/A) | update_plan | (same) | (same) | (N/A) |
-| Skill | (N/A) | (N/A) | (same) | (same) | (N/A) |
+| Read | read_file | Read | Read | Read | Read |
+| Write | write_file | Write | Write | Write | Write |
+| Edit | replace | Edit | Edit | Edit | Edit |
+| Bash | run_shell_command | Bash | Bash | Bash | Bash |
+| Grep | grep_search | Grep | Grep | Grep | Grep |
+| Glob | glob | Glob | Glob | Glob | Glob |
+| Task | @agent-name | spawn_agent | Task | Task | agents.list[] |
+| Agent | @agent-name | spawn_agent | Agent | Agent | agents.list[] |
+| TodoWrite | write_todos | update_plan | TodoWrite | TodoWrite | (N/A) |
+| Skill | activate_skill | (N/A) | Skill | Skill | (N/A) |
+| WebSearch | google_web_search | WebSearch | WebSearch | WebSearch | WebSearch |
+| WebFetch | web_fetch | WebFetch | WebFetch | WebFetch | WebFetch |
+| AskUserQuestion | ask_user | AskUserQuestion | AskUserQuestion | AskUserQuestion | AskUserQuestion |
 
 **Rules**:
-- `(same)` means platform uses same tool name as Claude Code.
-- Gemini has no Task/Agent tool — uses `@agent-name` syntax in prompts.
+- Gemini renames most tools — see `lib/references/gemini-tools.md` for full details.
 - Codex replaces Task/Agent with `spawn_agent` and TodoWrite with `update_plan`.
+  Codex has no Skill tool — skills load natively.
 - OpenClaw manages agents via `agents.list[]` in runtime config, not a tool.
+  OpenClaw has no TodoWrite or Skill tool equivalents.
 
 ---
 
@@ -151,3 +155,60 @@ Maps Claude Code model shortnames to platform equivalents.
 | Codex | TOML (`.codex/agents/*.toml`) | Codex model name | stripped |
 | Antigravity | Combined `AGENTS.md` + `.agent/rules/*.md` | (removed) | (removed) |
 | OpenClaw | Listed in manifest `agents.list[]` | OpenClaw `provider/model` | stripped |
+
+---
+
+## Table 10: Context File Names
+
+| Platform | Primary Context File | Secondary Context Files |
+|---|---|---|
+| Claude Code | `CLAUDE.md` | — |
+| Cursor | `AGENTS.md` | `.cursor/rules/*.mdc` |
+| Gemini | `GEMINI.md` | — |
+| Codex | `AGENTS.md` | `.codex/INSTALL.md` |
+| Antigravity | `AGENTS.md` | `GEMINI.md` (higher priority), `.agent/rules/*.md` |
+| OpenClaw | `AGENTS.md` | — |
+
+**Notes**:
+- `AGENTS.md` is the universal fallback — every platform except Claude Code reads it.
+- Antigravity prioritises `GEMINI.md` over `AGENTS.md` when both exist.
+- Cursor `.mdc` rules use YAML frontmatter (`description`, `alwaysApply`).
+
+---
+
+## Table 11: Rules and Policies Format
+
+| Platform | Path | Format | Notes |
+|---|---|---|---|
+| Claude Code | — | — | No standalone rules format |
+| Cursor | `.cursor/rules/*.mdc` | Markdown + YAML front | `alwaysApply: true` for global rules |
+| Gemini | `policies/*.toml` | TOML | Optional policy constraints |
+| Codex | — | — | Instructions in `AGENTS.md` only |
+| Antigravity | `.agent/rules/*.md` | Markdown | Auto-discovered by runtime |
+| OpenClaw | — | — | Configured in `openclaw.plugin.json` |
+
+---
+
+## Table 12: Commands Format
+
+| Platform | Path | Format | Notes |
+|---|---|---|---|
+| Claude Code | `commands/` | Deprecated | Use skills instead |
+| Cursor | `commands/` | Optional | Auto-discovered from manifest |
+| Gemini | `commands/*.toml` | TOML | Named commands with descriptions |
+| Codex | — | — | No standalone commands format |
+| Antigravity | `.agents/workflows/` | Markdown | Slash-command workflows |
+| OpenClaw | — | — | Defined in manifest |
+
+---
+
+## Table 13: MCP Configuration
+
+| Platform | Config Path | Notes |
+|---|---|---|
+| Claude Code | `.mcp.json` | Dot-prefixed; supports resources and tools |
+| Cursor | `mcp.json` | No dot prefix; no MCP Resources support |
+| Gemini | — | MCP not supported via config file |
+| Codex | — | MCP not supported via config file |
+| Antigravity | — | MCP not supported via config file |
+| OpenClaw | `openclaw.plugin.json` → `mcp` block | Embedded in manifest |

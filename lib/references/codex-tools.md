@@ -4,14 +4,22 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 
 | Skill references | Codex equivalent |
 | ---------------- | ---------------- |
+| `Read` (file reading) | `Read` |
+| `Write` (file creation) | `Write` |
+| `Edit` (file editing) | `Edit` |
+| `Bash` (run commands) | `Bash` |
+| `Grep` (search file content) | `Grep` |
+| `Glob` (search files by name) | `Glob` |
 | `Task` tool (dispatch subagent) | `spawn_agent` (see [Named agent dispatch](#named-agent-dispatch)) |
+| `Agent` (dispatch subagent) | `spawn_agent` |
 | Multiple `Task` calls (parallel) | Multiple `spawn_agent` calls |
 | Task returns result | `wait` |
 | Task completes automatically | `close_agent` to free slot |
 | `TodoWrite` (task tracking) | `update_plan` |
 | `Skill` tool (invoke a skill) | Skills load natively — just follow the instructions |
-| `Read`, `Write`, `Edit` (files) | Use your native file tools |
-| `Bash` (run commands) | Use your native shell tools |
+| `WebSearch` (web search) | `WebSearch` |
+| `WebFetch` (fetch URL) | `WebFetch` |
+| `AskUserQuestion` (structured input) | `AskUserQuestion` |
 
 ## Subagent dispatch requires multi-agent support
 

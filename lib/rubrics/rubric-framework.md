@@ -184,7 +184,7 @@ a `# fixes:` annotation linking it to the condition IDs it resolves.
 ### Drift Detection
 
 ```pseudocode
-rubric_ids  = collect all condition IDs from lib/patterns/platforms/*.yaml
+rubric_ids  = collect all condition IDs from lib/rubrics/*.yaml
 uplift_ids  = collect all "fixes:" references from skills/plugin-portability/
 template_ids = collect all "fixes:" references from lib/templates/
 
