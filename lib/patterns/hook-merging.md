@@ -51,7 +51,12 @@ GENERATE_CURSOR_HOOKS(plugin_path):
 
     cursor_hooks[cursor_event] = []
     for entry in entries:
-      cursor_hooks[cursor_event].append({ "command": entry.command })
+      cursor_entry = { "command": entry.command }
+      if entry has matcher:
+        cursor_entry["matcher"] = entry.matcher
+      if entry has timeout:
+        cursor_entry["timeout"] = entry.timeout
+      cursor_hooks[cursor_event].append(cursor_entry)
       if entry.command contains "$CLAUDE_PLUGIN_ROOT":
         flags.append(entry.command)
 
