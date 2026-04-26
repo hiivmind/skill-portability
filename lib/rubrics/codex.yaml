@@ -1,7 +1,7 @@
 platform: codex
 manifest_path: .codex-plugin/plugin.json  # native path; skill-discovery uses AGENTS.md
 context_files: [AGENTS.md]
-hooks_path: null  # Codex has no hook system
+hooks_path: hooks.json  # Same JSON format as Claude Code; requires codex_hooks feature flag
 
 categories:
   1_manifest:
@@ -145,9 +145,57 @@ categories:
           patterns should be explained if the plugin uses subagents.
 
   4_hooks:
-    # N/A — Codex has no hook system (LOOKUP Table 3: all events map to N/A).
-    # Hook scripts are copied as standalone utilities only.
-    conditions: []
+    conditions:
+      - id: codex.4_hooks.hooks_json.exists
+        type: checkable
+        component: hooks_json
+        critical: false
+        points: 1
+        check: |
+          # Codex hooks are optional (behind feature flag) — not critical
+          if file_exists("hooks/hooks.json"):
+            json = read_json("hooks/hooks.json")
+            assert "hooks" in json, "hooks.json missing top-level 'hooks' key"
+
+      - id: codex.4_hooks.event_names.pascalcase
+        type: checkable
+        component: event_names
+        critical: true
+        points: 1
+        check: |
+          if file_exists("hooks/hooks.json"):
+            hooks = read_json("hooks/hooks.json")
+            valid_events = ["SessionStart", "PreToolUse", "PostToolUse",
+                            "PermissionRequest", "UserPromptSubmit", "Stop"]
+            for event in hooks.get("hooks", {}):
+              assert event in valid_events, \
+                f"Invalid Codex hook event: {event} — must be PascalCase (Table 3)"
+
+      - id: codex.4_hooks.feature_flag.documented
+        type: judgement
+        component: install_docs
+        critical: true
+        points: 1
+        check: |
+          If hooks/hooks.json exists, install documentation must include the
+          Codex hooks feature flag enablement:
+            [features]
+            codex_hooks = true
+          Without this flag, hooks silently do nothing.
+
+      - id: codex.4_hooks.scripts.no_claude_paths
+        type: checkable
+        component: scripts
+        critical: true
+        points: 1
+        check: |
+          for script in glob("hooks/scripts/*"):
+            content = read(script)
+            if "${CLAUDE_PLUGIN_ROOT}" in content:
+              # Codex has no plugin root variable — scripts must use
+              # relative paths or detect their own location
+              assert "dirname" in content or "BASH_SOURCE" in content, \
+                f"{script}: bare ${{CLAUDE_PLUGIN_ROOT}} without self-location fallback"
 
   5_toolmap:
     conditions:
