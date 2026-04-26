@@ -2,7 +2,7 @@
 
 The agent skills ecosystem is thriving — multiple platforms, growing registries, one-command installs. For consumers installing skills and for authors publishing standalone skills, the tooling works well. The friction appears when an author needs to deliver a cross-platform plugin with shared resources and patterns (hooks, context files, platform manifests, cross-skill references).
 
-This document maps both sides: what works today, and where cross-platform plugin delivery hits real limits. The `uplifting-a-plugin` skill generates the cross-platform artifacts where it can. For what cannot be fixed at the plugin layer, platform-level changes are needed.
+This document maps both sides: what works today, and where cross-platform plugin delivery hits real limits. The `plugin-portability` skill generates the cross-platform artifacts where it can. For what cannot be fixed at the plugin layer, platform-level changes are needed.
 
 ---
 
@@ -89,7 +89,7 @@ Each registry is platform-native. There is no cross-platform registry. A plugin 
 
 ### How skill-portability solves this
 
-The uplift skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each platform requires for installation — so for platforms that install directly from GitHub (Claude Code, Copilot CLI, Gemini CLI, Codex), the plugin is installable without additional setup by the author.
+The `plugin-portability` skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each platform requires for installation — so for platforms that install directly from GitHub (Claude Code, Copilot CLI, Gemini CLI, Codex), the plugin is installable without additional setup by the author.
 
 Discovery itself remains a manual step: authors must submit to each platform's registry separately.
 
@@ -267,7 +267,7 @@ The self-bootstrapping pattern at the core of cross-platform plugins is **six pa
 
 This parallel-adapters approach is not elegant. But it works on five of six platforms with a strong guarantee (forced session-start injection), and on the sixth (Codex) with a weaker one (passive discovery).
 
-The `uplifting-a-plugin` skill generates the manifests, hook configs, context files, tool-mapping sidecars, and install documentation that this pattern requires. The remaining unfixable gaps (Gemini subagents, Codex hook injection, the fundamental lack of a unified manifest standard) require platform-level changes.
+The `plugin-portability` skill generates the manifests, hook configs, context files, tool-mapping sidecars, and install documentation that this pattern requires. The remaining unfixable gaps (Gemini subagents, Codex hook injection, the fundamental lack of a unified manifest standard) require platform-level changes.
 
 ---
 
