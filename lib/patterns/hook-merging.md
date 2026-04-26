@@ -162,60 +162,9 @@ Both merge operations must preserve all other existing hooks. Only the session-s
 
 ---
 
-## Claude Code → Copilot VS Code Event Mapping
+## Antigravity / OpenClaw Hook Notes
 
-| Claude Code | Copilot VS Code |
-|-------------|-----------------|
-| `SessionStart` | `SessionStart` |
-| `PreToolUse` | `PreToolUse` |
-| `PostToolUse` | `PostToolUse` |
-| `SubagentStart` | `SubagentStart` |
-| `SubagentStop` | `SubagentStop` |
-| `Stop` | `Stop` |
-| `PreCompact` | `PreCompact` |
-| `UserPromptSubmit` | `UserPromptSubmit` |
-
----
-
-## Copilot Hook Format
-
-```pseudocode
-GENERATE_COPILOT_HOOKS(claude_hooks):
-  copilot_hooks = { "version": 1, "hooks": {} }
-
-  event_map = {
-    "SessionStart":    "sessionStart",
-    "PreToolUse":      "preToolUse",
-    "PostToolUse":     "postToolUse",
-    "SubagentStop":    "subagentStop",
-    "Stop":            "agentStop",
-    "UserPromptSubmit": "userPromptSubmitted",
-  }
-
-  FOR event, entries IN claude_hooks.hooks:
-    IF event NOT IN event_map:
-      SKIP
-    copilot_event = event_map[event]
-    copilot_hooks.hooks[copilot_event] = []
-
-    FOR entry IN entries:
-      copilot_entry = {
-        "type": "command",
-        "bash": entry.hooks[0].command,
-        "powershell": convert_to_powershell_path(entry.hooks[0].command),
-        "timeoutSec": min(entry.hooks[0].timeout / 1000, 30)
-      }
-      copilot_hooks.hooks[copilot_event].append(copilot_entry)
-
-  Write(".github/hooks/hooks.json", JSON.stringify(copilot_hooks, indent=2))
-```
-
-Key differences from Claude Code hooks:
-- Separate `bash` and `powershell` fields instead of `command`
-- No `matcher` — tool name filtering must be done in the script by inspecting `toolName` from stdin JSON
-- Default timeout is 30 seconds
-- Only `preToolUse` can deny/block actions; all other hooks are observational
-- Hooks stored in `.github/hooks/` not `hooks/`
+Antigravity and OpenClaw do not have a dedicated hooks file format. Both platforms auto-discover `hooks/session-start` and execute it at session start if present. No separate hook generation or merging step is needed for these platforms — the Claude Code `hooks/hooks.json` and the session-start script cover their needs.
 
 ---
 

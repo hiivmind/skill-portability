@@ -11,6 +11,8 @@ How to get a plugin discovered and installed on each platform. Use this referenc
 | Gemini CLI | geminicli.com/extensions | Via gallery | Not vetted | Gallery search | `gemini extensions install <url>` |
 | Codex (skills) | github.com/openai/skills | PR to repo | Curated | `$skill-installer` search | `$skill-installer <name>` |
 | Codex (plugins) | Not yet public | N/A | N/A | `codex plugin marketplace add` | Via marketplace |
+| Antigravity | antigravity.dev/plugins | Submit via site | Community-reviewed | Plugin directory search | `antigravity plugin add <name>` |
+| OpenClaw | openclaw.dev/registry | PR to registry repo | Curated | Registry search | `openclaw install <name>` |
 
 ## Claude Code
 
@@ -152,4 +154,54 @@ Public self-serve plugin publishing is "coming soon" per OpenAI docs. Currently,
 ### Upgrade
 
 `codex plugin marketplace upgrade [marketplace-name]`
+
+## Antigravity
+
+Plugin directory at [antigravity.dev/plugins](https://antigravity.dev/plugins/).
+
+### Publishing
+
+Plugins are published as GitHub repositories and submitted to the Antigravity plugin directory. Community members can review and rate plugins.
+
+### Requirements
+
+- `AGENTS.md` context file describing the plugin
+- `skills/*/SKILL.md` with standard frontmatter
+
+Antigravity auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
+
+### Discovery and install
+
+- Browse the directory at `antigravity.dev/plugins`
+- Install: `antigravity plugin add <name>`
+- Install from URL: `antigravity plugin add <github-url>`
+
+### Local development
+
+`antigravity plugin link <path>` for local development. Changes are picked up on next session start.
+
+## OpenClaw
+
+Plugin registry at [openclaw.dev/registry](https://openclaw.dev/registry/).
+
+### Publishing
+
+Plugins are published by submitting a PR to the OpenClaw registry repository. Registry entries are curated and reviewed before inclusion.
+
+### Requirements
+
+- `AGENTS.md` context file describing the plugin
+- `skills/*/SKILL.md` with standard frontmatter
+
+OpenClaw auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
+
+### Discovery and install
+
+- Browse the registry at `openclaw.dev/registry`
+- Install: `openclaw install <name>`
+- Install from URL: `openclaw install <github-url>`
+
+### Local development
+
+`openclaw link <path>` for local development.
 

@@ -78,8 +78,7 @@ Skills use Claude Code tool names. See each skill's `references/` directory for 
 ```
 mkdir -p <plugin-path>/skills/using-{{name}}/references/
 
-Write the same three sidecar files as the skill sidecar generation step:
-  - using-{{name}}/references/copilot-tools.md
+Write the same two sidecar files as the skill sidecar generation step:
   - using-{{name}}/references/codex-tools.md
   - using-{{name}}/references/gemini-tools.md
 
@@ -300,7 +299,7 @@ ELSE IF skip_bootstrapping AND reason == "user declined" THEN
 ELSE
   "Session-start injection configured. Generated:
     - using-{{name}}/SKILL.md
-    - using-{{name}}/references/ (3 sidecars)
+    - using-{{name}}/references/ (2 sidecars)
     - hooks/session-start
     - hooks/run-hook.cmd
     - hooks/hooks.json (SessionStart entry merged)

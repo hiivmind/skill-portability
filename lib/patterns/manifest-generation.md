@@ -35,7 +35,7 @@ RENDER_WITH_CONDITIONALS(template, metadata, computed):
 
 Template provides structure with `{{sectionPlaceholders}}`. Builder constructs dynamic sections from skill/agent/command inventory.
 
-Applies to: `gemini-context`, `agents-context`, `copilot-instructions`
+Applies to: `gemini-context`, `agents-context`
 
 ```pseudocode
 RENDER_WITH_BUILDER(template, metadata, computed):
@@ -176,12 +176,3 @@ For single-plugin upstream repos, this manifest points to the repo root with `so
 
 > **Template:** `lib/templates/manifests/codex-plugin/marketplace.json.tmpl`
 
----
-
-## copilot-instructions
-
-**Target:** `.github/copilot-instructions.md`
-
-Create `.github/` directory if needed.
-
-> **Template:** `lib/templates/context-files/copilot-instructions.md.tmpl`
