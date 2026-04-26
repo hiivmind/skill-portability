@@ -19,9 +19,9 @@ assignees: ''
 - [ ] Claude Code
 - [ ] Cursor
 - [ ] Gemini CLI
-- [ ] OpenCode
-- [ ] Copilot CLI
 - [ ] Codex
+- [ ] Antigravity
+- [ ] OpenClaw
 - [ ] All platforms
 
 ## Alternatives Considered

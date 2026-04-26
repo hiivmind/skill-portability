@@ -70,58 +70,53 @@ gemini extensions install hiivmind/skill-portability
 
 Users can browse the gallery or install directly from the GitHub URL.
 
-## OpenCode
+## Antigravity
 
-No marketplace. Distribution via npm or filesystem.
+Published to the [OpenVSX](https://open-vsx.org/) registry.
 
 ### Publishing
 
-Publish the plugin as an npm package. No submission or review process.
+Package the plugin as a VSIX extension and publish to OpenVSX:
+
+```bash
+antigravity publish
+```
+
+Extensions are reviewed by the OpenVSX team before listing.
+
+### How users find and install Skill Portability
+
+```bash
+antigravity --install-extension hiivmind.skill-portability
+```
+
+Users can also browse and install from the OpenVSX web registry.
+
+## OpenClaw
+
+Published to [ClawHub](https://clawhub.dev/) and via npm.
+
+### Publishing
+
+Publish as an npm package and register on ClawHub:
+
+```bash
+npm publish
+```
+
+Then submit to ClawHub for listing. No formal review process.
 
 ### How users find and install Skill Portability
 
 **npm:**
-Add to `opencode.json`:
-
-```json
-{
-  "plugin": ["skill-portability"]
-}
-```
-
-**Local files:**
-Copy `.opencode/plugins/skill-portability.js` to `.opencode/plugins/` (project) or `~/.config/opencode/plugins/` (global).
-
-Requires [Bun](https://bun.sh) for plugin loading.
-
-## Copilot CLI
-
-Skills published via GitHub CLI (v2.90.0+).
-
-### Publishing
 
 ```bash
-gh skill publish [--fix]
+npm install -g @hiivmind/skill-portability
 ```
 
-Validates against the Agent Skills spec. No formal review — skills are published to the GitHub repository.
+**ClawHub:**
 
-### How users find and install Skill Portability
-
-```bash
-gh skill search skill-portability
-gh skill preview hiivmind/skill-portability skill-portability
-gh skill install hiivmind/skill-portability
-```
-
-### Third-party registries
-
-- [skills.sh](https://skills.sh) — community directory with 300k+ monthly views
-- [github/awesome-copilot](https://github.com/github/awesome-copilot) — GitHub's curated collection
-
-### Security note
-
-Always recommend users run `gh skill preview` before installing. GitHub does not vet third-party skills.
+Browse [clawhub.dev](https://clawhub.dev/) and install directly from the listing.
 
 ## Codex
 
