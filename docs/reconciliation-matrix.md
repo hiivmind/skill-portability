@@ -6,7 +6,7 @@ Track every platform-specific claim in the plugin against researched facts in
 **Research sources:** `docs/platforms/` (sourced, cited) and
 `docs/research_sources.md` (URL index).
 
-**Status key:** Correct | Wrong | Missing | Needs review
+**Status key:** Correct | Wrong | Missing | Needs review | Fixed
 
 ---
 
@@ -16,8 +16,8 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Cell | Current value | Research says | Status |
 |------|--------------|---------------|--------|
-| Codex / Edit | `Edit` | `apply_patch` | Wrong |
-| Codex / WebFetch | `WebFetch` | No direct equivalent (use MCP) | Wrong |
+| Codex / Edit | `apply_patch` | `apply_patch` | Fixed |
+| Codex / WebFetch | `(N/A — use MCP)` | No direct equivalent (use MCP) | Fixed |
 | Codex / TodoWrite | `update_plan` | `update_plan` | Correct |
 | Codex / Task | `spawn_agent` | `spawn_agent` | Correct |
 | Codex / Skill | `(N/A)` | Native loading via `$skill-name` | Needs review |
@@ -30,28 +30,28 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Cell | Current value | Research says | Status |
 |------|--------------|---------------|--------|
-| All Codex events | `N/A` | Full hook system exists behind feature flag | Wrong |
-| Codex / SessionStart | `N/A` | `SessionStart` (same name) | Wrong |
-| Codex / PreToolUse | `N/A` | `PreToolUse` (same name) | Wrong |
-| Codex / PostToolUse | `N/A` | `PostToolUse` (same name) | Wrong |
-| Codex / UserPromptSubmit | `N/A` | `UserPromptSubmit` (same name) | Wrong |
-| Codex / Stop | `N/A` | `Stop` (same name) | Wrong |
-| Codex / PermissionRequest | Not listed | New event, no Claude equivalent | Missing |
+| All Codex events | Mapped | Full hook system exists behind feature flag | Fixed |
+| Codex / SessionStart | `SessionStart` | `SessionStart` (same name) | Fixed |
+| Codex / PreToolUse | `PreToolUse` | `PreToolUse` (same name) | Fixed |
+| Codex / PostToolUse | `PostToolUse` | `PostToolUse` (same name) | Fixed |
+| Codex / UserPromptSubmit | `UserPromptSubmit` | `UserPromptSubmit` (same name) | Fixed |
+| Codex / Stop | `Stop` | `Stop` (same name) | Fixed |
+| Codex / PermissionRequest | Listed | New event, no Claude equivalent | Fixed |
 | All Antigravity events | `N/A` | Confirmed no hooks | Correct |
-| Gemini / mapped events | 3 mapped | 7 events exist (BeforeModel, AfterModel, BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification) | Missing |
+| Gemini / mapped events | 7 mapped | 7 events exist (BeforeModel, AfterModel, BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification) | Fixed |
 | Gemini / SubagentStart | `(N/A)` | Verify | Needs review |
-| Table 3 notes | "Codex has no hook system" | Wrong — has hooks behind feature flag | Wrong |
+| Table 3 notes | Updated | Reflects Codex hooks behind feature flag | Fixed |
 
 ### platform-mappings.md — Table 7: Hook Format Rules
 
 | Cell | Current value | Research says | Status |
 |------|--------------|---------------|--------|
-| Codex row | Omitted entirely | Codex hooks use same JSON protocol as Claude Code | Wrong |
-| Codex event case | — | PascalCase (same as Claude Code) | Missing |
-| Codex timeout unit | — | Seconds | Missing |
-| Codex async | — | Needs verification | Missing |
-| Codex structure | — | Nested (same as Claude Code) | Missing |
-| Gemini hooks location | "settings.json (user-configured)" | Can also be in extension manifest and hooks.json | Wrong |
+| Codex row | Added | Codex hooks use same JSON protocol as Claude Code | Fixed |
+| Codex event case | PascalCase | PascalCase (same as Claude Code) | Fixed |
+| Codex timeout unit | seconds | Seconds | Fixed |
+| Codex async | no (strip) | Verified | Fixed |
+| Codex structure | nested | Nested (same as Claude Code) | Fixed |
+| Gemini hooks location | "settings.json or extension manifest" | Can also be in extension manifest and hooks.json | Fixed |
 
 ### platform-mappings.md — Table 8: Skill Output Directory
 
@@ -65,15 +65,15 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Cell | Current value | Research says | Status |
 |------|--------------|---------------|--------|
-| Codex | "MCP not supported via config file" | Supported via `config.toml` and `.mcp.json` | Wrong |
-| Gemini | "MCP not supported via config file" | Supported via extensions | Needs review |
+| Codex | `.mcp.json` or `config.toml [mcp]` | Supported via `config.toml` and `.mcp.json` | Fixed |
+| Gemini | `gemini-extension.json` → `mcpServers` | Supported via extensions | Fixed |
 | Antigravity | "MCP not supported via config file" | Verify | Needs review |
 
 ### gemini-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Subagent support | "No equivalent — Gemini CLI does not support subagents" | Full subagent support (generalist, cli_help, codebase_investigator + custom agents) | Wrong |
+| Subagent support | Full subagent support documented | Full subagent support (generalist, cli_help, codebase_investigator + custom agents) | Fixed |
 | Tool names | Listed mappings | Verify each against tool-names.ts | Needs review |
 | Additional tools | 5 listed | Research may show more | Needs review |
 
@@ -81,11 +81,11 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Edit mapping | `Edit` | `apply_patch` | Wrong |
+| Edit mapping | `apply_patch` | `apply_patch` | Fixed |
 | WebSearch | `WebSearch` | Verify | Needs review |
-| WebFetch | `WebFetch` | "Not directly equivalent — use MCP" | Wrong |
+| WebFetch | No direct equivalent | "Not directly equivalent — use MCP" | Fixed |
 | spawn_agent details | Documented | Verify accuracy | Needs review |
-| Hooks section | Not present | Should document hook availability | Missing |
+| Hooks section | Added | Documents hook availability and feature flag | Fixed |
 
 ### cursor-tools.md
 
@@ -120,8 +120,8 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| `hooks_path: null` | No hook system | Codex has hooks (behind feature flag) | Wrong |
-| Hook conditions | None | Should have hook portability conditions | Missing |
+| `hooks_path: hooks.json` | Hook system with feature flag | Codex has hooks (behind feature flag) | Fixed |
+| Hook conditions | 4 conditions added | Should have hook portability conditions | Fixed |
 | MCP conditions | Verify | Codex supports MCP | Needs review |
 
 ### gemini-cli.yaml
@@ -166,8 +166,8 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Codex hooks | Not covered (skipped) | Should generate Codex hooks | Missing |
-| Gemini hooks | "user settings.json only" | Can also be in extension manifest | Wrong |
+| Codex hooks | Generation section added | Should generate Codex hooks | Fixed |
+| Gemini hooks | "settings.json or extension manifest" | Can also be in extension manifest | Fixed |
 | Antigravity/OpenClaw | "no dedicated hooks file format" | Correct for Antigravity; OpenClaw uses SDK | Correct |
 | Cursor hook generation | Documented | Verify format against research | Needs review |
 
@@ -175,7 +175,7 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Gemini manifest fields | Documented | Verify against research (new fields: hooksDir, skillsDir, settings) | Needs review |
+| Gemini manifest fields | Optional fields documented | Verify against research (new fields: hooksDir, skillsDir, settings) | Fixed |
 | Codex manifest fields | Documented | Verify against research | Needs review |
 | All template references | Listed | Verify templates exist and match | Needs review |
 
@@ -196,7 +196,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | Skill discovery paths | Per platform | Verify against research | Needs review |
-| Hook discovery | Per platform | Codex hooks now exist | Missing |
+| Hook discovery | Per platform | Codex hooks now exist | Fixed (hook-merging.md updated) |
 
 ---
 
@@ -219,7 +219,7 @@ Track every platform-specific claim in the plugin against researched facts in
 |----------|---------|---------------|--------|
 | `hooks.json.tmpl` | Claude Code format | Correct | Correct |
 | `hooks-cursor.json.tmpl` | Cursor format | Verify camelCase, flat structure | Needs review |
-| Codex hooks template | Does not exist | Codex has hooks — needs template | Missing |
+| Codex hooks template | Not needed (same format as Claude Code) | Codex has hooks — shares hooks.json | Fixed |
 | Gemini hooks template | Does not exist | May need extension-manifest hooks template | Needs review |
 
 ### templates/context-files/
@@ -254,8 +254,8 @@ Track every platform-specific claim in the plugin against researched facts in
 | Phase 0b | Shape detection → uplift target | No platform-specific claims | Correct |
 | Phase 3 | Loads rubric YAMLs per platform | Correct mechanism | Correct |
 | Phase 5 | ALLOWED_CATEGORIES by shape | Verify category names match rubrics | Needs review |
-| Phase 6 | Hook porting (skips if 4_hooks not allowed) | Codex now has hooks — may need hook porting | Missing |
-| Phase 6 | References hook-merging.md | hook-merging.md lacks Codex | Missing |
+| Phase 6 | Hook porting (skips if 4_hooks not allowed) | Codex now has hooks — hook-merging.md updated | Fixed |
+| Phase 6 | References hook-merging.md | hook-merging.md now covers Codex | Fixed |
 
 ---
 
@@ -271,26 +271,23 @@ These are tracked under GitHub issues #11 and #12, not this matrix.
 
 ## Summary: Items Requiring Action
 
-### Definitively Wrong (fix now)
+### Fixed (this batch)
 
-1. **Table 2**: Codex Edit → `apply_patch` not `Edit`
-2. **Table 2**: Codex WebFetch → no direct equivalent
-3. **Table 3**: All Codex events marked N/A — Codex has full hooks
-4. **Table 3 notes**: "Codex has no hook system" — wrong
-5. **Table 7**: Codex omitted — needs row
-6. **Table 13**: Codex MCP "not supported" — wrong
-7. **gemini-tools.md**: "No subagent support" — wrong
-8. **codex-tools.md**: Edit mapped wrong, WebFetch wrong
-9. **codex.yaml**: `hooks_path: null` — wrong
-10. **hook-merging.md**: No Codex hook generation — missing
-11. **hooks templates**: No Codex hook template — missing
-
-### Likely Wrong (verify then fix)
-
-12. **Table 3**: Gemini missing 4 hook events
-13. **Table 7**: Gemini hooks location incomplete
-14. **Table 13**: Gemini MCP claim
-15. **manifest-generation.md**: Gemini manifest fields incomplete
+1. ~~**Table 2**: Codex Edit → `apply_patch`~~ Fixed
+2. ~~**Table 2**: Codex WebFetch → N/A~~ Fixed
+3. ~~**Table 3**: All Codex events marked N/A~~ Fixed
+4. ~~**Table 3 notes**: "Codex has no hook system"~~ Fixed
+5. ~~**Table 7**: Codex omitted~~ Fixed
+6. ~~**Table 13**: Codex MCP "not supported"~~ Fixed
+7. ~~**gemini-tools.md**: "No subagent support"~~ Fixed
+8. ~~**codex-tools.md**: Edit and WebFetch wrong~~ Fixed
+9. ~~**codex.yaml**: `hooks_path: null`~~ Fixed
+10. ~~**hook-merging.md**: No Codex hook generation~~ Fixed
+11. ~~**hooks templates**: No Codex hook template~~ Fixed (not needed)
+12. ~~**Table 3**: Gemini missing 4 hook events~~ Fixed
+13. ~~**Table 7**: Gemini hooks location incomplete~~ Fixed
+14. ~~**Table 13**: Gemini MCP claim~~ Fixed
+15. ~~**manifest-generation.md**: Gemini manifest fields incomplete~~ Fixed
 
 ### Needs Systematic Verification
 
