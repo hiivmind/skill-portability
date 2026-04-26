@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "skill-portability",
-      "description": "Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support",
+      "description": "Assess or uplift any plugin for multi-platform portability: Claude Code, Cursor, Gemini CLI, Codex, Antigravity, and OpenClaw",
       "version": "0.1.1",
       "source": "./",
       "author": {
