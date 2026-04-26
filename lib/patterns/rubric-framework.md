@@ -1,6 +1,6 @@
 # Rubric Framework
 
-Shared scoring model for plugin portability assessment. Used by `assessing-plugin-portability`.
+Shared scoring model for plugin portability assessment. Used by `plugin-portability`.
 Per-platform conditions are in `platforms/<platform>.yaml`.
 Lookup tables are in `lib/references/platform-mappings.md`.
 
@@ -185,7 +185,7 @@ a `# fixes:` annotation linking it to the condition IDs it resolves.
 
 ```pseudocode
 rubric_ids  = collect all condition IDs from lib/patterns/platforms/*.yaml
-uplift_ids  = collect all "fixes:" references from skills/uplifting-a-plugin/
+uplift_ids  = collect all "fixes:" references from skills/plugin-portability/
 template_ids = collect all "fixes:" references from lib/templates/
 
 orphan_conditions = rubric_ids - (uplift_ids | template_ids)

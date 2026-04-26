@@ -1,6 +1,6 @@
 # Detection Algorithm
 
-Shared by `uplifting-a-plugin` and `assessing-plugin-portability`. Run once at start.
+Shared by `plugin-portability`. Run once at start (Phase 1).
 
 ---
 
