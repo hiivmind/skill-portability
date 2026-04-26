@@ -122,40 +122,40 @@ Track every platform-specific claim in the plugin against researched facts in
 |-------|---------|---------------|--------|
 | `hooks_path: hooks.json` | Hook system with feature flag | Codex has hooks (behind feature flag) | Fixed |
 | Hook conditions | 4 conditions added | Should have hook portability conditions | Fixed |
-| MCP conditions | Verify | Codex supports MCP | Needs review |
+| MCP conditions | Verify | Codex supports MCP | Fixed |
 
 ### gemini-cli.yaml
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| `hooks_path: null` | "settings.json, not file-based" | Hooks can be in extension manifest | Needs review |
-| Subagent conditions | Verify | Gemini has full subagent support | Needs review |
+| `hooks_path: null` | "settings.json, not file-based" | Hooks can be in extension manifest | Fixed |
+| Subagent conditions | Verify | Gemini has full subagent support — @agent-name condition exists | Correct |
 
 ### cursor.yaml
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Subagent conditions | Verify | Full subagent support with async, model, readonly | Needs review |
+| Subagent conditions | Verify | Full subagent support — documented condition exists (same Task/Agent syntax) | Correct |
 
 ### antigravity.yaml
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | `hooks_path: null` | No hooks | Confirmed | Correct |
-| Workflow conditions | Verify | Workflows in .agents/workflows/ | Needs review |
+| Workflow conditions | Verify | Workflows in .agents/workflows/ — condition confirmed | Correct |
 
 ### openclaw.yaml
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | `hooks_path: null` | TypeScript SDK hooks | Confirmed SDK-based | Correct |
-| Context file conditions | Verify | 7+ context files (AGENTS.md, SOUL.md, TOOLS.md, etc.) | Needs review |
+| Context file conditions | Verify | 7+ are user workspace files; AGENTS.md correct for plugin output | Correct |
 
 ### rubric-framework.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Category definitions | 7 categories | Verify completeness against research | Needs review |
+| Category definitions | 7 categories | All 7 comprehensive — no missing dimensions | Correct |
 | Scoring formula | Documented | No platform-specific claims | Correct |
 
 ---
@@ -169,33 +169,33 @@ Track every platform-specific claim in the plugin against researched facts in
 | Codex hooks | Generation section added | Should generate Codex hooks | Fixed |
 | Gemini hooks | "settings.json or extension manifest" | Can also be in extension manifest | Fixed |
 | Antigravity/OpenClaw | "no dedicated hooks file format" | Correct for Antigravity; OpenClaw uses SDK | Correct |
-| Cursor hook generation | Documented | Verify format against research | Needs review |
+| Cursor hook generation | Documented | Was dropping matchers — Cursor supports them | Fixed |
 
 ### manifest-generation.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | Gemini manifest fields | Optional fields documented | Verify against research (new fields: hooksDir, skillsDir, settings) | Fixed |
-| Codex manifest fields | Documented | Verify against research | Needs review |
-| All template references | Listed | Verify templates exist and match | Needs review |
+| Codex manifest fields | Documented | Fields match research | Correct |
+| All template references | Listed | All 10 templates verified to exist | Correct |
 
 ### detection-algorithm.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Platform signal detection | Various file checks | Verify signals match actual platform artifacts | Needs review |
+| Platform signal detection | Various file checks | Missing openclaw.plugin.json | Fixed |
 
 ### bootstrapping.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Session-start per platform | Documented | Verify hook format per platform | Needs review |
+| Session-start per platform | Documented | Cursor and Claude Code output verified; Codex falls to else branch (unverifiable) | Correct |
 
 ### inventory.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| Skill discovery paths | Per platform | Verify against research | Needs review |
+| Skill discovery paths | Per platform | Source plugin glob correct; platform paths handled by rubrics | Correct |
 | Hook discovery | Per platform | Codex hooks now exist | Fixed (hook-merging.md updated) |
 
 ---
@@ -299,10 +299,16 @@ These are tracked under GitHub issues #11 and #12, not this matrix.
 - **cursor-tools.md**: Subagent support not documented (Missing — needs separate fix)
 - **Table 2 Antigravity**: 7 of 13 tool names unverifiable from current research
 
-### Needs Systematic Verification (Tier 2 & 3)
+### Fixed (Tier 2 — rubrics/patterns verification)
 
-18. All rubric conditions against researched platform capabilities (Tier 2)
-19. All pattern docs against researched platform details (Tier 2)
-20. All manifest template schemas against researched schemas (Tier 3)
-21. All install doc commands against researched install methods (Tier 3)
-22. All context file templates against researched context file formats (Tier 3)
+18. ~~**codex.yaml**: No MCP conditions~~ Fixed — added mcp.exists and mcp.config_toml
+19. ~~**gemini-cli.yaml**: hooks_path comment missing extension manifest~~ Fixed
+20. ~~**openclaw.yaml**: Hook event names condition listed only 4 events~~ Fixed — references full 15-event list
+21. ~~**hook-merging.md**: Cursor hook generation dropped matchers~~ Fixed — matchers and timeout now carried over
+22. ~~**detection-algorithm.md**: Missing openclaw.plugin.json~~ Fixed — added to sources, tie-break, and shape classification
+
+### Needs Systematic Verification (Tier 3)
+
+23. All manifest template schemas against researched schemas (Tier 3)
+24. All install doc commands against researched install methods (Tier 3)
+25. All context file templates against researched context file formats (Tier 3)
