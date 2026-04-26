@@ -155,10 +155,12 @@ categories:
         points: 1
         check: |
           If hook guidance exists, verify it uses correct OpenClaw snake_case
-          event names from LOOKUP["hook_events"]["openclaw"]:
-          before_tool_call, tool_result_persist, gateway:startup,
-          session:compact:before.
-          Not Claude's PascalCase or Cursor's camelCase variants.
+          event names (see lib/references/openclaw-tools.md for full 15-event
+          list): before_tool_call, after_tool_call, tool_result_persist,
+          llm_input, llm_output, message_received, message_sent,
+          before_agent_finalize, agent_end, before_model_resolve,
+          before_compaction, after_compaction, before_install, command,
+          gateway:startup (not Claude PascalCase or Cursor camelCase)
 
       - id: openclaw.4_hooks.hooks_json.typescript_wrapper
         type: judgement

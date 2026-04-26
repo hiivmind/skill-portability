@@ -1,7 +1,7 @@
 platform: gemini-cli
 manifest_path: gemini-extension.json
 context_files: [GEMINI.md]
-hooks_path: null  # settings.json (user-configured, not file-based)
+hooks_path: null  # settings.json or extension manifest hooks field (not standalone file)
 
 categories:
   1_manifest:

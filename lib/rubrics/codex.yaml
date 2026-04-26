@@ -341,3 +341,22 @@ categories:
           If agents use spawn_agent for subagent delegation, verify that
           worker role specification is documented — what role each subagent
           plays and how it reports results back to the orchestrator.
+
+      - id: codex.7_runtime.mcp.exists
+        type: checkable
+        component: mcp
+        critical: false
+        points: 1
+        check: |
+          if file_exists(".mcp.json"):
+            assert valid_json(read(".mcp.json"))
+            # Codex reads .mcp.json (same dot-prefixed name as Claude Code)
+      - id: codex.7_runtime.mcp.config_toml
+        type: judgement
+        component: mcp
+        critical: false
+        points: 1
+        check: |
+          If plugin uses MCP servers, verify install documentation mentions
+          both .mcp.json (portable) and config.toml [mcp_servers] (Codex-native)
+          configuration paths.
