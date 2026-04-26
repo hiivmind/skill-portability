@@ -6,7 +6,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | ---------------- | ---------------- |
 | `Read` (file reading) | `Read` |
 | `Write` (file creation) | `Write` |
-| `Edit` (file editing) | `Edit` |
+| `Edit` (file editing) | `apply_patch` |
 | `Bash` (run commands) | `Bash` |
 | `Grep` (search file content) | `Grep` |
 | `Glob` (search files by name) | `Glob` |
@@ -18,7 +18,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | `TodoWrite` (task tracking) | `update_plan` |
 | `Skill` tool (invoke a skill) | Skills load natively — just follow the instructions |
 | `WebSearch` (web search) | `WebSearch` |
-| `WebFetch` (fetch URL) | `WebFetch` |
+| `WebFetch` (fetch URL) | No direct equivalent — use MCP for URL fetching |
 | `AskUserQuestion` (structured input) | `AskUserQuestion` |
 
 ## Subagent dispatch requires multi-agent support
@@ -106,3 +106,22 @@ the user to use the App's native controls:
 
 The agent can still run tests, stage files, and output suggested branch
 names, commit messages, and PR descriptions for the user to copy.
+
+## Hooks
+
+Codex has a lifecycle hook system behind a feature flag. Enable it in config:
+
+```toml
+# ~/.codex/config.toml or .codex/config.toml
+[features]
+codex_hooks = true
+```
+
+Codex hooks use the same JSON protocol and PascalCase event names as Claude
+Code (`SessionStart`, `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`).
+Codex also has a `PermissionRequest` event with no Claude Code equivalent.
+
+Hook config goes in `hooks.json` (same format as Claude Code) or inline
+`[hooks]` tables in `config.toml`. Default timeout: 600 seconds.
+
+See `lib/patterns/hook-merging.md` for generation logic.
