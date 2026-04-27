@@ -57,8 +57,9 @@ TYPE PlatformSpec = {
 
   # ── Manifest ──
   manifest: {
-    path:            string | null,
-    required_fields: List[string],
+    path:             string | null,
+    marketplace_path: string | null,
+    required_fields:  List[string],
   },
 
   # ── Frontmatter ──
@@ -190,4 +191,16 @@ FUNCTION diff_from(source, target)
       EMIT op
   strip_fields: tgt.frontmatter.strip
   model_format: tgt.frontmatter.model_format
+
+# ── Reverse lookups ──
+
+FUNCTION platform_for_spec(filename)
+  RETURNS platform ID from a spec filename like "codex.md" → "codex".
+  FOR EACH pid IN REGISTRY:
+    IF filename == pid + ".md": RETURN pid
+
+FUNCTION platform_for_hooks(path)
+  RETURNS platform ID from a hooks file path.
+  IF "cursor" IN path: RETURN "cursor"
+  RETURN "claude-code"
 ```
