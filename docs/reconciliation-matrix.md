@@ -395,6 +395,19 @@ in `docs/research/per-platform-context-loading.md` (#12).
 38. ~~**All rubrics**: Synonym duplication (`find_file`/`find_first`, `count`/`len`, `field_present`/`in`)~~ Fixed — unified to canonical names
 39. ~~**lib/patterns/pseudocode-principles.md**: Decision boundary doc missing~~ Fixed — created with three-tier framework
 
+### Pattern Deduplication
+
+40. ~~**hook-merging.md**: 20-line event mapping table duplicated REGISTRY data~~ Fixed — replaced with hook_event() reference
+41. ~~**hook-merging.md**: Hardcoded codex_events list~~ Fixed — derived from REGISTRY canonical + extra_events
+42. ~~**hook-merging.md**: Inline gemini_event_map dictionary~~ Fixed — replaced with hook_event() lookups
+43. ~~**inventory.md**: Hardcoded manifest_checks list~~ Fixed — derived from REGISTRY manifest.path + marketplace_path
+44. ~~**inventory.md**: Hardcoded context_checks list~~ Fixed — derived from REGISTRY primary_file + secondary_files
+45. ~~**inventory.md**: Inline spec_platform/hook_platform helpers~~ Fixed — replaced with platform_for_spec/platform_for_hooks from platform-api.md
+46. ~~**injection-checks.md**: Hardcoded "SessionStart"/"sessionStart" strings~~ Fixed — replaced with hook_event() calls
+47. ~~**bootstrapping.md**: Inline hook output format documentation~~ Fixed — references REGISTRY[platform].hooks.output_key
+48. ~~**PlatformSpec**: Missing marketplace_path field~~ Fixed — added to type and all 6 platform specs
+49. ~~**antigravity.md**: GEMINI.md in priority_note prose, not secondary_files~~ Fixed — added to secondary_files
+
 ### Verification status
 
-All tiers, platform API restructure, and rubric check alignment: complete, zero gaps.
+All tiers, platform API restructure, rubric check alignment, and pattern deduplication: complete, zero gaps.
