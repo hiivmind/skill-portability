@@ -18,8 +18,8 @@ Assess or uplift a plugin for multi-platform portability. Single entry point for
 **Output:** Assessment report; if uplift mode, also generated artifacts with `fixes:` annotations.
 
 > **External references:**
-> `lib/patterns/detection-algorithm.md` | `lib/patterns/inventory.md` | `lib/patterns/rubric-framework.md`
-> `lib/patterns/platforms/*.yaml` | `lib/references/platform-mappings.md` | `lib/patterns/manifest-generation.md`
+> `lib/patterns/detection-algorithm.md` | `lib/patterns/inventory.md` | `lib/rubrics/rubric-framework.md`
+> `lib/rubrics/*.yaml` | `lib/references/platform-mappings.md` | `lib/patterns/manifest-generation.md`
 > `lib/patterns/hook-merging.md` | `lib/patterns/bootstrapping.md` | `lib/patterns/injection-checks.md`
 > `lib/templates/install-docs/` | `lib/templates/manifests/` | `lib/templates/context-files/`
 
@@ -162,12 +162,12 @@ INTENT_UPLIFT_TARGET(computed):
 
 ## Phase 3: Score
 
-Always runs full scoring. References `lib/patterns/rubric-framework.md` and `lib/patterns/platforms/*.yaml`.
+Always runs full scoring. References `lib/rubrics/rubric-framework.md` and `lib/rubrics/*.yaml`.
 
 ```pseudocode
 SCORE(computed, platforms):
   FOR platform IN platforms:
-    rubric = load_yaml("lib/patterns/platforms/" + platform + ".yaml")
+    rubric = load_yaml("lib/rubrics/" + platform + ".yaml")
     FOR category IN rubric.categories:
       FOR condition IN category.conditions:
         passed = jit_evaluate(condition, computed)

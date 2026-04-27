@@ -82,11 +82,9 @@ jobs:
           done
 
           echo ""
-          echo "=== Per-Skill Sidecars ==="
-          for skill_dir in skills/*/; do
-            for sidecar in codex-tools.md gemini-tools.md; do
-              check_file "${skill_dir}references/${sidecar}"
-            done
+          echo "=== Shared Tool References ==="
+          for sidecar in codex-tools.md gemini-tools.md cursor-tools.md antigravity-tools.md openclaw-tools.md; do
+            check_file "lib/references/${sidecar}"
           done
 
           echo ""

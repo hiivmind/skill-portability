@@ -134,6 +134,27 @@ Only generated for multi-plugin repositories. Lists all plugins with their sourc
 
 > **Template:** `lib/templates/manifests/gemini-extension.json.tmpl`
 
+### Required fields
+
+`name` (kebab-case, matches npm conventions), `version` (semver).
+
+### Optional fields (conditional generation)
+
+| Field | Include when | Value |
+|-------|-------------|-------|
+| `description` | Always | From computed metadata |
+| `contextFileName` | Always | `"GEMINI.md"` |
+| `mcpServers` | Source plugin has `.mcp.json` | Map of server configs with `${extensionPath}` variables |
+| `hooksDir` | Hooks exist in non-default path | Relative path (default `hooks/` is auto-discovered) |
+| `skillsDir` | Skills exist in non-default path | Relative path (default `skills/` is auto-discovered) |
+| `settings` | Plugin requires user configuration | Array of `{ name, description, envVar, sensitive? }` |
+| `plan` | Plugin uses planning artifacts | `{ "directory": "<path>" }` |
+| `excludeTools` | Plugin restricts dangerous operations | Array of tool exclusion strings |
+
+### Variable substitution
+
+Use `${extensionPath}` for absolute paths, `${workspacePath}` for workspace-relative, `${/}` for OS path separator.
+
 ---
 
 ## gemini-context

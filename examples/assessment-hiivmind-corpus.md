@@ -25,7 +25,7 @@ it as a candidate for full portable plugin uplift.
 ```
 
 Scores use a 7-category rubric (max 3 points each, 21 total). See
-[rubric-framework.md](../lib/patterns/rubric-framework.md) for category definitions.
+[rubric-framework.md](../lib/rubrics/rubric-framework.md) for category definitions.
 
 ---
 

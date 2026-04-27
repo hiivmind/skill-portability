@@ -33,22 +33,28 @@ Maps Claude Code model shortnames to platform equivalents.
 
 | Claude Tool | Gemini | Codex | Cursor | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| Read | read_file | (same) | (same) | (same) | (same) |
-| Write | write_file | (same) | (same) | (same) | (same) |
-| Edit | replace | (same) | (same) | (same) | (same) |
-| Bash | run_shell_command | (same) | (same) | (same) | (same) |
-| Grep | grep_search | (same) | (same) | (same) | (same) |
-| Glob | list_files | (same) | (same) | (same) | (same) |
-| Task | @agent-name | spawn_agent | (same) | (same) | agents.list[] |
-| Agent | @agent-name | spawn_agent | (same) | (same) | agents.list[] |
-| TodoWrite | (N/A) | update_plan | (same) | (same) | (N/A) |
-| Skill | (N/A) | (N/A) | (same) | (same) | (N/A) |
+| Read | read_file | Read | Read | view_file | Read |
+| Write | write_file | Write | Write | write_to_file | Write |
+| Edit | replace | apply_patch | Edit | replace_file_content | Edit |
+| Bash | run_shell_command | Bash | Bash | run_command | Bash |
+| Grep | grep_search | Grep | Grep | grep_search | Grep |
+| Glob | glob | Glob | Glob | find_by_name | Glob |
+| Task | @agent-name | spawn_agent | Task | (N/A) | agents.list[] |
+| Agent | @agent-name | spawn_agent | Agent | (N/A) | agents.list[] |
+| TodoWrite | write_todos | update_plan | TodoWrite | (N/A) | (N/A) |
+| Skill | activate_skill | (N/A) | Skill | (N/A — auto-activate) | (N/A) |
+| WebSearch | google_web_search | WebSearch | WebSearch | search_web | WebSearch |
+| WebFetch | web_fetch | (N/A — use MCP) | WebFetch | read_url_content | WebFetch |
+| AskUserQuestion | ask_user | AskUserQuestion | AskUserQuestion | (N/A) | AskUserQuestion |
 
 **Rules**:
-- `(same)` means platform uses same tool name as Claude Code.
-- Gemini has no Task/Agent tool — uses `@agent-name` syntax in prompts.
+- Gemini renames most tools — see `lib/references/gemini-tools.md` for full details.
 - Codex replaces Task/Agent with `spawn_agent` and TodoWrite with `update_plan`.
+  Codex has no Skill tool — skills load natively.
+- Antigravity renames ALL tools — see `lib/references/antigravity-tools.md`.
+  Antigravity has no Task/Agent, TodoWrite, Skill, or AskUserQuestion equivalents.
 - OpenClaw manages agents via `agents.list[]` in runtime config, not a tool.
+  OpenClaw has no TodoWrite or Skill tool equivalents.
 
 ---
 
@@ -56,21 +62,29 @@ Maps Claude Code model shortnames to platform equivalents.
 
 | Claude Event | Cursor | Gemini | Codex | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| SessionStart | sessionStart | SessionStart | N/A | N/A | gateway:startup (plugin SDK) |
-| PreToolUse | preToolUse | BeforeTool | N/A | N/A | before_tool_call (plugin SDK) |
-| PostToolUse | postToolUse | AfterTool | N/A | N/A | tool_result_persist (plugin SDK) |
-| PostToolUseFailure | postToolUseFailure | (N/A) | N/A | N/A | N/A |
-| SubagentStart | subagentStart | (N/A) | N/A | N/A | N/A |
-| SubagentStop | subagentStop | (N/A) | N/A | N/A | N/A |
-| PreCompact | preCompact | PreCompress | N/A | N/A | session:compact:before (plugin SDK) |
-| Stop | stop | AfterAgent | N/A | N/A | N/A |
-| UserPromptSubmit | beforeSubmitPrompt | (N/A) | N/A | N/A | N/A |
+| SessionStart | sessionStart | SessionStart | SessionStart | N/A | gateway:startup (plugin SDK) |
+| PreToolUse | preToolUse | BeforeTool | PreToolUse | N/A | before_tool_call (plugin SDK) |
+| PostToolUse | postToolUse | AfterTool | PostToolUse | N/A | tool_result_persist (plugin SDK) |
+| PostToolUseFailure | postToolUseFailure | (N/A) | (N/A) | N/A | N/A |
+| SubagentStart | subagentStart | (N/A) | (N/A) | N/A | N/A |
+| SubagentStop | subagentStop | (N/A) | (N/A) | N/A | N/A |
+| PreCompact | preCompact | PreCompress | (N/A) | N/A | session:compact:before (plugin SDK) |
+| Stop | stop | AfterAgent | Stop | N/A | N/A |
+| UserPromptSubmit | beforeSubmitPrompt | (N/A) | UserPromptSubmit | N/A | N/A |
+| (N/A) | (N/A) | BeforeModel | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | AfterModel | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | BeforeToolSelection | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | Notification | (N/A) | N/A | N/A |
+| (N/A) | (N/A) | (N/A) | PermissionRequest | N/A | N/A |
 
 **Rules**:
-- Codex and Antigravity have no hook systems.
-- Gemini hooks go in user `settings.json`, not repo files — generate guidance only.
+- Codex hooks require `codex_hooks = true` feature flag in `config.toml`.
+- Codex `PermissionRequest` has no Claude Code equivalent — it controls approval flow.
+- Antigravity has no hook system.
+- Gemini hooks go in user `settings.json` or the extension manifest `hooks` field.
+- Gemini has 4 platform-specific events not available on other platforms (BeforeModel, AfterModel, BeforeToolSelection, Notification).
 - OpenClaw hooks use TypeScript plugin SDK (`api.registerHook()`), not file-based config.
-- Cursor uses camelCase; Gemini uses PascalCase.
+- Cursor uses camelCase; Gemini and Codex use PascalCase.
 
 ---
 
@@ -89,10 +103,12 @@ Maps Claude Code model shortnames to platform equivalents.
 |---|---|---|---|---|---|
 | `disable-model-invocation` | strip | strip | strip | **keep** | strip |
 | `allowed-tools` | strip | strip | strip | strip | strip |
+| `user-invocable` | strip | strip | strip | strip | strip |
 
 **Rules**:
 - Cursor keeps `disable-model-invocation` (supported natively).
 - All platforms strip `allowed-tools` (Claude-specific).
+- All platforms strip `user-invocable` — Antigravity uses Workflows for slash-command invocation instead.
 
 ---
 
@@ -116,15 +132,15 @@ Maps Claude Code model shortnames to platform equivalents.
 
 ## Table 7: Hook Format Rules
 
-| Rule | Claude Code | Cursor | Gemini | OpenClaw |
-|---|---|---|---|---|
-| Event name case | PascalCase | camelCase | PascalCase | snake_case (SDK) |
-| Timeout unit | seconds | seconds | milliseconds | N/A (SDK-managed) |
-| Async support | yes (optional) | no (strip) | no (strip) | yes (async handlers) |
-| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json (user-configured) | `api.registerHook()` (TypeScript) |
-| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A | return value from handler |
+| Rule | Claude Code | Cursor | Gemini | Codex | OpenClaw |
+|---|---|---|---|---|---|
+| Event name case | PascalCase | camelCase | PascalCase | PascalCase | snake_case (SDK) |
+| Timeout unit | seconds | seconds | milliseconds | seconds | N/A (SDK-managed) |
+| Async support | yes (optional) | no (strip) | no (strip) | no (strip) | yes (async handlers) |
+| Structure | nested (matcher → hooks[]) | flat (matcher at hook level) | settings.json or extension manifest `hooks` field | nested (same as Claude Code) | `api.registerHook()` (TypeScript) |
+| Output key | `hookSpecificOutput.additionalContext` | `additional_context` | N/A | `permissionDecision` / `decision` (event-specific) | return value from handler |
 
-**Notes**: Codex and Antigravity have no hook systems — omitted from this table.
+**Notes**: Antigravity has no hook system — omitted from this table.
 
 ---
 
@@ -151,3 +167,60 @@ Maps Claude Code model shortnames to platform equivalents.
 | Codex | TOML (`.codex/agents/*.toml`) | Codex model name | stripped |
 | Antigravity | Combined `AGENTS.md` + `.agent/rules/*.md` | (removed) | (removed) |
 | OpenClaw | Listed in manifest `agents.list[]` | OpenClaw `provider/model` | stripped |
+
+---
+
+## Table 10: Context File Names
+
+| Platform | Primary Context File | Secondary Context Files |
+|---|---|---|
+| Claude Code | `CLAUDE.md` | — |
+| Cursor | `AGENTS.md` | `.cursor/rules/*.mdc` |
+| Gemini | `GEMINI.md` | — |
+| Codex | `AGENTS.md` | `.codex/INSTALL.md` |
+| Antigravity | `AGENTS.md` | `GEMINI.md` (higher priority), `.agent/rules/*.md` |
+| OpenClaw | `AGENTS.md` | — |
+
+**Notes**:
+- `AGENTS.md` is the universal fallback — every platform except Claude Code reads it.
+- Antigravity prioritises `GEMINI.md` over `AGENTS.md` when both exist.
+- Cursor `.mdc` rules use YAML frontmatter (`description`, `alwaysApply`).
+
+---
+
+## Table 11: Rules and Policies Format
+
+| Platform | Path | Format | Notes |
+|---|---|---|---|
+| Claude Code | — | — | No standalone rules format |
+| Cursor | `.cursor/rules/*.mdc` | Markdown + YAML front | `alwaysApply: true` for global rules |
+| Gemini | `policies/*.toml` | TOML | Optional policy constraints |
+| Codex | — | — | Instructions in `AGENTS.md` only |
+| Antigravity | `.agent/rules/*.md` | Markdown | Auto-discovered by runtime |
+| OpenClaw | — | — | Configured in `openclaw.plugin.json` |
+
+---
+
+## Table 12: Commands Format
+
+| Platform | Path | Format | Notes |
+|---|---|---|---|
+| Claude Code | `commands/` | Deprecated | Use skills instead |
+| Cursor | `commands/` | Optional | Auto-discovered from manifest |
+| Gemini | `commands/*.toml` | TOML | Named commands with descriptions |
+| Codex | — | — | No standalone commands format |
+| Antigravity | `.agents/workflows/` | Markdown | Slash-command workflows |
+| OpenClaw | — | — | Defined in manifest |
+
+---
+
+## Table 13: MCP Configuration
+
+| Platform | Config Path | Notes |
+|---|---|---|
+| Claude Code | `.mcp.json` | Dot-prefixed; supports resources and tools |
+| Cursor | `mcp.json` | No dot prefix; no MCP Resources support |
+| Gemini | `gemini-extension.json` → `mcpServers` | Extension-bundled MCP servers |
+| Codex | `.mcp.json` or `config.toml [mcp]` | Supports stdio and SSE transports |
+| Antigravity | — | MCP not supported via config file |
+| OpenClaw | `openclaw.plugin.json` → `mcp` block | Embedded in manifest |

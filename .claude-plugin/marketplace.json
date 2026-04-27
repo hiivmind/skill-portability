@@ -9,7 +9,7 @@
     {
       "name": "skill-portability",
       "description": "Assess or uplift any plugin for multi-platform portability: Claude Code, Cursor, Gemini CLI, Codex, Antigravity, and OpenClaw",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "source": "./",
       "author": {
         "name": "Nathaniel Ramm",

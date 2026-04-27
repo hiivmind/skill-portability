@@ -29,6 +29,10 @@ FUNCTION SCAN_METADATA_SOURCES(plugin_path):
       fields: ["name", "description", "version"]
     },
     {
+      path:   "openclaw.plugin.json",
+      fields: ["name", "description", "version"]
+    },
+    {
       path:   "package.json",
       fields: ["name", "version", "description"]
     },
@@ -75,6 +79,7 @@ FUNCTION ELECT_CANONICAL(found_sources):
     ".cursor-plugin/plugin.json",
     ".codex-plugin/plugin.json",
     "gemini-extension.json",
+    "openclaw.plugin.json",
     "package.json",
     "AGENTS.md",
     # first skills/*/SKILL.md alphabetically by directory name
@@ -186,6 +191,7 @@ FUNCTION CLASSIFY_SHAPE(found_sources):
     ".cursor-plugin/plugin.json",
     ".codex-plugin/plugin.json",
     "gemini-extension.json",
+    "openclaw.plugin.json",
   ]
 
   has_skills = ANY source.path MATCHES "skills/*/SKILL.md"

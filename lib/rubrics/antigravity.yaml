@@ -159,6 +159,21 @@ categories:
 
   5_toolmap:
     conditions:
+      - id: antigravity.5_toolmap.tool_refs.reachable
+        type: judgement
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          Antigravity uses completely different tool names from Claude Code
+          (view_file, run_command, grep_search, etc.). Verify that tool
+          mapping content is reachable:
+          IF shape == "full-portable-plugin":
+            Via AGENTS.md tool mapping section, GEMINI.md @ includes, or
+            shared antigravity-tools.md reference
+          ELIF shape IN ["bare-skill-repo", "skill-first"]:
+            Via per-skill references/antigravity-tools.md sidecar
+
       - id: antigravity.5_toolmap.model_mapping.no_model_field
         type: checkable
         component: model_mapping
