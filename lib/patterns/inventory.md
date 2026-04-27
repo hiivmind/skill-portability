@@ -57,15 +57,23 @@ INVENTORY(plugin_path, computed):
                          "antigravity.md", "openclaw.md"]
   computed.sidecar_results = []
 
-  IF computed.shape IN ["bare-skill-repo", "skill-first"]:
-    # Bare skills need per-skill spec files — no context file to carry shared refs
+  IF computed.uplift_target IS NOT null:
+    strategy = sidecar_strategy(computed.uplift_target)
+  ELSE:
+    IF computed.shape IN ["bare-skill-repo"]:
+      strategy = "per-skill"
+    ELSE:
+      strategy = "shared"
+
+  IF strategy == "per-skill":
+    # Per-skill spec files — no context file to carry shared refs
     FOR skill IN computed.skills:
       FOR spec_file IN platform_spec_files:
         target = "skills/" + skill.dir + "/references/" + spec_file
         status = IF file_exists(plugin_path + "/" + target) THEN "PRESENT" ELSE "MISSING"
         computed.sidecar_results.append({ skill: skill.dir, file: spec_file, status: status })
 
-  ELIF computed.shape == "full-portable-plugin":
+  ELIF strategy == "shared":
     # Plugins have context files — check shared references instead
     shared_paths = ["lib/references/platforms/", "references/platforms/", "lib/references/"]
     FOR spec_file IN platform_spec_files:
