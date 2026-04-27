@@ -19,7 +19,7 @@ Assess or uplift a plugin for multi-platform portability. Single entry point for
 
 > **External references:**
 > `lib/patterns/detection-algorithm.md` | `lib/patterns/inventory.md` | `lib/rubrics/rubric-framework.md`
-> `lib/rubrics/*.yaml` | `lib/references/platform-mappings.md` | `lib/patterns/manifest-generation.md`
+> `lib/rubrics/*.yaml` | `lib/references/platform-api.md` | `lib/references/platforms/*.md` | `lib/patterns/manifest-generation.md`
 > `lib/patterns/hook-merging.md` | `lib/patterns/bootstrapping.md` | `lib/patterns/injection-checks.md`
 > `lib/templates/install-docs/` | `lib/templates/manifests/` | `lib/templates/context-files/`
 

@@ -6,13 +6,9 @@ Templates in `lib/templates/` are seeded from [superpowers](https://github.com/o
 
 1. Install the new superpowers version: update your Claude Code plugin config to the new version.
 2. Locate the new cache path: `~/.claude/plugins/cache/claude-plugins-official/superpowers/<version>/`
-3. Update tool-mapping sidecars:
-
-   ```bash
-   SP=~/.claude/plugins/cache/claude-plugins-official/superpowers/<new-version>
-   cp "$SP/skills/using-superpowers/references/codex-tools.md" lib/references/
-   cp "$SP/skills/using-superpowers/references/gemini-tools.md" lib/references/
-   ```
+3. Review platform specs in `lib/references/platforms/` against any tool
+   name changes in the new superpowers release. The structured `PlatformSpec`
+   dictionaries replace the old per-tool sidecar files.
 
 4. Compare manifest templates in `lib/templates/manifests/` and context-file templates in `lib/templates/context-files/` against the new superpowers manifests (`.claude-plugin/`, `.cursor-plugin/`, `gemini-extension.json`, `GEMINI.md`, hooks files) and update accordingly.
 5. Update this file with the new version pin.
