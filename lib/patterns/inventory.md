@@ -24,18 +24,13 @@ INVENTORY(plugin_path, computed):
   computed.flagged = []   # strings
 
   ## 2.2 Check Platform Manifests
-  ## 10 paths across 6 platforms. Record { platform, path, status }.
-  manifest_checks = [
-    { platform: "claude-code",  path: ".claude-plugin/plugin.json" },
-    { platform: "claude-code",  path: ".claude-plugin/marketplace.json" },
-    { platform: "cursor",       path: ".cursor-plugin/plugin.json" },
-    { platform: "cursor",       path: ".cursor-plugin/marketplace.json" },
-    { platform: "gemini-cli",   path: "gemini-extension.json" },
-    { platform: "codex",        path: ".codex-plugin/plugin.json" },
-    { platform: "codex",        path: ".agents/plugins/marketplace.json" },
-    { platform: "antigravity",  path: "package.json" },
-    { platform: "openclaw",     path: "openclaw.plugin.json" },
-  ]
+  ## Derive paths from REGISTRY. Record { platform, path, status }.
+  manifest_checks = []
+  FOR pid, spec IN REGISTRY:
+    IF spec.manifest.path IS NOT null:
+      manifest_checks.append({ platform: pid, path: spec.manifest.path })
+    IF spec.manifest.marketplace_path IS NOT null:
+      manifest_checks.append({ platform: pid, path: spec.manifest.marketplace_path })
 
   computed.manifest_results = []
   FOR check IN manifest_checks:
@@ -43,16 +38,12 @@ INVENTORY(plugin_path, computed):
     computed.manifest_results.append({ platform: check.platform, path: check.path, status: status })
 
   ## 2.3 Check Context Files
-  ## 7 checks: CLAUDE.md, AGENTS.md x4, GEMINI.md x2.
-  context_checks = [
-    { platform: "claude-code",  path: "CLAUDE.md" },
-    { platform: "cursor",       path: "AGENTS.md" },
-    { platform: "gemini-cli",   path: "GEMINI.md" },
-    { platform: "codex",        path: "AGENTS.md" },
-    { platform: "antigravity",  path: "AGENTS.md" },
-    { platform: "antigravity",  path: "GEMINI.md" },
-    { platform: "openclaw",     path: "AGENTS.md" },
-  ]
+  ## Derive from REGISTRY primary_file + secondary_files.
+  context_checks = []
+  FOR pid, spec IN REGISTRY:
+    context_checks.append({ platform: pid, path: spec.context.primary_file })
+    FOR secondary IN spec.context.secondary_files:
+      context_checks.append({ platform: pid, path: secondary })
 
   computed.context_results = []
   FOR check IN context_checks:
@@ -140,10 +131,10 @@ INVENTORY(plugin_path, computed):
   FOR r IN computed.sidecar_results:
     IF r.status == "PRESENT":
       p = "skills/" + r.skill + "/references/" + r.file
-      computed.existing_files.append({ path: p, platform: spec_platform(r.file) })
+      computed.existing_files.append({ path: p, platform: platform_for_spec(r.file) })
   FOR r IN computed.hook_results:
     IF r.status == "PRESENT":
-      computed.existing_files.append({ path: r.path, platform: hook_platform(r.path) })
+      computed.existing_files.append({ path: r.path, platform: platform_for_hooks(r.path) })
 
   # Any file that already exists will be skipped during generation (idempotent).
   computed.skipped = computed.existing_files
@@ -155,5 +146,5 @@ INVENTORY(plugin_path, computed):
 |--------|-----------|
 | `parse_yaml_frontmatter` | inline — read between `---` markers |
 | `check_injection_components` | `lib/patterns/injection-checks.md` |
-| `spec_platform(file)` | `"gemini-cli.md" → "gemini-cli"`, `"codex.md" → "codex"` |
-| `hook_platform(path)` | `"hooks.json" → "claude-code"`, `"hooks-cursor.json" → "cursor"` |
+| `platform_for_spec(file)` | `lib/references/platform-api.md` |
+| `platform_for_hooks(path)` | `lib/references/platform-api.md` |
