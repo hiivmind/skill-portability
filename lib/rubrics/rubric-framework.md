@@ -152,7 +152,7 @@ When evaluating checkable conditions, the LLM may generate a read-only script
 from the condition's pseudocode and execute it, rather than manually interpreting
 each check. The pseudocode operations (`read_json`, `file_exists`,
 `parse_frontmatter`, `glob`) map to read-only filesystem queries.
-See `lib/patterns/pseudocode-principles.md` for the full canonical
+See `lib/principles/pseudocode-principles.md` for the full canonical
 primitive list and the three-tier decision boundary (define / self-evident / inline).
 
 This skill is used by plugin authors on their own repos. JIT scripts are
