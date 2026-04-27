@@ -23,7 +23,7 @@ categories:
         points: 1
         check: |
           json = read_json(".claude-plugin/plugin.json")
-          for field in LOOKUP["manifest_required_fields"]["claude-code"]:
+          for field in REGISTRY["claude-code"].manifest.required_fields:
             assert field_present(json, field)
           # Required: name, version, description, author.name, author.email
         template: manifests/claude-plugin/plugin.json.tmpl?merge
@@ -110,7 +110,7 @@ categories:
         critical: true
         points: 1
         check: |
-          builtin = LOOKUP["tool_names"]["claude-code"]
+          builtin = supported_tools("claude-code")
           # [Read, Write, Edit, Bash, Grep, Glob, Task, Agent,
           #  TodoWrite, Skill, WebSearch, WebFetch]
           for skill in glob("skills/*/SKILL.md"):
@@ -171,7 +171,7 @@ categories:
         points: 1
         check: |
           hooks = read_json("hooks/hooks.json")
-          valid_events = LOOKUP["hook_events"]["claude-code"]
+          valid_events = REGISTRY["claude-code"].hooks.events
           # [SessionStart, PreToolUse, PostToolUse, PostToolUseFailure,
           #  SubagentStart, SubagentStop, PreCompact, Stop, UserPromptSubmit]
           for event in hooks.keys():

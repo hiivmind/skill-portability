@@ -2,7 +2,7 @@
 
 Shared scoring model for plugin portability assessment. Used by `plugin-portability`.
 Per-platform conditions are in `platforms/<platform>.yaml`.
-Lookup tables are in `lib/references/platform-mappings.md`.
+Platform specs are in `lib/references/platforms/*.md`. Lookup functions are in `lib/references/platform-api.md`.
 
 ---
 
@@ -141,7 +141,7 @@ Blockers override raw scores. A repo with a decent score may still have one crit
 | Hook env hard-coding | Major | Hook scripts reference `CLAUDE_PLUGIN_ROOT` without env branching |
 | Docs/structure mismatch | Major | Install docs describe paths that don't exist in repo |
 | Whole-repo assumption | Minor | Repo requires whole-repo install but only documents single-skill copying |
-| Missing subagent translation | Minor | Skills dispatch via `Task`/`Agent` but no codex-tools or gemini-tools sidecar |
+| Missing subagent translation | Minor | Skills dispatch via `Task`/`Agent` but no platform spec documents the mapping |
 | Gemini import gaps | Minor | `GEMINI.md` exists but missing `@` includes for some skills |
 
 ---

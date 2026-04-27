@@ -24,7 +24,7 @@ categories:
         check: |
           if file_exists("package.json"):
             json = read_json("package.json")
-            for field in LOOKUP["manifest_required_fields"]["antigravity"]:
+            for field in REGISTRY["antigravity"].manifest.required_fields:
               assert field in json, f"Missing required field: {field}"
             # Required: name, displayName, version, description, publisher
         template: manifests/antigravity/package.json.tmpl?merge
@@ -60,7 +60,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["field_stripping"]["antigravity"]: strip both fields
+          # strip_fields("antigravity"): strip both fields
           for skill in glob(".agents/skills/*/SKILL.md") + glob(".agent/skills/*/SKILL.md"):
             fm = parse_frontmatter(skill)
             assert "disable-model-invocation" not in fm, \
@@ -170,9 +170,9 @@ categories:
           mapping content is reachable:
           IF shape == "full-portable-plugin":
             Via AGENTS.md tool mapping section, GEMINI.md @ includes, or
-            shared antigravity-tools.md reference
+            lib/references/platforms/antigravity.md reference
           ELIF shape IN ["bare-skill-repo", "skill-first"]:
-            Via per-skill references/antigravity-tools.md sidecar
+            Via per-skill references/platforms/antigravity.md sidecar
 
       - id: antigravity.5_toolmap.model_mapping.no_model_field
         type: checkable
