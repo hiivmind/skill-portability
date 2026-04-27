@@ -47,24 +47,26 @@ CHECK_INJECTION_COMPONENTS(computed):
     results.append({ component: path, status: "MISSING" })
 
   # 5. hooks.json SessionStart entry
+  claude_event = hook_event("claude-code", "session.start")
   IF file_exists("hooks/hooks.json"):
     content = Read("hooks/hooks.json")
-    IF content contains "SessionStart" AND content contains "session-start":
-      results.append({ component: "hooks/hooks.json (SessionStart)", status: "PRESENT" })
+    IF content contains claude_event AND content contains "session-start":
+      results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "PRESENT" })
     ELSE:
-      results.append({ component: "hooks/hooks.json (SessionStart)", status: "MISSING" })
+      results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "MISSING" })
   ELSE:
-    results.append({ component: "hooks/hooks.json (SessionStart)", status: "MISSING" })
+    results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "MISSING" })
 
   # 6. hooks-cursor.json sessionStart entry
+  cursor_event = hook_event("cursor", "session.start")
   IF file_exists("hooks/hooks-cursor.json"):
     content = Read("hooks/hooks-cursor.json")
-    IF content contains "sessionStart" AND content contains "session-start":
-      results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "PRESENT" })
+    IF content contains cursor_event AND content contains "session-start":
+      results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "PRESENT" })
     ELSE:
-      results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "MISSING" })
+      results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "MISSING" })
   ELSE:
-    results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "MISSING" })
+    results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "MISSING" })
 
   # 7. GEMINI.md ordering
   IF file_exists("GEMINI.md"):
