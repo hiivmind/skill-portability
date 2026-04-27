@@ -96,7 +96,7 @@ Seven functions in claude-code.yaml that hide simple logic behind names:
 | Current | Inlined replacement |
 |---------|-------------------|
 | `extract_tool_references(skill)` | `for tool_call in skill content:` |
-| `remaps_claude_tools(content)` | `content maps any tool in supported_tools("claude-code") to a different name` |
+| `remaps_claude_tools(content)` | `for op in supported_tools("claude-code"): name = tool_name("claude-code", op); if content maps name to a different name: fail` |
 | `scan_plugin_structure(".")` | Remove — the judgement prose already says what to check |
 | `content_matches_structure(content, structure)` | `CLAUDE.md describes the actual plugin layout (skills, hooks, agents) accurately` |
 | `has_agent_definitions(".")` | `glob("agents/*.md") is non-empty` |
