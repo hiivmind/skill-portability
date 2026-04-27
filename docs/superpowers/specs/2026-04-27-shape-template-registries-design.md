@@ -173,7 +173,7 @@ The sidecar check needs a default. Derive it from shape:
 
 ### New file: `lib/references/templates/registry.md`
 
-Contains the type, 10 data entries, and 2 lookup functions.
+Contains the type, 12 data entries, and 3 lookup functions.
 
 #### Type
 
@@ -230,6 +230,14 @@ TEMPLATE_REGISTRY: List[TemplateEntry] = [
   { schema: "codex-marketplace",  platform: "codex",       mode: "plain",
     template_path: "lib/templates/manifests/codex-plugin/marketplace.json.tmpl",
     target_path:   ".agents/plugins/marketplace.json" },
+
+  { schema: "antigravity-package", platform: "antigravity", mode: "plain",
+    template_path: "lib/templates/manifests/antigravity/package.json.tmpl",
+    target_path:   "package.json" },
+
+  { schema: "openclaw-plugin",    platform: "openclaw",    mode: "plain",
+    template_path: "lib/templates/manifests/openclaw/openclaw.plugin.json.tmpl",
+    target_path:   "openclaw.plugin.json" },
 ]
 ```
 
@@ -241,12 +249,25 @@ FUNCTION template_for_schema(schema)
   FOR entry IN TEMPLATE_REGISTRY:
     IF entry.schema == schema: RETURN entry
 
+FUNCTION template_for_path(template_ref)
+  RETURNS the TemplateEntry matching a rubric template reference.
+  Strips "?merge" suffix and prepends "lib/templates/" if needed.
+  normalized = strip_suffix(template_ref, "?merge")
+  full_path = "lib/templates/" + normalized
+  FOR entry IN TEMPLATE_REGISTRY:
+    IF entry.template_path == full_path: RETURN entry
+
 FUNCTION templates_for_platform(platform)
   RETURNS all TemplateEntries for a given platform.
   FOR entry IN TEMPLATE_REGISTRY:
     IF entry.platform == platform OR entry.platform == "all":
       INCLUDE entry
 ```
+
+**Note on rubric contract:** Rubric conditions carry `condition.template` values
+like `manifests/gemini-extension.json.tmpl?merge` — a path relative to
+`lib/templates/` with an optional `?merge` action suffix. `template_for_path()`
+bridges this contract to the registry by normalizing the reference.
 
 ### Consumer changes
 
@@ -281,9 +302,9 @@ renderer to call.
 
 **3. SKILL.md Phase 5 — resolve_target_path**
 
-`resolve_target_path(condition.template, platform)` can look up
-`template_for_schema(schema).target_path` from the registry instead of
-re-deriving it.
+`resolve_target_path(condition.template, platform)` can use
+`template_for_path(condition.template).target_path` from the registry instead
+of re-deriving the target path. The `?merge` suffix is stripped by the lookup.
 
 ---
 
@@ -306,4 +327,6 @@ After all edits:
 3. `grep -n 'ALLOWED_CATEGORIES' skills/plugin-portability/SKILL.md` returns 0 — replaced with `allowed_categories()`
 4. `grep -n 'allowed_categories\|sidecar_strategy' skills/plugin-portability/SKILL.md` shows lookup calls
 5. `grep -cP '^\| .*(claude-plugin|cursor-plugin|gemini-extension).*\|' lib/patterns/manifest-generation.md` returns 0 — prose table replaced with registry reference
-6. `grep -n 'template_for_schema\|templates_for_platform' lib/patterns/manifest-generation.md` shows lookup calls
+6. `grep -n 'template_for_schema\|template_for_path\|templates_for_platform' lib/patterns/manifest-generation.md` shows lookup calls
+7. Template registry has 12 entries — one per `.tmpl` file in `lib/templates/manifests/` + 2 context-file entries
+8. Every non-null `template:` value in `lib/rubrics/*.yaml` resolves via `template_for_path()`
