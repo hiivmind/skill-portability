@@ -10,7 +10,9 @@
 
 ---
 
-## The Pattern
+## The Patterns
+
+### For files
 
 ```pseudocode
 LOAD_AND_VERIFY(path, proof):
@@ -21,8 +23,19 @@ LOAD_AND_VERIFY(path, proof):
   DISPLAY "Loaded {path}: {extracted}"
 ```
 
+### For directories
+
+```pseudocode
+GLOB_AND_VERIFY(pattern, proof):
+  files = Glob(pattern)
+  IF files IS empty:
+    HALT "Cannot proceed: no files matching {pattern}"
+  extracted = proof(files)
+  DISPLAY "Found {pattern}: {extracted}"
+```
+
 The `proof` function is phase-specific — it extracts something that can only
-come from actually reading the file.
+come from actually reading the file or listing the directory.
 
 ---
 
@@ -97,7 +110,15 @@ SCORE(computed, platforms):
     proof: content contains scoring formula with critical_pass/critical_count
       threshold and 4 bands: strong, viable, partial, weak)
 
+  LOAD_AND_VERIFY("lib/references/platform-api.md",
+    proof: content contains TYPE PlatformSpec and FUNCTION definitions for
+      tool_name, hook_event, strip_fields, supported_tools)
+
   FOR platform IN platforms:
+    LOAD_AND_VERIFY("lib/references/platforms/" + platform + ".md",
+      proof: content contains REGISTRY[platform] with tools, hooks,
+        manifest, frontmatter sections)
+
     LOAD_AND_VERIFY("lib/rubrics/" + platform + ".yaml",
       proof: file parses as YAML with categories containing conditions
         with id, type, check fields)
@@ -151,11 +172,12 @@ Replace with:
 
 ```pseudocode
 DOCUMENT(computed, intent):
-  LOAD_AND_VERIFY("lib/templates/install-docs/",
-    proof: directory contains install doc templates;
-      list files found)
+  GLOB_AND_VERIFY("lib/templates/install-docs/**/*.md",
+    proof: list template files found, at least one per target platform)
 
-  # Generate install documentation per platform from templates
+  FOR platform IN intent.platforms:
+    LOAD_AND_VERIFY install doc template for platform
+    # Generate install documentation from template
 ```
 
 ### Phase 8: Bootstrap
@@ -188,7 +210,9 @@ BOOTSTRAP(computed, intent):
 
 After all edits:
 
-1. Every phase that previously said "Follow ..." or "References ..." now has a `LOAD_AND_VERIFY` block
-2. `grep -c 'LOAD_AND_VERIFY' skills/plugin-portability/SKILL.md` returns at least 10
+1. Every phase that previously said "Follow ..." or "References ..." now has a `LOAD_AND_VERIFY` or `GLOB_AND_VERIFY` block
+2. `grep -c 'LOAD_AND_VERIFY\|GLOB_AND_VERIFY' skills/plugin-portability/SKILL.md` returns at least 12
 3. No phase begins executing logic before its gate passes
 4. Each gate's proof value is specific enough that it can only be satisfied by reading the actual file
+5. Phase 3 gates include platform-api.md and per-platform spec files before rubric evaluation
+6. Phase 7 uses GLOB_AND_VERIFY for the install-docs directory, not Read
