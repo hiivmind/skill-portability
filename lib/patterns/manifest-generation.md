@@ -63,18 +63,10 @@ RENDER_WITH_BUILDER(template, metadata, computed):
 
 ## Schema-to-Template Mapping
 
-| Schema | Mode | Template file |
-|--------|------|---------------|
-| claude-plugin | Plain | `lib/templates/manifests/claude-plugin/plugin.json.tmpl` |
-| claude-marketplace | Plain | `lib/templates/manifests/claude-plugin/marketplace.json.tmpl` |
-| claude-context | Plain | `lib/templates/context-files/CLAUDE.md.tmpl` |
-| cursor-plugin | Conditional | `lib/templates/manifests/cursor-plugin/plugin.json.tmpl` |
-| cursor-marketplace | Plain | `lib/templates/manifests/cursor-plugin/marketplace.json.tmpl` |
-| gemini-extension | Plain | `lib/templates/manifests/gemini-extension.json.tmpl` |
-| gemini-context | Builder | `lib/templates/context-files/GEMINI.md.tmpl` |
-| agents-context | Builder | `lib/templates/context-files/AGENTS.md.tmpl` |
-| codex-plugin | Plain | `lib/templates/manifests/codex-plugin/plugin.json.tmpl` |
-| codex-marketplace | Plain | `lib/templates/manifests/codex-plugin/marketplace.json.tmpl` |
+Schema-to-template mappings are defined in `lib/references/templates/registry.md`.
+Use `template_for_schema(schema)` to look up template path, target path, and
+rendering mode for a given schema. Use `template_for_path(template_ref)` to
+resolve a rubric `condition.template` value to its registry entry.
 
 ---
 
