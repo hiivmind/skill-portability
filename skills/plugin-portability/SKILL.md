@@ -20,6 +20,7 @@ Assess or uplift a plugin for multi-platform portability. Single entry point for
 > **External references:**
 > `lib/patterns/detection-algorithm.md` | `lib/patterns/inventory.md` | `lib/rubrics/rubric-framework.md`
 > `lib/rubrics/*.yaml` | `lib/references/platform-api.md` | `lib/references/platforms/*.md` | `lib/patterns/manifest-generation.md`
+> `lib/references/uplift-targets/registry.md` | `lib/references/templates/registry.md`
 > `lib/patterns/hook-merging.md` | `lib/patterns/bootstrapping.md` | `lib/patterns/injection-checks.md`
 > `lib/templates/install-docs/` | `lib/templates/manifests/` | `lib/templates/context-files/`
 
@@ -139,12 +140,10 @@ INTENT_UPLIFT_TARGET(computed):
     recommended = "full-portable-plugin"
     reason = computed.shape + " with " + str(len(computed.skills)) + " skills"
 
-  # Q3: Build options with "(Recommended)" suffix on derived choice
-  options = [
-    { label: "Skill-first",          description: "Sidecars, tool mapping, context files only." },
-    { label: "Full portable plugin", description: "Manifests, context, hooks, install docs -- everything." },
-    { label: "Curated note only",    description: "Documentation only. No generated artifacts." }
-  ]
+  # Q3: Build options from UPLIFT_TARGETS registry
+  options = []
+  FOR id, target IN UPLIFT_TARGETS:
+    options.append({ label: title_case(id), description: target.description })
   FOR opt IN options:
     IF opt.label.lower().startswith(recommended.replace("-", " ")):
       opt.label += " (Recommended)"
@@ -218,14 +217,7 @@ REPORT(computed, intent):
 
 ### Allowed categories by uplift target
 
-```pseudocode
-ALLOWED_CATEGORIES = {
-  "skill-first":          ["2_skills", "3_context", "5_toolmap", "6_install"],
-  "full-portable-plugin": ["1_manifest", "2_skills", "3_context", "4_hooks",
-                           "5_toolmap", "6_install", "7_runtime"],
-  "curated-note-only":    ["6_install"]
-}
-```
+Derived from `lib/references/uplift-targets/registry.md`.
 
 ### Template action types
 
@@ -236,7 +228,7 @@ ALLOWED_CATEGORIES = {
 ### Phase 5: Generate
 
 ```pseudocode
-allowed = ALLOWED_CATEGORIES[computed.uplift_target]
+allowed = allowed_categories(computed.uplift_target)
 
 FOR platform IN intent.platforms:
   FOR condition IN computed.scores[platform].failing:
@@ -244,7 +236,7 @@ FOR platform IN intent.platforms:
     IF NOT condition.template:
       computed.manual_actions.append(condition); CONTINUE
 
-    target_path = resolve_target_path(condition.template, platform)
+    target_path = template_for_path(condition.template).target_path
     action = parse_action(condition.template)  # "create" or "merge"
 
     IF action == "create" AND NOT exists(target_path):
