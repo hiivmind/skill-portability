@@ -1,8 +1,9 @@
 # Pseudocode & Registry Principles
 
-Decision frameworks for how structured data and pseudocode are organized
-in this repo. Two concerns: when to create a registry, and how to write
-pseudocode in rubric checks and pattern files.
+Decision frameworks for how structured data, pseudocode, and external
+references are organized in this repo. Three concerns: when to create a
+registry, how to write pseudocode, and how to enforce that external
+references are actually read.
 
 ---
 
@@ -95,3 +96,41 @@ Inlining examples:
 | `uses_mcp_servers(".")` | `file_exists(".mcp.json") or config references MCP servers` |
 | `contains_verification_guidance(content)` | `content includes steps to verify the plugin loaded` |
 | `skill_name_referenced(content, skill)` | `name from parse_frontmatter(skill) appears in content` |
+
+---
+
+## Verification Gates
+
+When a skill or pattern file delegates to an external reference ("follow
+detection-algorithm.md", "see hook-merging.md"), the executing LLM may
+skip reading the file and hallucinate the algorithm. A prose hint like
+"Follow X" is not a directive — it's a suggestion the LLM can ignore.
+
+### The principle
+
+Every phase that depends on an external reference must **read the file,
+prove it read it, and then follow the instructions**. No phase logic
+executes before its gate passes.
+
+### Two patterns
+
+**LOAD_AND_VERIFY** — for files. Read the file, extract a proof value
+that can only come from actually reading it (function names, entry counts,
+structural markers), display a checkpoint.
+
+**GLOB_AND_VERIFY** — for directories. Glob for expected files, verify
+the list is non-empty and covers the expected scope, display what was found.
+
+### What makes a good proof
+
+The proof must be **specific enough that it cannot be guessed**. Bad proofs:
+"file exists" (trivially true). Good proofs: "content contains FUNCTION
+definitions for X, Y, Z" or "YAML parses with N conditions across 7
+categories."
+
+### When to use
+
+- A skill phase says "follow" or "see" an external file — add a gate
+- A pseudocode block calls functions defined in another file — gate that file
+- A phase iterates over files in a directory — GLOB_AND_VERIFY first
+- A phase only uses self-contained logic (no external refs) — no gate needed
