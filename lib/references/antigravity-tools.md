@@ -59,9 +59,9 @@ All skill and agent frontmatter must have these fields **removed**:
 
 ### Context files
 
-- Primary: `AGENTS.md`
-- `GEMINI.md` takes higher priority when both exist
-- Additional: `.agent/rules/*.md` for rule-based agent bodies
+- `AGENTS.md` has highest priority (universal standard)
+- `GEMINI.md` is Antigravity-native, loaded if present
+- Additional: `.agents/rules/*.md` for rule-based agent bodies
 
 ### No hooks system
 
