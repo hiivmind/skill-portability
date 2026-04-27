@@ -98,7 +98,7 @@ categories:
         check: |
           For each SKILL.md, verify tool references are resolvable on OpenClaw.
           OpenClaw uses (same) for most tools but has no Task/Agent tool — it uses
-          agents.list[] in runtime config instead (tool_name("openclaw", "Task")).
+          agents.list[] in runtime config instead (tool_name("openclaw", "subagent.dispatch")).
           Also has no TodoWrite or Skill tool (mapped to N/A).
           Flag any unresolvable tool references.
 
@@ -227,7 +227,7 @@ categories:
           If any skills reference Task or Agent tool usage, verify that the
           OpenClaw equivalent (agents.list[] in runtime config) is documented.
           OpenClaw manages agents via manifest configuration, not a tool —
-          tool_name("openclaw", "Task") = "agents.list[]".
+          tool_name("openclaw", "subagent.dispatch") = "agents.list[]".
 
   6_install:
     conditions:

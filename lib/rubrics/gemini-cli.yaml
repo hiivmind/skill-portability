@@ -108,7 +108,7 @@ categories:
         check: |
           For each SKILL.md, verify there are no references to Task or Agent
           tools. Gemini does not have a Task tool — it uses @agent-name syntax
-          instead (tool_name("gemini-cli", "Task") = "@agent-name").
+          instead (tool_name("gemini-cli", "subagent.dispatch") = "@agent-name").
           Flag any raw Task/Agent tool invocations.
 
   3_context:

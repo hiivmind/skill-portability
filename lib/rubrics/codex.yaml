@@ -109,7 +109,7 @@ categories:
         check: |
           For each SKILL.md that references Task or Agent tools, verify that
           the Codex equivalent (spawn_agent) is documented. Claude Code Task/Agent
-          maps to Codex spawn_agent (tool_name("codex", "Task")). A lib/references/platforms/codex.md
+          maps to Codex spawn_agent (tool_name("codex", "subagent.dispatch")). A lib/references/platforms/codex.md
           reference or inline note must explain this mapping.
 
       - id: codex.2_skills.tool_refs.update_plan
@@ -120,7 +120,7 @@ categories:
         check: |
           For each SKILL.md that references TodoWrite, verify that the Codex
           equivalent (update_plan) is documented. Claude Code TodoWrite maps to
-          Codex update_plan (tool_name("codex", "TodoWrite")).
+          Codex update_plan (tool_name("codex", "task.track")).
 
   3_context:
     conditions:
