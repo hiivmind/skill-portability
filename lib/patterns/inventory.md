@@ -59,16 +59,33 @@ INVENTORY(plugin_path, computed):
     status = IF file_exists(plugin_path + "/" + check.path) THEN "PRESENT" ELSE "MISSING"
     computed.context_results.append({ platform: check.platform, path: check.path, status: status })
 
-  ## 2.4 Check Per-Skill Sidecars
-  ## codex-tools.md and gemini-tools.md per skill directory.
-  sidecar_files = ["codex-tools.md", "gemini-tools.md"]
+  ## 2.4 Check Tool Reference Sidecars
+  ## Shape-aware: bare-skill repos need per-skill sidecars (no context file to carry
+  ## shared references). Plugin repos can use shared references via context files.
+  sidecar_files = ["codex-tools.md", "gemini-tools.md", "cursor-tools.md",
+                   "antigravity-tools.md", "openclaw-tools.md"]
   computed.sidecar_results = []
 
-  FOR skill IN computed.skills:
+  IF computed.shape IN ["bare-skill-repo", "skill-first"]:
+    # Bare skills need per-skill sidecars — no context file to carry shared refs
+    FOR skill IN computed.skills:
+      FOR sidecar IN sidecar_files:
+        target = "skills/" + skill.dir + "/references/" + sidecar
+        status = IF file_exists(plugin_path + "/" + target) THEN "PRESENT" ELSE "MISSING"
+        computed.sidecar_results.append({ skill: skill.dir, file: sidecar, status: status })
+
+  ELIF computed.shape == "full-portable-plugin":
+    # Plugins have context files — check shared references instead
+    shared_paths = ["lib/references/", "references/"]
     FOR sidecar IN sidecar_files:
-      target = "skills/" + skill.dir + "/references/" + sidecar
-      status = IF file_exists(plugin_path + "/" + target) THEN "PRESENT" ELSE "MISSING"
-      computed.sidecar_results.append({ skill: skill.dir, file: sidecar, status: status })
+      found = false
+      FOR shared IN shared_paths:
+        IF file_exists(plugin_path + "/" + shared + sidecar):
+          found = true
+          computed.sidecar_results.append({ skill: "(shared)", file: shared + sidecar, status: "PRESENT" })
+          BREAK
+      IF NOT found:
+        computed.sidecar_results.append({ skill: "(shared)", file: sidecar, status: "MISSING" })
 
   ## 2.5 Check Frontmatter Compatibility
   ## name and description are required for all platforms.
