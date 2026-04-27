@@ -1,7 +1,7 @@
 {
   "name": "skill-portability",
   "description": "Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare SKILL.md repos as input. Emits every missing platform artifact.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "skills": "./skills/",
   "hooks": "./hooks/"
 }
