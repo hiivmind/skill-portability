@@ -198,6 +198,36 @@ Track every platform-specific claim in the plugin against researched facts in
 | Skill discovery paths | Per platform | Source plugin glob correct; platform paths handled by rubrics | Correct |
 | Hook discovery | Per platform | Codex hooks now exist | Fixed (hook-merging.md updated) |
 
+### publishing-and-discoverability.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Claude Code publishing | Git repos, marketplace, team distribution | Confirmed: marketplace add, extraKnownMarketplaces | Correct |
+| Cursor publishing | cursor.com/marketplace, /add-plugin | Confirmed: marketplace submission, /add-plugin install | Correct |
+| Gemini CLI publishing | geminicli.com/extensions, extensions install | Confirmed: gallery, extensions install command | Correct |
+| Codex skills publishing | $skill-installer, GitHub repos | Confirmed: $skill-installer, standard skill paths | Fixed (removed unverifiable .curated/.experimental claims) |
+| Codex plugins publishing | marketplace add, not yet public | Confirmed: codex plugin marketplace add | Correct |
+| Antigravity publishing | Claimed antigravity.dev/plugins marketplace | No official marketplace exists; distribution via git repos and npm installers | Fixed (rewrote section) |
+| Antigravity install commands | Claimed `antigravity plugin add` | No such CLI command; install by copying to .agents/skills/ | Fixed (rewrote section) |
+| OpenClaw registry | Claimed openclaw.dev/registry | Registry is ClawHub at clawhub.ai | Fixed (corrected URL and name) |
+| OpenClaw install commands | Claimed `openclaw install <name>` | Actual: `openclaw plugins install clawhub:<pkg>` or `openclaw skills install <slug>` | Fixed (corrected syntax) |
+| OpenClaw manifest requirement | Claimed "no manifest required" | `openclaw.plugin.json` with id and configSchema IS required for native plugins | Fixed (added requirement) |
+
+### injection-checks.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Component 2 sidecar path | Was `skills/using-{{name}}/references/gemini-tools.md` | Per-skill sidecars deleted in #11; shared refs at `lib/references/` | Fixed (updated to shared path) |
+| Component 5 hooks.json SessionStart | Claude Code PascalCase | Correct | Correct |
+| Component 6 hooks-cursor.json sessionStart | Cursor camelCase | Correct | Correct |
+| Component 7 GEMINI.md ordering | First @./skills/ include | Correct (lib/references/ includes don't match skills/ regex) | Correct |
+
+### report-template.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Report structure | Phase-based computed fields | No platform-specific claims — purely structural | Correct |
+
 ---
 
 ## 4. Templates (`lib/templates/`)
@@ -246,16 +276,31 @@ Track every platform-specific claim in the plugin against researched facts in
 
 ---
 
-## 5. Skill Logic (`skills/plugin-portability/SKILL.md`)
+## 5. Skill Logic (`skills/`)
+
+### skills/plugin-portability/SKILL.md
 
 | Section | Claim | Research says | Status |
 |---------|-------|---------------|--------|
 | Phase 0a | Platform list (6) | Correct set | Correct |
+| Phase 0a | Platform descriptions (Cursor, Gemini, Codex, Antigravity, OpenClaw) | All 5 descriptions accurate | Correct |
 | Phase 0b | Shape detection → uplift target | No platform-specific claims | Correct |
-| Phase 3 | Loads rubric YAMLs per platform | Correct mechanism | Correct |
+| Phase 3 | Loads rubric YAMLs per platform | Correct mechanism and file paths | Correct |
 | Phase 5 | ALLOWED_CATEGORIES by shape | Category names match rubric-framework.md (verified Tier 2) | Correct |
+| Phase 5 | Template action types (create, merge, none) | No platform-specific claims | Correct |
 | Phase 6 | Hook porting (skips if 4_hooks not allowed) | Codex now has hooks — hook-merging.md updated | Fixed |
 | Phase 6 | References hook-merging.md | hook-merging.md now covers Codex | Fixed |
+| Phase 7 | References lib/templates/install-docs/ | Correct path | Correct |
+| Phase 8 | References lib/patterns/bootstrapping.md | Correct path | Correct |
+
+### skills/using-skill-portability/SKILL.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Claude Code / Cursor invocation | `Skill` tool | Correct for both | Correct |
+| Gemini CLI invocation | `activate_skill` tool | Correct | Correct |
+| Antigravity / OpenClaw / Codex | "Skills are auto-discovered" | Antigravity: semantic match auto-activate. Codex: native loading. OpenClaw: prompt injection. All correct. | Correct |
+| Tool reference pointer | `lib/references/` | Correct shared path | Correct |
 
 ---
 
@@ -327,6 +372,16 @@ in `docs/research/per-platform-context-loading.md` (#12).
 24. ~~**cursor-tools.md**: Subagent support not documented~~ Fixed — added full subagent section
 25. ~~**antigravity-tools.md + Table 2**: Tool names claimed "same as Claude"~~ Fixed — all 13 tools have different names (view_file, run_command, grep_search, etc.)
 
+### Fixed (Tier 4 — patterns pseudocode and skills)
+
+26. ~~**publishing-and-discoverability.md**: Antigravity section fabricated marketplace URL and CLI commands~~ Fixed — rewritten with git/npm distribution, copy-based install
+27. ~~**publishing-and-discoverability.md**: OpenClaw section wrong registry URL, wrong CLI syntax, false "no manifest" claim~~ Fixed — corrected to ClawHub, proper install commands, manifest requirement
+28. ~~**injection-checks.md**: Component 2 referenced deleted per-skill sidecar path~~ Fixed — updated to shared `lib/references/gemini-tools.md`
+29. ~~**publishing-and-discoverability.md**: Codex skills claimed unverifiable `.curated/`/`.experimental/` folders~~ Fixed — simplified to verified paths
+30. ~~**publishing/openclaw.md template**: Wrong ClawHub URL (clawhub.dev → clawhub.ai), wrong CLI commands~~ Fixed — corrected to clawhub CLI and proper install syntax
+
 ### All verification complete
 
 Zero "Needs review", "Missing", or known gap items remain.
+
+Full coverage: references (Tier 1), rubrics/patterns (Tier 2), templates/install docs (Tier 3), patterns pseudocode and skills (Tier 4).
