@@ -198,6 +198,36 @@ Track every platform-specific claim in the plugin against researched facts in
 | Skill discovery paths | Per platform | Source plugin glob correct; platform paths handled by rubrics | Correct |
 | Hook discovery | Per platform | Codex hooks now exist | Fixed (hook-merging.md updated) |
 
+### publishing-and-discoverability.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Claude Code publishing | Git repos, marketplace, team distribution | Confirmed: marketplace add, extraKnownMarketplaces | Correct |
+| Cursor publishing | cursor.com/marketplace, /add-plugin | Confirmed: marketplace submission, /add-plugin install | Correct |
+| Gemini CLI publishing | geminicli.com/extensions, extensions install | Confirmed: gallery, extensions install command | Correct |
+| Codex skills publishing | $skill-installer, GitHub repos | Confirmed: $skill-installer, standard skill paths | Fixed (removed unverifiable .curated/.experimental claims) |
+| Codex plugins publishing | marketplace add, not yet public | Confirmed: codex plugin marketplace add | Correct |
+| Antigravity publishing | Claimed antigravity.dev/plugins marketplace | No official marketplace exists; distribution via git repos and npm installers | Fixed (rewrote section) |
+| Antigravity install commands | Claimed `antigravity plugin add` | No such CLI command; install by copying to .agents/skills/ | Fixed (rewrote section) |
+| OpenClaw registry | Claimed openclaw.dev/registry | Registry is ClawHub at clawhub.ai | Fixed (corrected URL and name) |
+| OpenClaw install commands | Claimed `openclaw install <name>` | Actual: `openclaw plugins install clawhub:<pkg>` or `openclaw skills install <slug>` | Fixed (corrected syntax) |
+| OpenClaw manifest requirement | Claimed "no manifest required" | `openclaw.plugin.json` with id and configSchema IS required for native plugins | Fixed (added requirement) |
+
+### injection-checks.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Component 2 sidecar path | Was `skills/using-{{name}}/references/gemini-tools.md` | Per-skill sidecars deleted in #11; shared refs at `lib/references/` | Fixed (updated to shared path) |
+| Component 5 hooks.json SessionStart | Claude Code PascalCase | Correct | Correct |
+| Component 6 hooks-cursor.json sessionStart | Cursor camelCase | Correct | Correct |
+| Component 7 GEMINI.md ordering | First @./skills/ include | Correct (lib/references/ includes don't match skills/ regex) | Correct |
+
+### report-template.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Report structure | Phase-based computed fields | No platform-specific claims — purely structural | Correct |
+
 ---
 
 ## 4. Templates (`lib/templates/`)
@@ -246,16 +276,31 @@ Track every platform-specific claim in the plugin against researched facts in
 
 ---
 
-## 5. Skill Logic (`skills/plugin-portability/SKILL.md`)
+## 5. Skill Logic (`skills/`)
+
+### skills/plugin-portability/SKILL.md
 
 | Section | Claim | Research says | Status |
 |---------|-------|---------------|--------|
 | Phase 0a | Platform list (6) | Correct set | Correct |
+| Phase 0a | Platform descriptions (Cursor, Gemini, Codex, Antigravity, OpenClaw) | All 5 descriptions accurate | Correct |
 | Phase 0b | Shape detection → uplift target | No platform-specific claims | Correct |
-| Phase 3 | Loads rubric YAMLs per platform | Correct mechanism | Correct |
+| Phase 3 | Loads rubric YAMLs per platform | Correct mechanism and file paths | Correct |
 | Phase 5 | ALLOWED_CATEGORIES by shape | Category names match rubric-framework.md (verified Tier 2) | Correct |
+| Phase 5 | Template action types (create, merge, none) | No platform-specific claims | Correct |
 | Phase 6 | Hook porting (skips if 4_hooks not allowed) | Codex now has hooks — hook-merging.md updated | Fixed |
 | Phase 6 | References hook-merging.md | hook-merging.md now covers Codex | Fixed |
+| Phase 7 | References lib/templates/install-docs/ | Correct path | Correct |
+| Phase 8 | References lib/patterns/bootstrapping.md | Correct path | Correct |
+
+### skills/using-skill-portability/SKILL.md
+
+| Claim | Current | Research says | Status |
+|-------|---------|---------------|--------|
+| Claude Code / Cursor invocation | `Skill` tool | Correct for both | Correct |
+| Gemini CLI invocation | `activate_skill` tool | Correct | Correct |
+| Antigravity / OpenClaw / Codex | "Skills are auto-discovered" | Antigravity: semantic match auto-activate. Codex: native loading. OpenClaw: prompt injection. All correct. | Correct |
+| Tool reference pointer | `lib/references/` | Correct shared path | Correct |
 
 ---
 
@@ -327,6 +372,50 @@ in `docs/research/per-platform-context-loading.md` (#12).
 24. ~~**cursor-tools.md**: Subagent support not documented~~ Fixed — added full subagent section
 25. ~~**antigravity-tools.md + Table 2**: Tool names claimed "same as Claude"~~ Fixed — all 13 tools have different names (view_file, run_command, grep_search, etc.)
 
-### All verification complete
+### Fixed (Tier 4 — patterns pseudocode and skills)
 
-Zero "Needs review", "Missing", or known gap items remain.
+26. ~~**publishing-and-discoverability.md**: Antigravity section fabricated marketplace URL and CLI commands~~ Fixed — rewritten with git/npm distribution, copy-based install
+27. ~~**publishing-and-discoverability.md**: OpenClaw section wrong registry URL, wrong CLI syntax, false "no manifest" claim~~ Fixed — corrected to ClawHub, proper install commands, manifest requirement
+28. ~~**injection-checks.md**: Component 2 referenced deleted per-skill sidecar path~~ Fixed — updated to shared `lib/references/gemini-tools.md`
+29. ~~**publishing-and-discoverability.md**: Codex skills claimed unverifiable `.curated/`/`.experimental/` folders~~ Fixed — simplified to verified paths
+30. ~~**publishing/openclaw.md template**: Wrong ClawHub URL (clawhub.dev → clawhub.ai), wrong CLI commands~~ Fixed — corrected to clawhub CLI and proper install syntax
+
+### Platform API Restructure
+
+31. ~~**lib/references/**: Duplicated prose-based reference system~~ Fixed — replaced `platform-mappings.md` + 5 `*-tools.md` files with structured `platform-api.md` (type system + lookup functions) and 6 `PlatformSpec` data files in `platforms/`
+32. ~~**Rubric YAMLs**: 28 LOOKUP comments referenced deleted tables~~ Fixed — all converted to `tool_name()`, `hook_event()`, `strip_fields()`, `REGISTRY[platform].*` function calls
+33. ~~**Consumer files**: GEMINI.md, AGENTS.md, CLAUDE.md, CI, patterns, CONTRIBUTING referenced old paths~~ Fixed — all updated to `lib/references/platform-api.md` and `lib/references/platforms/*.md`
+34. ~~**codex-tools.md prose**: Subagent dispatch patterns buried in tool reference~~ Fixed — relocated to `lib/patterns/subagent-dispatch.md`
+
+### Rubric Check Alignment
+
+35. ~~**Rubric YAMLs**: `tool_name()` called with tool names instead of canonical Operations (4 instances)~~ Fixed — all use canonical Operation enum values
+36. ~~**claude-code.yaml**: `supported_tools()` comment lists tool names not canonical ops~~ Fixed — lists canonical operations
+37. ~~**claude-code.yaml**: 7 opaque utility functions should be inlined as prose pseudocode~~ Fixed — all inlined
+38. ~~**All rubrics**: Synonym duplication (`find_file`/`find_first`, `count`/`len`, `field_present`/`in`)~~ Fixed — unified to canonical names
+39. ~~**lib/patterns/pseudocode-principles.md**: Decision boundary doc missing~~ Fixed — created with three-tier framework
+
+### Pattern Deduplication
+
+40. ~~**hook-merging.md**: 20-line event mapping table duplicated REGISTRY data~~ Fixed — replaced with hook_event() reference
+41. ~~**hook-merging.md**: Hardcoded codex_events list~~ Fixed — derived from REGISTRY canonical + extra_events
+42. ~~**hook-merging.md**: Inline gemini_event_map dictionary~~ Fixed — replaced with hook_event() lookups
+43. ~~**inventory.md**: Hardcoded manifest_checks list~~ Fixed — derived from REGISTRY manifest.path + marketplace_path
+44. ~~**inventory.md**: Hardcoded context_checks list~~ Fixed — derived from REGISTRY primary_file + secondary_files
+45. ~~**inventory.md**: Inline spec_platform/hook_platform helpers~~ Fixed — replaced with platform_for_spec/platform_for_hooks from platform-api.md
+46. ~~**injection-checks.md**: Hardcoded "SessionStart"/"sessionStart" strings~~ Fixed — replaced with hook_event() calls
+47. ~~**bootstrapping.md**: Inline hook output format documentation~~ Fixed — references REGISTRY[platform].hooks.output_key
+48. ~~**PlatformSpec**: Missing marketplace_path field~~ Fixed — added to type and all 6 platform specs
+49. ~~**antigravity.md**: GEMINI.md in priority_note prose, not secondary_files~~ Fixed — added to secondary_files
+
+### Shape & Template Registries
+
+50. ~~**SKILL.md Phase 0b**: Hardcoded uplift option labels/descriptions~~ Fixed — derived from UPLIFT_TARGETS registry
+51. ~~**SKILL.md Phase 5**: Inline ALLOWED_CATEGORIES dict~~ Fixed — replaced with allowed_categories() lookup
+52. ~~**SKILL.md Phase 5**: resolve_target_path re-derives target paths~~ Fixed — uses template_for_path().target_path
+53. ~~**inventory.md**: Shape-based sidecar branching~~ Fixed — uses sidecar_strategy() lookup
+54. ~~**manifest-generation.md**: 10-row Schema-to-Template prose table~~ Fixed — references lib/references/templates/registry.md
+
+### Verification status
+
+All tiers, platform API restructure, rubric check alignment, pattern deduplication, and shape/template registries: complete, zero gaps.

@@ -36,7 +36,7 @@ categories:
         check: |
           if file_exists(".codex-plugin/plugin.json"):
             json = read_json(".codex-plugin/plugin.json")
-            for field in LOOKUP["manifest_required_fields"]["codex"]:
+            for field in REGISTRY["codex"].manifest.required_fields:
               assert field in json, f"Missing required field: {field}"
             # Required: name, version, description (Table 6)
         template: manifests/codex-plugin/plugin.json.tmpl?merge
@@ -49,7 +49,7 @@ categories:
         check: |
           # Only for native plugin path with multiple plugins
           if file_exists(".codex-plugin/plugin.json"):
-            if count(glob(".agents/skills/*/SKILL.md")) > 1:
+            if len(glob(".agents/skills/*/SKILL.md")) > 1:
               assert file_exists(".codex-plugin/marketplace.json"), \
                 "Multi-skill native plugin missing marketplace.json"
         template: manifests/codex-plugin/marketplace.json.tmpl
@@ -84,7 +84,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["field_stripping"]["codex"]: strip disable-model-invocation, allowed-tools
+          # strip_fields("codex"): strip disable-model-invocation, allowed-tools
           for skill in glob(".agents/skills/*/SKILL.md"):
             fm = parse_frontmatter(skill)
             assert "disable-model-invocation" not in fm, \
@@ -109,8 +109,8 @@ categories:
         check: |
           For each SKILL.md that references Task or Agent tools, verify that
           the Codex equivalent (spawn_agent) is documented. Claude Code Task/Agent
-          maps to Codex spawn_agent (LOOKUP Table 2). A references/codex-tools.md
-          sidecar or inline note must explain this mapping.
+          maps to Codex spawn_agent (tool_name("codex", "subagent.dispatch")). A lib/references/platforms/codex.md
+          reference or inline note must explain this mapping.
 
       - id: codex.2_skills.tool_refs.update_plan
         type: judgement
@@ -120,7 +120,7 @@ categories:
         check: |
           For each SKILL.md that references TodoWrite, verify that the Codex
           equivalent (update_plan) is documented. Claude Code TodoWrite maps to
-          Codex update_plan (LOOKUP Table 2).
+          Codex update_plan (tool_name("codex", "task.track")).
 
   3_context:
     conditions:
@@ -208,7 +208,7 @@ categories:
           IF shape IN ["bare-skill-repo", "skill-first"]:
             for skill_dir in glob_dirs("skills/*/") + glob_dirs(".agents/skills/*/"):
               name = basename(skill_dir)
-              skill_path = skill_dir + "/references/codex-tools.md"
+              skill_path = skill_dir + "/references/platforms/codex.md"
               assert file_exists(skill_path), \
                 f"{skill_path} sidecar missing"
           ELSE:
@@ -222,7 +222,7 @@ categories:
         check: |
           IF shape == "full-portable-plugin":
             Verify Codex tool mapping content is reachable — either via
-            shared references/codex-tools.md, lib/references/codex-tools.md,
+            lib/references/platforms/codex.md,
             or documented in AGENTS.md directly. Must contain "spawn_agent"
             and "apply_patch" mappings.
           ELSE:
@@ -234,12 +234,12 @@ categories:
         critical: true
         points: 1
         check: |
-          sidecars = glob("**/codex-tools.md")
-          assert len(sidecars) > 0, "No codex-tools.md found"
+          sidecars = glob("**/platforms/codex.md") OR find_first("lib/references/platforms/codex.md")
+          assert len(sidecars) > 0, "No Codex platform spec found"
           found = false
           for sidecar in sidecars:
             if "spawn_agent" in read(sidecar): found = true
-          assert found, "No codex-tools.md documents Task/Agent → spawn_agent"
+          assert found, "No Codex platform spec documents Task/Agent → spawn_agent"
 
       - id: codex.5_toolmap.sidecar.update_plan_mapped
         type: checkable
@@ -247,12 +247,12 @@ categories:
         critical: false
         points: 1
         check: |
-          sidecars = glob("**/codex-tools.md")
+          sidecars = glob("**/platforms/codex.md") OR find_first("lib/references/platforms/codex.md")
           if len(sidecars) > 0:
             found = false
             for sidecar in sidecars:
               if "update_plan" in read(sidecar): found = true
-            assert found, "No codex-tools.md documents TodoWrite → update_plan"
+            assert found, "No Codex platform spec documents TodoWrite → update_plan"
 
       - id: codex.5_toolmap.model_mapping.no_claude_models
         type: checkable
@@ -260,7 +260,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["model_mapping"]["codex"]: opus→gpt-5.4, sonnet/haiku→gpt-5.4-mini
+          # REGISTRY["codex"].frontmatter.model_format: opus→gpt-5.4, sonnet/haiku→gpt-5.4-mini
           claude_models = ["opus", "sonnet", "haiku"]
           for toml in glob(".codex/agents/*.toml"):
             content = read(toml)
@@ -307,7 +307,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md", ".codex/INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md", ".codex/INSTALL.md"])
           assert readme is not None, "No README.md, INSTALL.md, or .codex/INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"

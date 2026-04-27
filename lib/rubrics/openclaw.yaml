@@ -22,7 +22,7 @@ categories:
         points: 1
         check: |
           json = read_json("openclaw.plugin.json")
-          for field in LOOKUP["manifest_required_fields"]["openclaw"]:
+          for field in REGISTRY["openclaw"].manifest.required_fields:
             assert field in json, f"Missing required field: {field}"
           # Required: id, configSchema
         template: manifests/openclaw/openclaw.plugin.json.tmpl?merge
@@ -73,7 +73,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["field_stripping"]["openclaw"]: strip both fields
+          # strip_fields("openclaw"): strip both fields
           for skill in glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(skill)
             assert "disable-model-invocation" not in fm, \
@@ -98,7 +98,7 @@ categories:
         check: |
           For each SKILL.md, verify tool references are resolvable on OpenClaw.
           OpenClaw uses (same) for most tools but has no Task/Agent tool — it uses
-          agents.list[] in runtime config instead (LOOKUP["tool_mapping"]["openclaw"]).
+          agents.list[] in runtime config instead (tool_name("openclaw", "subagent.dispatch")).
           Also has no TodoWrite or Skill tool (mapped to N/A).
           Flag any unresolvable tool references.
 
@@ -155,7 +155,7 @@ categories:
         points: 1
         check: |
           If hook guidance exists, verify it uses correct OpenClaw snake_case
-          event names (see lib/references/openclaw-tools.md for full 15-event
+          event names (see lib/references/platforms/openclaw.md for full 15-event
           list): before_tool_call, after_tool_call, tool_result_persist,
           llm_input, llm_output, message_received, message_sent,
           before_agent_finalize, agent_end, before_model_resolve,
@@ -182,8 +182,8 @@ categories:
         points: 1
         check: |
           OpenClaw shares most tool names with Claude Code but has no
-          Task/Agent or TodoWrite tools. Verify that AGENTS.md or an
-          openclaw-tools.md reference documents these differences and
+          Task/Agent or TodoWrite tools. Verify that AGENTS.md or
+          lib/references/platforms/openclaw.md documents these differences and
           the agents.list[] manifest-based agent dispatch pattern.
 
       - id: openclaw.5_toolmap.model_mapping.no_claude_models
@@ -192,7 +192,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["model_mapping"]["openclaw"]: opus→anthropic/claude-opus-4-6, etc.
+          # REGISTRY["openclaw"].frontmatter.model_format: opus→anthropic/claude-opus-4-6, etc.
           claude_models = ["opus", "sonnet", "haiku"]
           for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(md)
@@ -227,7 +227,7 @@ categories:
           If any skills reference Task or Agent tool usage, verify that the
           OpenClaw equivalent (agents.list[] in runtime config) is documented.
           OpenClaw manages agents via manifest configuration, not a tool —
-          LOOKUP["tool_mapping"]["openclaw"]["Task"] = "agents.list[]".
+          tool_name("openclaw", "subagent.dispatch") = "agents.list[]".
 
   6_install:
     conditions:
@@ -237,7 +237,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md"])
           assert readme is not None, "No README.md or INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"

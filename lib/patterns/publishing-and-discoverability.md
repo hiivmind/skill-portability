@@ -9,10 +9,10 @@ How to get a plugin discovered and installed on each platform. Use this referenc
 | Claude Code | No (Git repos) | N/A | N/A | Share repo URL | 1. `/plugin marketplace add owner/repo` 2. `/plugin install name@marketplace` |
 | Cursor | cursor.com/marketplace | cursor.com/marketplace/publish | Manual, open-source only | Marketplace search or `/add-plugin` | `/add-plugin owner/repo` |
 | Gemini CLI | geminicli.com/extensions | Via gallery | Not vetted | Gallery search | `gemini extensions install <url>` |
-| Codex (skills) | github.com/openai/skills | PR to repo | Curated | `$skill-installer` search | `$skill-installer <name>` |
+| Codex (skills) | Community directories | GitHub repo | N/A | `$skill-installer` search | `$skill-installer <name>` |
 | Codex (plugins) | Not yet public | N/A | N/A | `codex plugin marketplace add` | Via marketplace |
-| Antigravity | antigravity.dev/plugins | Submit via site | Community-reviewed | Plugin directory search | `antigravity plugin add <name>` |
-| OpenClaw | openclaw.dev/registry | PR to registry repo | Curated | Registry search | `openclaw install <name>` |
+| Antigravity | No (Git repos + npm) | N/A | N/A | Community collections | Copy to `.agents/skills/` |
+| OpenClaw | ClawHub (clawhub.ai) | ClawHub CLI or npm | Curated | ClawHub search | `openclaw plugins install clawhub:<pkg>` |
 
 ## Claude Code
 
@@ -110,9 +110,7 @@ For repos that are mostly instructions with no plugin UI metadata needed.
 
 ### Publishing
 
-- Submit a PR to `github.com/openai/skills` for inclusion in the curated catalog
-- Skills go into `.curated/` (vetted) or `.experimental/` (community/developmental)
-- Alternatively, publish as a standalone GitHub repo
+- Publish as a standalone GitHub repo with `SKILL.md` frontmatter
 
 ### Requirements
 
@@ -120,16 +118,11 @@ For repos that are mostly instructions with no plugin UI metadata needed.
 
 ### Discovery and install
 
-- `$skill-installer <name>` — install from the curated catalog by name
-- `$skill-installer install <name> from the .experimental folder`
+- `$skill-installer <name>` — install by name
 - `$skill-installer install <github-url>` — install by URL
-- Manual: clone and symlink `skills/` to `~/.agents/skills/<name>`
+- Manual: copy or symlink to `~/.codex/skills/<name>/` or `~/.agents/skills/<name>/`
 
-Skills install into `~/.codex/skills/<name>/` by default.
-
-### Third-party registries
-
-SkillsMP.com and Smithery.ai have emerged as community skill directories.
+Skills install into `~/.codex/skills/<name>/` by default. Restart Codex after adding new skills.
 
 ## Codex — Plugin Packaging Path
 
@@ -157,50 +150,64 @@ Public self-serve plugin publishing is "coming soon" per OpenAI docs. Currently,
 
 ## Antigravity
 
-Plugin directory at [antigravity.dev/plugins](https://antigravity.dev/plugins/).
+No official skill marketplace or registry. Distribution is via Git repositories, community npm installers, and manual sharing.
 
 ### Publishing
 
-Plugins are published as GitHub repositories and submitted to the Antigravity plugin directory. Community members can review and rate plugins.
+Skills are published as GitHub repositories. Community skill collections (e.g., `antigravity-awesome-skills` with 1,400+ skills) provide npm-based cross-platform installers.
 
 ### Requirements
 
-- `AGENTS.md` context file describing the plugin
-- `skills/*/SKILL.md` with standard frontmatter
+- `.agents/skills/<name>/SKILL.md` with standard frontmatter
+- `AGENTS.md` context file (optional but recommended)
 
-Antigravity auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
+Antigravity auto-discovers skills from `.agents/skills/` directories. No platform-specific manifest is required for skill distribution.
 
 ### Discovery and install
 
-- Browse the directory at `antigravity.dev/plugins`
-- Install: `antigravity plugin add <name>`
-- Install from URL: `antigravity plugin add <github-url>`
+- Community collections: [sickn33/antigravity-awesome-skills](https://github.com/sickn33/antigravity-awesome-skills)
+- npm installer: `npx antigravity-awesome-skills` (installs to `~/.gemini/antigravity/skills/`)
+- Manual: copy skill directory into `.agents/skills/` (workspace) or `~/.gemini/antigravity/skills/` (global)
 
 ### Local development
 
-`antigravity plugin link <path>` for local development. Changes are picked up on next session start.
+Copy or symlink skill directory into `.agents/skills/`. Changes are picked up on next session start.
+
+### VS Code extensions
+
+As a VS Code fork, Antigravity uses **OpenVSX** for IDE extensions (separate from the skill system). Install via `--install-extension <path-to-vsix>`.
 
 ## OpenClaw
 
-Plugin registry at [openclaw.dev/registry](https://openclaw.dev/registry/).
+Public registry at [ClawHub](https://clawhub.ai). Also supports npm distribution.
 
 ### Publishing
 
-Plugins are published by submitting a PR to the OpenClaw registry repository. Registry entries are curated and reviewed before inclusion.
+Plugins are published via ClawHub CLI or npm:
+
+```bash
+npm i -g clawhub
+clawhub login
+clawhub package publish your-org/your-plugin
+clawhub skill publish ./my-skill-pack
+```
+
+Alternatively, publish to npm with `openclaw.extensions` in `package.json`.
 
 ### Requirements
 
-- `AGENTS.md` context file describing the plugin
-- `skills/*/SKILL.md` with standard frontmatter
-
-OpenClaw auto-discovers skills from the `skills/` directory and context from `AGENTS.md`. No platform-specific manifest is required.
+- `openclaw.plugin.json` manifest with `id` and `configSchema` (required for native plugins)
+- `package.json` with `openclaw.extensions` and `openclaw.compat` (required for npm distribution)
+- `AGENTS.md` context file (optional but recommended)
+- `skills/*/SKILL.md` with standard frontmatter (for skill-bearing plugins)
 
 ### Discovery and install
 
-- Browse the registry at `openclaw.dev/registry`
-- Install: `openclaw install <name>`
-- Install from URL: `openclaw install <github-url>`
+- ClawHub: `openclaw plugins install clawhub:<package>`
+- Skills: `openclaw skills install <slug>`
+- npm: `openclaw plugins install @org/plugin-name`
+- Bare names check ClawHub first, then npm
 
 ### Local development
 
-`openclaw link <path>` for local development.
+`openclaw plugins install -l ./my-plugin` for linked local development. Or add to `plugins.load.paths` in `~/.openclaw/openclaw.json`.

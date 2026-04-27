@@ -1,38 +1,12 @@
-# Codex Tool Mapping
+# Subagent Dispatch Patterns
 
-Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent:
+Cross-platform patterns for dispatching subagents from skills that use
+Claude Code's `Task` or `Agent` tools. Referenced by rubric conditions and
+skill pseudocode.
 
-| Skill references | Codex equivalent |
-| ---------------- | ---------------- |
-| `Read` (file reading) | `Read` |
-| `Write` (file creation) | `Write` |
-| `Edit` (file editing) | `apply_patch` |
-| `Bash` (run commands) | `Bash` |
-| `Grep` (search file content) | `Grep` |
-| `Glob` (search files by name) | `Glob` |
-| `Task` tool (dispatch subagent) | `spawn_agent` (see [Named agent dispatch](#named-agent-dispatch)) |
-| `Agent` (dispatch subagent) | `spawn_agent` |
-| Multiple `Task` calls (parallel) | Multiple `spawn_agent` calls |
-| Task returns result | `wait` |
-| Task completes automatically | `close_agent` to free slot |
-| `TodoWrite` (task tracking) | `update_plan` |
-| `Skill` tool (invoke a skill) | Skills load natively — just follow the instructions |
-| `WebSearch` (web search) | `WebSearch` |
-| `WebFetch` (fetch URL) | No direct equivalent — use MCP for URL fetching |
-| `AskUserQuestion` (structured input) | `AskUserQuestion` |
+---
 
-## Subagent dispatch requires multi-agent support
-
-Add to your Codex config (`~/.codex/config.toml`):
-
-```toml
-[features]
-multi_agent = true
-```
-
-This enables `spawn_agent`, `wait`, and `close_agent` for skills like `dispatching-parallel-agents` and `subagent-driven-development`.
-
-## Named agent dispatch
+## Codex: Named Agent Dispatch
 
 Claude Code skills reference named agent types like `superpowers:code-reviewer`.
 Codex does not have a named agent registry — `spawn_agent` creates generic agents
@@ -56,16 +30,14 @@ When a skill says to dispatch a named agent type:
 The `message` parameter is user-level input, not a system prompt. Structure it
 for maximum instruction adherence:
 
-```text
-Your task is to perform the following. Follow the instructions below exactly.
+    Your task is to perform the following. Follow the instructions below exactly.
 
-<agent-instructions>
-[filled prompt content from the agent's .md file]
-</agent-instructions>
+    <agent-instructions>
+    [filled prompt content from the agent's .md file]
+    </agent-instructions>
 
-Execute this now. Output ONLY the structured response following the format
-specified in the instructions above.
-```
+    Execute this now. Output ONLY the structured response following the format
+    specified in the instructions above.
 
 - Use task-delegation framing ("Your task is...") rather than persona framing ("You are...")
 - Wrap instructions in XML tags — the model treats tagged blocks as authoritative
@@ -78,22 +50,36 @@ field in `plugin.json`. When `RawPluginManifest` gains an `agents` field, the
 plugin can symlink to `agents/` (mirroring the existing `skills/` symlink) and
 skills can dispatch named agent types directly.
 
+---
+
+## Codex: Multi-Agent Feature Flag
+
+Subagent dispatch requires the multi-agent feature flag:
+
+    # ~/.codex/config.toml
+    [features]
+    multi_agent = true
+
+This enables `spawn_agent`, `wait`, and `close_agent`.
+
+---
+
 ## Environment Detection
 
 Skills that create worktrees or finish branches should detect their
 environment with read-only git commands before proceeding:
 
-```bash
-GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
-GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-BRANCH=$(git branch --show-current)
-```
+    GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+    GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+    BRANCH=$(git branch --show-current)
 
 - `GIT_DIR != GIT_COMMON` → already in a linked worktree (skip creation)
 - `BRANCH` empty → detached HEAD (cannot branch/push/PR from sandbox)
 
 See `using-git-worktrees` Step 0 and `finishing-a-development-branch`
 Step 1 for how each skill uses these signals.
+
+---
 
 ## Codex App Finishing
 
@@ -106,22 +92,3 @@ the user to use the App's native controls:
 
 The agent can still run tests, stage files, and output suggested branch
 names, commit messages, and PR descriptions for the user to copy.
-
-## Hooks
-
-Codex has a lifecycle hook system behind a feature flag. Enable it in config:
-
-```toml
-# ~/.codex/config.toml or .codex/config.toml
-[features]
-codex_hooks = true
-```
-
-Codex hooks use the same JSON protocol and PascalCase event names as Claude
-Code (`SessionStart`, `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`).
-Codex also has a `PermissionRequest` event with no Claude Code equivalent.
-
-Hook config goes in `hooks.json` (same format as Claude Code) or inline
-`[hooks]` tables in `config.toml`. Default timeout: 600 seconds.
-
-See `lib/patterns/hook-merging.md` for generation logic.

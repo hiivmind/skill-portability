@@ -7,13 +7,14 @@ Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor
 @./skills/using-skill-portability/SKILL.md
 @./skills/plugin-portability/SKILL.md
 
-## Tool References
+## Platform API
 
-@./lib/references/gemini-tools.md
-@./lib/references/codex-tools.md
-@./lib/references/cursor-tools.md
-@./lib/references/antigravity-tools.md
-@./lib/references/openclaw-tools.md
+@./lib/references/platform-api.md
+@./lib/references/platforms/gemini-cli.md
+@./lib/references/platforms/codex.md
+@./lib/references/platforms/cursor.md
+@./lib/references/platforms/antigravity.md
+@./lib/references/platforms/openclaw.md
 
 ## Platform Accuracy Constraint
 
@@ -24,8 +25,8 @@ claims, cross-reference:
 1. **Research docs** — `docs/platforms/*.md` (sourced, with inline citations)
 2. **Reconciliation matrix** — `docs/reconciliation-matrix.md` (tracks known
    discrepancies and their fix status)
-3. **Canonical lookup tables** — `lib/references/platform-mappings.md` (single
-   source of truth consumed by rubrics)
+3. **Platform API** — `lib/references/platform-api.md` and `lib/references/platforms/*.md`
+   (structured PlatformSpec dictionaries consumed by rubrics)
 
 If you find a conflict between these sources, trust the researched platform docs
 (they have citations). Update the reconciliation matrix when fixing discrepancies

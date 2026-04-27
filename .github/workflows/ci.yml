@@ -82,9 +82,10 @@ jobs:
           done
 
           echo ""
-          echo "=== Shared Tool References ==="
-          for sidecar in codex-tools.md gemini-tools.md cursor-tools.md antigravity-tools.md openclaw-tools.md; do
-            check_file "lib/references/${sidecar}"
+          echo "=== Platform Specs ==="
+          check_file "lib/references/platform-api.md"
+          for spec in codex.md gemini-cli.md cursor.md antigravity.md openclaw.md claude-code.md; do
+            check_file "lib/references/platforms/${spec}"
           done
 
           echo ""

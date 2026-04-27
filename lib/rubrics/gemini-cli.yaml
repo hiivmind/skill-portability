@@ -22,7 +22,7 @@ categories:
         points: 1
         check: |
           json = read_json("gemini-extension.json")
-          for field in LOOKUP["manifest_required_fields"]["gemini"]:
+          for field in REGISTRY["gemini-cli"].manifest.required_fields:
             assert field in json, f"Missing required field: {field}"
           # Required: name, version, description, contextFileName
         template: manifests/gemini-extension.json.tmpl?merge
@@ -83,7 +83,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["field_stripping"]["gemini"]: strip both fields
+          # strip_fields("gemini-cli"): strip both fields
           for skill in glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(skill)
             assert "disable-model-invocation" not in fm, \
@@ -108,7 +108,7 @@ categories:
         check: |
           For each SKILL.md, verify there are no references to Task or Agent
           tools. Gemini does not have a Task tool — it uses @agent-name syntax
-          instead (LOOKUP["tool_mapping"]["gemini"]["Task"] = "@agent-name").
+          instead (tool_name("gemini-cli", "subagent.dispatch") = "@agent-name").
           Flag any raw Task/Agent tool invocations.
 
   3_context:
@@ -145,8 +145,8 @@ categories:
           # Only for full-portable-plugin shape
           IF shape == "full-portable-plugin":
             content = read("GEMINI.md")
-            assert "@" in content and "gemini-tools.md" in content, \
-              "GEMINI.md must @ include a gemini-tools.md (shared or per-skill)"
+            assert "@" in content and "platforms/gemini-cli.md" in content, \
+              "GEMINI.md must @ include a platforms/gemini-cli.md (shared or per-skill)"
           ELSE:
             SKIP  # bare-skill — no GEMINI.md to check
         template: context-files/GEMINI.md.tmpl?merge
@@ -181,7 +181,7 @@ categories:
         points: 1
         check: |
           If hook guidance exists, verify it uses correct Gemini PascalCase event
-          names from LOOKUP["hook_events"]["gemini"]:
+          names from REGISTRY["gemini-cli"].hooks.events:
           SessionStart, BeforeTool, AfterTool, PreCompress, AfterAgent.
           Not Claude's PascalCase variants or Cursor's camelCase.
 
@@ -197,8 +197,8 @@ categories:
           IF shape IN ["bare-skill-repo", "skill-first"]:
             for skill_dir in glob_dirs("skills/*/"):
               name = basename(skill_dir)
-              assert file_exists(f"skills/{name}/references/gemini-tools.md"), \
-                f"skills/{name}/references/gemini-tools.md sidecar missing"
+              assert file_exists(f"skills/{name}/references/platforms/gemini-cli.md"), \
+                f"skills/{name}/references/platforms/gemini-cli.md sidecar missing"
           ELSE:
             SKIP  # plugin shape — shared references checked below
 
@@ -223,9 +223,9 @@ categories:
         critical: false
         points: 1
         check: |
-          # Find all gemini-tools.md files (per-skill or shared)
-          sidecars = glob("**/gemini-tools.md")
-          assert len(sidecars) > 0, "No gemini-tools.md found anywhere"
+          # Find all gemini-cli platform spec files (per-skill or shared)
+          sidecars = glob("**/platforms/gemini-cli.md") OR find_first("lib/references/platforms/gemini-cli.md")
+          assert len(sidecars) > 0, "No Gemini platform spec found anywhere"
           for sidecar in sidecars:
             content = read(sidecar)
             assert "read_file" in content, f"{sidecar}: missing Read → read_file"
@@ -238,7 +238,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["model_mapping"]["gemini"]: opus→gemini-2.5-pro, etc.
+          # REGISTRY["gemini-cli"].frontmatter.model_format: opus→gemini-2.5-pro, etc.
           claude_models = ["opus", "sonnet", "haiku"]
           for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(md)
@@ -278,7 +278,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md"])
           assert readme is not None, "No README.md or INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"
@@ -339,7 +339,7 @@ categories:
         critical: false
         points: 1
         check: |
-          # LOOKUP["agent_output_format"]["gemini"]: tools = ["*"]
+          # REGISTRY["gemini-cli"].skills.agents_path: tools = ["*"]
           for md in glob("agents/*.md"):
             fm = parse_frontmatter(md)
             if "tools" in fm:

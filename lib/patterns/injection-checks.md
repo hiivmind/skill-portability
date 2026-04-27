@@ -10,7 +10,7 @@ Only runs when `skills/using-<name>/SKILL.md` exists.
 | # | Component | Check | Status Values |
 |---|-----------|-------|---------------|
 | 1 | `skills/using-{{name}}/SKILL.md` | File exists | PRESENT / MISSING |
-| 2 | `skills/using-{{name}}/references/gemini-tools.md` | File exists | PRESENT / MISSING |
+| 2 | `lib/references/platforms/gemini-cli.md` | File exists (platform spec) | PRESENT / MISSING |
 | 3 | `hooks/session-start` | File exists and is executable | PRESENT / MISSING |
 | 4 | `hooks/run-hook.cmd` | File exists and is executable | PRESENT / MISSING |
 | 5 | `hooks/hooks.json` | Contains `SessionStart` entry with command containing `session-start` | PRESENT / MISSING |
@@ -29,8 +29,8 @@ CHECK_INJECTION_COMPONENTS(computed):
   # 1. using-skill SKILL.md
   results.append(check_file_exists("skills/using-" + name + "/SKILL.md"))
 
-  # 2. using-skill gemini sidecar
-  results.append(check_file_exists("skills/using-" + name + "/references/gemini-tools.md"))
+  # 2. shared gemini platform spec
+  results.append(check_file_exists("lib/references/platforms/gemini-cli.md"))
 
   # 3. session-start script
   path = "hooks/session-start"
@@ -47,24 +47,26 @@ CHECK_INJECTION_COMPONENTS(computed):
     results.append({ component: path, status: "MISSING" })
 
   # 5. hooks.json SessionStart entry
+  claude_event = hook_event("claude-code", "session.start")
   IF file_exists("hooks/hooks.json"):
     content = Read("hooks/hooks.json")
-    IF content contains "SessionStart" AND content contains "session-start":
-      results.append({ component: "hooks/hooks.json (SessionStart)", status: "PRESENT" })
+    IF content contains claude_event AND content contains "session-start":
+      results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "PRESENT" })
     ELSE:
-      results.append({ component: "hooks/hooks.json (SessionStart)", status: "MISSING" })
+      results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "MISSING" })
   ELSE:
-    results.append({ component: "hooks/hooks.json (SessionStart)", status: "MISSING" })
+    results.append({ component: "hooks/hooks.json (" + claude_event + ")", status: "MISSING" })
 
   # 6. hooks-cursor.json sessionStart entry
+  cursor_event = hook_event("cursor", "session.start")
   IF file_exists("hooks/hooks-cursor.json"):
     content = Read("hooks/hooks-cursor.json")
-    IF content contains "sessionStart" AND content contains "session-start":
-      results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "PRESENT" })
+    IF content contains cursor_event AND content contains "session-start":
+      results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "PRESENT" })
     ELSE:
-      results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "MISSING" })
+      results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "MISSING" })
   ELSE:
-    results.append({ component: "hooks/hooks-cursor.json (sessionStart)", status: "MISSING" })
+    results.append({ component: "hooks/hooks-cursor.json (" + cursor_event + ")", status: "MISSING" })
 
   # 7. GEMINI.md ordering
   IF file_exists("GEMINI.md"):
@@ -80,7 +82,7 @@ CHECK_INJECTION_COMPONENTS(computed):
   RETURN results
 
 COMPUTE_INJECTION_SUMMARY(results):
-  present = count(r for r in results if r.status == "PRESENT")
+  present = len(r for r in results if r.status == "PRESENT")
   total = len(results)
   IF present == total:
     RETURN "COMPLETE"

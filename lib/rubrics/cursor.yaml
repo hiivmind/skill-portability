@@ -23,7 +23,7 @@ categories:
         points: 1
         check: |
           json = read_json(".cursor-plugin/plugin.json")
-          for field in LOOKUP["manifest_required_fields"]["cursor"]:
+          for field in REGISTRY["cursor"].manifest.required_fields:
             assert field in json, f"Missing required field: {field}"
           # Required: name, displayName, description, version, author
         template: manifests/cursor-plugin/plugin.json.tmpl?merge
@@ -61,7 +61,7 @@ categories:
         points: 1
         check: |
           # Only required for multi-plugin repos
-          if count(glob("skills/*/SKILL.md")) > 1 or dir_exists(".cursor-plugin/plugins/"):
+          if len(glob("skills/*/SKILL.md")) > 1 or dir_exists(".cursor-plugin/plugins/"):
             assert file_exists(".cursor-plugin/marketplace.json"), "Multi-plugin repo missing marketplace.json"
         template: manifests/cursor-plugin/marketplace.json.tmpl
 
@@ -84,7 +84,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["field_stripping"]["cursor"]: strip allowed-tools, keep disable-model-invocation
+          # strip_fields("cursor"): strip allowed-tools, keep disable-model-invocation
           for skill in glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(skill)
             assert "allowed-tools" not in fm, f"{skill}: allowed-tools must be stripped for Cursor"
@@ -168,7 +168,7 @@ categories:
         points: 1
         check: |
           hooks = read_json("hooks/hooks-cursor.json")
-          valid_events = LOOKUP["hook_events"]["cursor"]
+          valid_events = REGISTRY["cursor"].hooks.events
           # Valid: sessionStart, preToolUse, postToolUse, postToolUseFailure,
           #        subagentStart, subagentStop, preCompact, stop, beforeSubmitPrompt
           for entry in hooks:
@@ -196,7 +196,7 @@ categories:
             if "${CLAUDE_PLUGIN_ROOT}" in content:
               assert "${CURSOR_PLUGIN_ROOT}" in content, \
                 f"{script}: bare ${{CLAUDE_PLUGIN_ROOT}} without ${{CURSOR_PLUGIN_ROOT}} branching"
-              # LOOKUP["path_variables"]["cursor"]: ${CURSOR_PLUGIN_ROOT}
+              # REGISTRY["cursor"].paths.plugin_root: ${CURSOR_PLUGIN_ROOT}
 
       - id: cursor.4_hooks.scripts.cross_platform
         type: checkable
@@ -215,7 +215,7 @@ categories:
         critical: false
         points: 1
         check: |
-          # LOOKUP["hook_format_rules"]["cursor"]: output key is additional_context
+          # REGISTRY["cursor"].hooks.output_key: output key is additional_context
           for script in glob("hooks/scripts/*"):
             content = read(script)
             if "hookSpecificOutput" in content or "additionalContext" in content:
@@ -231,7 +231,7 @@ categories:
         check: |
           Cursor uses the same tool names as Claude Code — no tool mapping
           sidecar is strictly required. However, verify that AGENTS.md or
-          a cursor-tools.md reference documents any Cursor-specific
+          lib/references/platforms/cursor.md documents any Cursor-specific
           differences (hook format, model handling, MCP path).
 
       - id: cursor.5_toolmap.model_mapping.no_claude_models
@@ -240,7 +240,7 @@ categories:
         critical: true
         points: 1
         check: |
-          # LOOKUP["model_mapping"]["cursor"]: all models map to "inherit"
+          # REGISTRY["cursor"].frontmatter.model_format: all models map to "inherit"
           claude_models = ["opus", "sonnet", "haiku"]
           for md in glob("agents/*.md") + glob("skills/*/SKILL.md"):
             fm = parse_frontmatter(md)
@@ -258,7 +258,7 @@ categories:
             fm = parse_frontmatter(md)
             if "model" in fm:
               assert fm["model"] == "inherit", \
-                f"{md}: model should be 'inherit' for Cursor (LOOKUP Table 1)"
+                f"{md}: model should be 'inherit' for Cursor (REGISTRY[\"cursor\"].frontmatter.model_format)"
 
       - id: cursor.5_toolmap.subagent_syntax.documented
         type: judgement
@@ -278,7 +278,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md"])
           assert readme is not None, "No README.md or INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"

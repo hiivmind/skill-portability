@@ -37,7 +37,7 @@ allowed-tools: Read, Write, Edit
 ---
 ```
 
-See existing skills in `skills/` for examples. Each skill should also have a `references/` subdirectory containing platform-specific tool mappings (`codex-tools.md`, `gemini-tools.md`, `antigravity-tools.md`, `openclaw-tools.md`).
+See existing skills in `skills/` for examples. Platform-specific tool mappings are in `lib/references/platforms/`. See `lib/references/platform-api.md` for the type system and lookup functions.
 
 ## Pull Request Process
 
