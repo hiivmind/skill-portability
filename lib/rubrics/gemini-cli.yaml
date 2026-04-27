@@ -136,18 +136,19 @@ categories:
               f"GEMINI.md missing @ include for {expected}"
         template: context-files/GEMINI.md.tmpl?merge
 
-      - id: gemini.3_context.gemini_md.at_includes_sidecars
+      - id: gemini.3_context.gemini_md.at_includes_tool_refs
         type: checkable
         component: gemini_md
         critical: true
         points: 1
         check: |
-          content = read("GEMINI.md")
-          for skill_dir in glob_dirs("skills/*/"):
-            name = basename(skill_dir)
-            expected = f"@./skills/{name}/references/gemini-tools.md"
-            assert expected in content, \
-              f"GEMINI.md missing @ include for sidecar {expected}"
+          # Only for full-portable-plugin shape
+          IF shape == "full-portable-plugin":
+            content = read("GEMINI.md")
+            assert "@" in content and "gemini-tools.md" in content, \
+              "GEMINI.md must @ include a gemini-tools.md (shared or per-skill)"
+          ELSE:
+            SKIP  # bare-skill — no GEMINI.md to check
         template: context-files/GEMINI.md.tmpl?merge
 
       - id: gemini.3_context.gemini_md.accurate
@@ -186,52 +187,50 @@ categories:
 
   5_toolmap:
     conditions:
-      - id: gemini.5_toolmap.sidecar.exists
+      - id: gemini.5_toolmap.sidecar.per_skill
         type: checkable
         component: sidecar
         critical: true
         points: 1
         check: |
-          for skill_dir in glob_dirs("skills/*/"):
-            name = basename(skill_dir)
-            assert file_exists(f"skills/{name}/references/gemini-tools.md"), \
-              f"skills/{name}/references/gemini-tools.md sidecar missing"
+          # Only for bare-skill-repo / skill-first shapes
+          IF shape IN ["bare-skill-repo", "skill-first"]:
+            for skill_dir in glob_dirs("skills/*/"):
+              name = basename(skill_dir)
+              assert file_exists(f"skills/{name}/references/gemini-tools.md"), \
+                f"skills/{name}/references/gemini-tools.md sidecar missing"
+          ELSE:
+            SKIP  # plugin shape — shared references checked below
 
-      - id: gemini.5_toolmap.sidecar.read_mapping
+      - id: gemini.5_toolmap.sidecar.shared_reachable
+        type: judgement
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          # Only for full-portable-plugin shape
+          IF shape == "full-portable-plugin":
+            Verify Gemini tool mapping content is reachable via GEMINI.md.
+            Check that GEMINI.md contains an @ include pointing to a file
+            with "read_file", "replace", and "run_shell_command" mappings.
+            The file can be at any path (shared lib/references/ or per-skill).
+          ELSE:
+            SKIP  # bare-skill shape — per-skill sidecars checked above
+
+      - id: gemini.5_toolmap.sidecar.mapping_content
         type: checkable
         component: sidecar
         critical: false
         points: 1
         check: |
-          # LOOKUP["tool_mapping"]["gemini"]["Read"] = "read_file"
-          for sidecar in glob("skills/*/references/gemini-tools.md"):
+          # Find all gemini-tools.md files (per-skill or shared)
+          sidecars = glob("**/gemini-tools.md")
+          assert len(sidecars) > 0, "No gemini-tools.md found anywhere"
+          for sidecar in sidecars:
             content = read(sidecar)
-            assert "read_file" in content, \
-              f"{sidecar}: missing Read → read_file mapping"
-
-      - id: gemini.5_toolmap.sidecar.edit_mapping
-        type: checkable
-        component: sidecar
-        critical: false
-        points: 1
-        check: |
-          # LOOKUP["tool_mapping"]["gemini"]["Edit"] = "replace"
-          for sidecar in glob("skills/*/references/gemini-tools.md"):
-            content = read(sidecar)
-            assert "replace" in content, \
-              f"{sidecar}: missing Edit → replace mapping"
-
-      - id: gemini.5_toolmap.sidecar.bash_mapping
-        type: checkable
-        component: sidecar
-        critical: false
-        points: 1
-        check: |
-          # LOOKUP["tool_mapping"]["gemini"]["Bash"] = "run_shell_command"
-          for sidecar in glob("skills/*/references/gemini-tools.md"):
-            content = read(sidecar)
-            assert "run_shell_command" in content, \
-              f"{sidecar}: missing Bash → run_shell_command mapping"
+            assert "read_file" in content, f"{sidecar}: missing Read → read_file"
+            assert "replace" in content, f"{sidecar}: missing Edit → replace"
+            assert "run_shell_command" in content, f"{sidecar}: missing Bash → run_shell_command"
 
       - id: gemini.5_toolmap.model_mapping.no_claude_models
         type: checkable
