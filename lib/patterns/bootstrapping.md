@@ -124,10 +124,8 @@ escape_for_json() {
 using_escaped=$(escape_for_json "$using_content")
 session_context="<IMPORTANT>\nThis plugin uses the superpowers portability pattern.\n\n${using_escaped}\n</IMPORTANT>"
 
-# Output context injection as JSON.
-# Cursor hooks expect additional_context (snake_case).
-# Claude Code hooks expect hookSpecificOutput.additionalContext (nested).
-# Other platforms expect additionalContext (top-level, SDK standard).
+# Output format per platform — see REGISTRY[platform].hooks.output_key
+# and REGISTRY[platform].hooks.structure for the authoritative mapping.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
 elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
