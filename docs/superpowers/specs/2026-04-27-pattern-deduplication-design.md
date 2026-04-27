@@ -28,6 +28,41 @@ FUNCTION platform_for_hooks(path)
 
 ---
 
+## PlatformSpec Prerequisites
+
+Before pattern file edits, update the type system and platform data:
+
+**1. Add `marketplace_path` to PlatformSpec.manifest in platform-api.md:**
+```
+manifest: {
+  path:             string | null,
+  marketplace_path: string | null,    # NEW
+  required_fields:  List[string],
+}
+```
+
+Populate in platform spec files:
+- claude-code: `".claude-plugin/marketplace.json"`
+- cursor: `".cursor-plugin/marketplace.json"`
+- codex: `".agents/plugins/marketplace.json"`
+- gemini-cli, antigravity, openclaw: `null`
+
+**2. Add `GEMINI.md` to Antigravity secondary_files:**
+
+In `lib/references/platforms/antigravity.md`, change:
+```
+secondary_files: [".agents/rules/*.md"],
+```
+to:
+```
+secondary_files: ["GEMINI.md", ".agents/rules/*.md"],
+```
+
+This moves `GEMINI.md` from prose-only `priority_note` to machine-readable
+`secondary_files`, enabling REGISTRY-derived context checks to capture it.
+
+---
+
 ## Changes by File
 
 ### hook-merging.md (3 changes)
@@ -75,6 +110,7 @@ Replace with:
 ```
   codex_events = [entry.name FOR event, entry IN REGISTRY["codex"].hooks.events
                   WHERE entry.name IS NOT null]
+                + [entry.name FOR entry IN REGISTRY["codex"].hooks.extra_events]
 ```
 
 **3. GENERATE_GEMINI_HOOK_GUIDANCE inline event map (lines 238-244)**
@@ -121,16 +157,11 @@ Replace with:
   FOR pid, spec IN REGISTRY:
     IF spec.manifest.path IS NOT null:
       manifest_checks.append({ platform: pid, path: spec.manifest.path })
+    IF spec.manifest.marketplace_path IS NOT null:
+      manifest_checks.append({ platform: pid, path: spec.manifest.marketplace_path })
 ```
 
-Note: The current list includes marketplace paths (e.g. `.claude-plugin/marketplace.json`)
-that are not in `REGISTRY[platform].manifest.path`. These need to be captured. Options:
-- The marketplace paths can be derived from the manifest path's parent directory
-- Or add a `marketplace_path` field check alongside the manifest check
-
-The simplest approach: keep a small supplementary list for marketplace paths that
-aren't derivable from REGISTRY, since only 3 platforms have them and the paths
-follow the convention `<manifest-dir>/marketplace.json`.
+See PlatformSpec Prerequisites section above for the `marketplace_path` addition.
 
 **5. context_checks hardcoded list (lines 47-55)**
 
@@ -149,13 +180,14 @@ Replace with:
   context_checks = []
   FOR pid, spec IN REGISTRY:
     context_checks.append({ platform: pid, path: spec.context.primary_file })
+    FOR secondary IN spec.context.secondary_files:
+      context_checks.append({ platform: pid, path: secondary })
 ```
 
-Note: The current list has duplicate entries — `AGENTS.md` appears for cursor,
-codex, antigravity, and openclaw. The REGISTRY-derived version naturally
-deduplicates (each platform contributes one entry). The inventory loop that
-consumes this list checks file existence per-platform, so duplicates were
-harmless but unnecessary.
+This captures Antigravity's `GEMINI.md` requirement (stored in `secondary_files`)
+and any future secondary context files. The current hardcoded list explicitly
+includes both `AGENTS.md` and `GEMINI.md` for Antigravity — the REGISTRY-derived
+version preserves this via `secondary_files`.
 
 **6. spec_platform() and hook_platform() helpers (lines 156-159)**
 
