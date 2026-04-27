@@ -69,7 +69,7 @@ REGISTRY["antigravity"] = {
 
   context: {
     primary_file: "AGENTS.md",
-    secondary_files: [".agents/rules/*.md"],
+    secondary_files: ["GEMINI.md", ".agents/rules/*.md"],
     priority_note: "GEMINI.md is also loaded if present (Antigravity-native)",
   },
 
@@ -85,6 +85,7 @@ REGISTRY["antigravity"] = {
 
   manifest: {
     path: "package.json",
+    marketplace_path: null,
     required_fields: ["name", "displayName", "version", "description", "publisher"],
   },
 

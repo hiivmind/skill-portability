@@ -75,6 +75,7 @@ REGISTRY["codex"] = {
 
   manifest: {
     path: ".codex-plugin/plugin.json",
+    marketplace_path: ".agents/plugins/marketplace.json",
     required_fields: ["name", "version", "description"],
   },
 

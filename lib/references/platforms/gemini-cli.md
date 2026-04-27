@@ -85,6 +85,7 @@ REGISTRY["gemini-cli"] = {
 
   manifest: {
     path: "gemini-extension.json",
+    marketplace_path: null,
     required_fields: ["name", "version", "description", "contextFileName"],
   },
 

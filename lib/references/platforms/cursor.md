@@ -83,6 +83,7 @@ REGISTRY["cursor"] = {
 
   manifest: {
     path: ".cursor-plugin/plugin.json",
+    marketplace_path: ".cursor-plugin/marketplace.json",
     required_fields: ["name", "displayName", "description", "version", "author"],
   },
 

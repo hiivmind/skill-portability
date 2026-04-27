@@ -80,6 +80,7 @@ REGISTRY["claude-code"] = {
 
   manifest: {
     path: ".claude-plugin/plugin.json",
+    marketplace_path: ".claude-plugin/marketplace.json",
     required_fields: ["name", "version", "description", "author.name", "author.email"],
   },
 

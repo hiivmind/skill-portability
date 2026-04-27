@@ -85,6 +85,7 @@ REGISTRY["openclaw"] = {
 
   manifest: {
     path: "openclaw.plugin.json",
+    marketplace_path: null,
     required_fields: ["id", "configSchema"],
   },
 
