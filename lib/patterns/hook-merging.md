@@ -6,24 +6,15 @@ Event name mapping and merge logic for porting hooks across platforms.
 
 ## Event Name Mapping
 
-| Claude Code event | Cursor event | Codex event | Notes |
-|---|---|---|---|
-| `SessionStart` | `sessionStart` | `SessionStart` | |
-| `PreToolUse` | `preToolUse` | `PreToolUse` | |
-| `PostToolUse` | `postToolUse` | `PostToolUse` | |
-| `PostToolUseFailure` | `postToolUseFailure` | (N/A) | |
-| `SubagentStart` | `subagentStart` | (N/A) | |
-| `SubagentStop` | `subagentStop` | (N/A) | |
-| `PreCompact` | `preCompact` | (N/A) | |
-| `Stop` | `stop` | `Stop` | |
-| `UserPromptSubmit` | `beforeSubmitPrompt` | `UserPromptSubmit` | |
-| (N/A) | (N/A) | `PermissionRequest` | Codex-only |
+Event mappings are derived from REGISTRY. To get the platform-native name
+for any canonical event:
 
-Cursor-only events (no Claude Code equivalent):
-`sessionEnd`, `beforeShellExecution`, `afterShellExecution`, `beforeMCPExecution`, `afterMCPExecution`, `beforeReadFile`, `afterFileEdit`, `afterAgentResponse`, `afterAgentThought`
+  hook_event(platform, canonical_event)
 
-Codex-only events (no Claude Code equivalent):
-`PermissionRequest`
+Example: hook_event("cursor", "session.start") → "sessionStart"
+
+For platform-specific events beyond the canonical set, see
+REGISTRY[platform].hooks.extra_events.
 
 ---
 
@@ -99,8 +90,9 @@ GENERATE_CODEX_HOOKS(plugin_path):
   // The install docs handle that (see lib/templates/install-docs/codex.md).
 
   // Check for unmapped events
-  codex_events = ["SessionStart", "PreToolUse", "PostToolUse",
-                   "UserPromptSubmit", "Stop", "PermissionRequest"]
+  codex_events = [entry.name FOR event, entry IN REGISTRY["codex"].hooks.events
+                  WHERE entry.name IS NOT null]
+                + [entry.name FOR entry IN REGISTRY["codex"].hooks.extra_events]
   flags = []
 
   for event in source.hooks:
@@ -235,25 +227,19 @@ For standalone use, it generates guidance text for install docs.
 
 ```pseudocode
 GENERATE_GEMINI_HOOK_GUIDANCE(claude_hooks):
-  gemini_event_map = {
-    "SessionStart":    "SessionStart",
-    "PreToolUse":      "BeforeTool",
-    "PostToolUse":     "AfterTool",
-    "PreCompact":      "PreCompress",
-    "Stop":            "AfterAgent",
-  }
-
   guidance = "### Gemini CLI Hook Configuration\n\n"
   guidance += "Add the following to your `~/.gemini/settings.json`:\n\n"
   guidance += "```json\n{\n  \"hooks\": {\n"
 
-  FOR event, entries IN claude_hooks.hooks:
-    IF event NOT IN gemini_event_map:
-      SKIP
-    gemini_event = gemini_event_map[event]
+  FOR canonical_event IN CanonicalEvent:
+    gemini_name = hook_event("gemini-cli", canonical_event)
+    IF gemini_name IS null: SKIP
+    claude_name = hook_event("claude-code", canonical_event)
+    IF claude_name NOT IN claude_hooks.hooks: SKIP
+    entries = claude_hooks.hooks[claude_name]
 
     FOR entry IN entries:
-      guidance += '    "' + gemini_event + '": [{\n'
+      guidance += '    "' + gemini_name + '": [{\n'
       IF entry.matcher:
         guidance += '      "matcher": "' + entry.matcher + '",\n'
       guidance += '      "sequential": true,\n'
