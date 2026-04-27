@@ -263,9 +263,11 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | File | Current | Status |
 |------|---------|--------|
-| All 10 pointer files | One-liner redirects to lib/references/ | Theatre (issue #11) |
+| All 10 pointer files | Deleted — shared lib/references/ used via GEMINI.md @includes | Fixed (#11) |
 
-These are tracked under GitHub issues #11 and #12, not this matrix.
+Resolved: rubric conditions are now shape-aware. Plugins use shared references
+via context files. Bare-skill repos use per-skill sidecars. Research documented
+in `docs/research/per-platform-context-loading.md` (#12).
 
 ---
 
