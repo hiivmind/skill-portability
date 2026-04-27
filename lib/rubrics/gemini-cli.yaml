@@ -13,7 +13,7 @@ categories:
         points: 1
         check: |
           file_exists("gemini-extension.json")
-        template: manifests/gemini-extension.json.tmpl
+        template: manifests/gemini-cli/gemini-extension.json.tmpl
 
       - id: gemini.1_manifest.extension_json.required_fields
         type: checkable
@@ -25,7 +25,7 @@ categories:
           for field in REGISTRY["gemini-cli"].manifest.required_fields:
             assert field in json, f"Missing required field: {field}"
           # Required: name, version, description, contextFileName
-        template: manifests/gemini-extension.json.tmpl?merge
+        template: manifests/gemini-cli/gemini-extension.json.tmpl?merge
 
       - id: gemini.1_manifest.extension_json.name_format
         type: checkable
@@ -40,7 +40,7 @@ categories:
           dir_name = basename(project_root())
           assert name == dir_name, \
             f"name '{name}' must match directory name '{dir_name}'"
-        template: manifests/gemini-extension.json.tmpl?merge
+        template: manifests/gemini-cli/gemini-extension.json.tmpl?merge
 
       - id: gemini.1_manifest.extension_json.context_filename
         type: checkable
@@ -51,7 +51,7 @@ categories:
           json = read_json("gemini-extension.json")
           assert json.get("contextFileName") == "GEMINI.md", \
             f"contextFileName must be 'GEMINI.md', got '{json.get('contextFileName')}'"
-        template: manifests/gemini-extension.json.tmpl?merge
+        template: manifests/gemini-cli/gemini-extension.json.tmpl?merge
 
       - id: gemini.1_manifest.extension_json.author
         type: checkable
@@ -62,7 +62,7 @@ categories:
           json = read_json("gemini-extension.json")
           assert json.get("author"), "author field not populated"
           assert json.get("homepage"), "homepage field not populated"
-        template: manifests/gemini-extension.json.tmpl?merge
+        template: manifests/gemini-cli/gemini-extension.json.tmpl?merge
 
   2_skills:
     conditions:

@@ -44,7 +44,7 @@ TEMPLATE_REGISTRY: List[TemplateEntry] = [
     target_path:   ".cursor-plugin/marketplace.json" },
 
   { schema: "gemini-extension",    platform: "gemini-cli",  mode: "plain",
-    template_path: "lib/templates/manifests/gemini-extension.json.tmpl",
+    template_path: "lib/templates/manifests/gemini-cli/gemini-extension.json.tmpl",
     target_path:   "gemini-extension.json" },
 
   { schema: "gemini-context",      platform: "gemini-cli",  mode: "builder",
