@@ -380,8 +380,15 @@ in `docs/research/per-platform-context-loading.md` (#12).
 29. ~~**publishing-and-discoverability.md**: Codex skills claimed unverifiable `.curated/`/`.experimental/` folders~~ Fixed — simplified to verified paths
 30. ~~**publishing/openclaw.md template**: Wrong ClawHub URL (clawhub.dev → clawhub.ai), wrong CLI commands~~ Fixed — corrected to clawhub CLI and proper install syntax
 
+### Platform API Restructure
+
+31. ~~**lib/references/**: Duplicated prose-based reference system~~ Fixed — replaced `platform-mappings.md` + 5 `*-tools.md` files with structured `platform-api.md` (type system + lookup functions) and 6 `PlatformSpec` data files in `platforms/`
+32. ~~**Rubric YAMLs**: 28 LOOKUP comments referenced deleted tables~~ Fixed — all converted to `tool_name()`, `hook_event()`, `strip_fields()`, `REGISTRY[platform].*` function calls
+33. ~~**Consumer files**: GEMINI.md, AGENTS.md, CLAUDE.md, CI, patterns, CONTRIBUTING referenced old paths~~ Fixed — all updated to `lib/references/platform-api.md` and `lib/references/platforms/*.md`
+34. ~~**codex-tools.md prose**: Subagent dispatch patterns buried in tool reference~~ Fixed — relocated to `lib/patterns/subagent-dispatch.md`
+
 ### All verification complete
 
 Zero "Needs review", "Missing", or known gap items remain.
 
-Full coverage: references (Tier 1), rubrics/patterns (Tier 2), templates/install docs (Tier 3), patterns pseudocode and skills (Tier 4).
+Full coverage: references (Tier 1), rubrics/patterns (Tier 2), templates/install docs (Tier 3), patterns pseudocode and skills (Tier 4), platform API restructure.
