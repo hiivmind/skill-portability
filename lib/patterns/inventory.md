@@ -62,30 +62,30 @@ INVENTORY(plugin_path, computed):
   ## 2.4 Check Tool Reference Sidecars
   ## Shape-aware: bare-skill repos need per-skill sidecars (no context file to carry
   ## shared references). Plugin repos can use shared references via context files.
-  sidecar_files = ["codex-tools.md", "gemini-tools.md", "cursor-tools.md",
-                   "antigravity-tools.md", "openclaw-tools.md"]
+  platform_spec_files = ["codex.md", "gemini-cli.md", "cursor.md",
+                         "antigravity.md", "openclaw.md"]
   computed.sidecar_results = []
 
   IF computed.shape IN ["bare-skill-repo", "skill-first"]:
-    # Bare skills need per-skill sidecars — no context file to carry shared refs
+    # Bare skills need per-skill spec files — no context file to carry shared refs
     FOR skill IN computed.skills:
-      FOR sidecar IN sidecar_files:
-        target = "skills/" + skill.dir + "/references/" + sidecar
+      FOR spec_file IN platform_spec_files:
+        target = "skills/" + skill.dir + "/references/" + spec_file
         status = IF file_exists(plugin_path + "/" + target) THEN "PRESENT" ELSE "MISSING"
-        computed.sidecar_results.append({ skill: skill.dir, file: sidecar, status: status })
+        computed.sidecar_results.append({ skill: skill.dir, file: spec_file, status: status })
 
   ELIF computed.shape == "full-portable-plugin":
     # Plugins have context files — check shared references instead
-    shared_paths = ["lib/references/", "references/"]
-    FOR sidecar IN sidecar_files:
+    shared_paths = ["lib/references/platforms/", "references/platforms/", "lib/references/"]
+    FOR spec_file IN platform_spec_files:
       found = false
       FOR shared IN shared_paths:
-        IF file_exists(plugin_path + "/" + shared + sidecar):
+        IF file_exists(plugin_path + "/" + shared + spec_file):
           found = true
-          computed.sidecar_results.append({ skill: "(shared)", file: shared + sidecar, status: "PRESENT" })
+          computed.sidecar_results.append({ skill: "(shared)", file: shared + spec_file, status: "PRESENT" })
           BREAK
       IF NOT found:
-        computed.sidecar_results.append({ skill: "(shared)", file: sidecar, status: "MISSING" })
+        computed.sidecar_results.append({ skill: "(shared)", file: spec_file, status: "MISSING" })
 
   ## 2.5 Check Frontmatter Compatibility
   ## name and description are required for all platforms.
@@ -140,7 +140,7 @@ INVENTORY(plugin_path, computed):
   FOR r IN computed.sidecar_results:
     IF r.status == "PRESENT":
       p = "skills/" + r.skill + "/references/" + r.file
-      computed.existing_files.append({ path: p, platform: sidecar_platform(r.file) })
+      computed.existing_files.append({ path: p, platform: spec_platform(r.file) })
   FOR r IN computed.hook_results:
     IF r.status == "PRESENT":
       computed.existing_files.append({ path: r.path, platform: hook_platform(r.path) })
@@ -155,5 +155,5 @@ INVENTORY(plugin_path, computed):
 |--------|-----------|
 | `parse_yaml_frontmatter` | inline — read between `---` markers |
 | `check_injection_components` | `lib/patterns/injection-checks.md` |
-| `sidecar_platform(file)` | `"gemini-tools.md" → "gemini-cli"`, `"codex-tools.md" → "codex"` |
+| `spec_platform(file)` | `"gemini-cli.md" → "gemini-cli"`, `"codex.md" → "codex"` |
 | `hook_platform(path)` | `"hooks.json" → "claude-code"`, `"hooks-cursor.json" → "cursor"` |

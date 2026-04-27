@@ -78,12 +78,8 @@ Skills use Claude Code tool names. See each skill's `references/` directory for 
 ```
 mkdir -p <plugin-path>/skills/using-{{name}}/references/
 
-Write the same two sidecar files as the skill sidecar generation step:
-  - using-{{name}}/references/codex-tools.md
-  - using-{{name}}/references/gemini-tools.md
-
-Source templates from lib/references/ (same templates used for other skills).
-Substitutions: {{name}}, {{displayName}}, {{description}} as in other sidecars.
+  # Per-skill sidecars are no longer generated. Shared platform specs
+  # in lib/references/platforms/ are loaded via context file @includes.
 ```
 
 ---
@@ -270,7 +266,7 @@ END
 Regenerate GEMINI.md placing using-{{name}} first:
 
   @./skills/using-{{name}}/SKILL.md
-  @./skills/using-{{name}}/references/gemini-tools.md
+  @./lib/references/platforms/gemini-cli.md
   {{otherSkillIncludes}}
   {{agentIncludes}}
   {{commandIncludes}}
@@ -278,7 +274,7 @@ Regenerate GEMINI.md placing using-{{name}} first:
 Where:
   - {{otherSkillIncludes}} = all skills except using-{{name}}, same format
     as the GEMINI.md generation step (one @./skills/<name>/SKILL.md line per
-    skill, with its gemini-tools.md sidecar if present)
+    skill, with its platform spec if present)
   - {{agentIncludes}} = agent includes in same format as original generation
   - {{commandIncludes}} = command includes in same format as original generation
 ```
@@ -299,7 +295,7 @@ ELSE IF skip_bootstrapping AND reason == "user declined" THEN
 ELSE
   "Session-start injection configured. Generated:
     - using-{{name}}/SKILL.md
-    - using-{{name}}/references/ (2 sidecars)
+    - using-{{name}}/references/ (shared platform specs from lib/references/platforms/)
     - hooks/session-start
     - hooks/run-hook.cmd
     - hooks/hooks.json (SessionStart entry merged)

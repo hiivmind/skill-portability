@@ -10,7 +10,7 @@ Only runs when `skills/using-<name>/SKILL.md` exists.
 | # | Component | Check | Status Values |
 |---|-----------|-------|---------------|
 | 1 | `skills/using-{{name}}/SKILL.md` | File exists | PRESENT / MISSING |
-| 2 | `skills/using-{{name}}/references/gemini-tools.md` | File exists | PRESENT / MISSING |
+| 2 | `lib/references/platforms/gemini-cli.md` | File exists (platform spec) | PRESENT / MISSING |
 | 3 | `hooks/session-start` | File exists and is executable | PRESENT / MISSING |
 | 4 | `hooks/run-hook.cmd` | File exists and is executable | PRESENT / MISSING |
 | 5 | `hooks/hooks.json` | Contains `SessionStart` entry with command containing `session-start` | PRESENT / MISSING |
@@ -29,8 +29,8 @@ CHECK_INJECTION_COMPONENTS(computed):
   # 1. using-skill SKILL.md
   results.append(check_file_exists("skills/using-" + name + "/SKILL.md"))
 
-  # 2. using-skill gemini sidecar
-  results.append(check_file_exists("skills/using-" + name + "/references/gemini-tools.md"))
+  # 2. shared gemini platform spec
+  results.append(check_file_exists("lib/references/platforms/gemini-cli.md"))
 
   # 3. session-start script
   path = "hooks/session-start"
