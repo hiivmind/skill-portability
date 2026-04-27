@@ -237,7 +237,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md"])
           assert readme is not None, "No README.md or INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"

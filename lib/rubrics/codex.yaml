@@ -49,7 +49,7 @@ categories:
         check: |
           # Only for native plugin path with multiple plugins
           if file_exists(".codex-plugin/plugin.json"):
-            if count(glob(".agents/skills/*/SKILL.md")) > 1:
+            if len(glob(".agents/skills/*/SKILL.md")) > 1:
               assert file_exists(".codex-plugin/marketplace.json"), \
                 "Multi-skill native plugin missing marketplace.json"
         template: manifests/codex-plugin/marketplace.json.tmpl
@@ -234,7 +234,7 @@ categories:
         critical: true
         points: 1
         check: |
-          sidecars = glob("**/platforms/codex.md") OR find_file("lib/references/platforms/codex.md")
+          sidecars = glob("**/platforms/codex.md") OR find_first("lib/references/platforms/codex.md")
           assert len(sidecars) > 0, "No Codex platform spec found"
           found = false
           for sidecar in sidecars:
@@ -247,7 +247,7 @@ categories:
         critical: false
         points: 1
         check: |
-          sidecars = glob("**/platforms/codex.md") OR find_file("lib/references/platforms/codex.md")
+          sidecars = glob("**/platforms/codex.md") OR find_first("lib/references/platforms/codex.md")
           if len(sidecars) > 0:
             found = false
             for sidecar in sidecars:
@@ -307,7 +307,7 @@ categories:
         critical: true
         points: 1
         check: |
-          readme = find_file(["README.md", "INSTALL.md", ".codex/INSTALL.md"])
+          readme = find_first(["README.md", "INSTALL.md", ".codex/INSTALL.md"])
           assert readme is not None, "No README.md, INSTALL.md, or .codex/INSTALL.md found"
           content = read(readme)
           assert "install" in content.lower(), "Install section missing from documentation"
