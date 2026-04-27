@@ -408,6 +408,14 @@ in `docs/research/per-platform-context-loading.md` (#12).
 48. ~~**PlatformSpec**: Missing marketplace_path field~~ Fixed — added to type and all 6 platform specs
 49. ~~**antigravity.md**: GEMINI.md in priority_note prose, not secondary_files~~ Fixed — added to secondary_files
 
+### Shape & Template Registries
+
+50. ~~**SKILL.md Phase 0b**: Hardcoded uplift option labels/descriptions~~ Fixed — derived from UPLIFT_TARGETS registry
+51. ~~**SKILL.md Phase 5**: Inline ALLOWED_CATEGORIES dict~~ Fixed — replaced with allowed_categories() lookup
+52. ~~**SKILL.md Phase 5**: resolve_target_path re-derives target paths~~ Fixed — uses template_for_path().target_path
+53. ~~**inventory.md**: Shape-based sidecar branching~~ Fixed — uses sidecar_strategy() lookup
+54. ~~**manifest-generation.md**: 10-row Schema-to-Template prose table~~ Fixed — references lib/references/templates/registry.md
+
 ### Verification status
 
-All tiers, platform API restructure, rubric check alignment, and pattern deduplication: complete, zero gaps.
+All tiers, platform API restructure, rubric check alignment, pattern deduplication, and shape/template registries: complete, zero gaps.
