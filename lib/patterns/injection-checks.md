@@ -80,7 +80,7 @@ CHECK_INJECTION_COMPONENTS(computed):
   RETURN results
 
 COMPUTE_INJECTION_SUMMARY(results):
-  present = count(r for r in results if r.status == "PRESENT")
+  present = len(r for r in results if r.status == "PRESENT")
   total = len(results)
   IF present == total:
     RETURN "COMPLETE"

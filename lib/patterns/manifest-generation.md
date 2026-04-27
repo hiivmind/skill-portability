@@ -22,9 +22,9 @@ Applies to: `cursor-plugin`
 RENDER_WITH_CONDITIONALS(template, metadata, computed):
   content = substitute(template, metadata)
   parsed = JSON.parse(content)
-  IF NOT directory_exists("agents/"):
+  IF NOT dir_exists("agents/"):
     delete parsed["agents"]
-  IF NOT directory_exists("commands/"):
+  IF NOT dir_exists("commands/"):
     delete parsed["commands"]
   IF NOT file_exists("hooks/hooks.json") AND NOT file_exists("hooks/hooks-cursor.json"):
     delete parsed["hooks"]
