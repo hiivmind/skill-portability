@@ -199,14 +199,34 @@ categories:
 
   5_toolmap:
     conditions:
-      - id: codex.5_toolmap.sidecar.exists
+      - id: codex.5_toolmap.sidecar.per_skill
         type: checkable
         component: sidecar
         critical: true
         points: 1
         check: |
-          file_exists("references/codex-tools.md")
-          # Per-skill or shared sidecar documenting Codex tool mappings
+          IF shape IN ["bare-skill-repo", "skill-first"]:
+            for skill_dir in glob_dirs("skills/*/") + glob_dirs(".agents/skills/*/"):
+              name = basename(skill_dir)
+              skill_path = skill_dir + "/references/codex-tools.md"
+              assert file_exists(skill_path), \
+                f"{skill_path} sidecar missing"
+          ELSE:
+            SKIP
+
+      - id: codex.5_toolmap.sidecar.shared_reachable
+        type: judgement
+        component: sidecar
+        critical: true
+        points: 1
+        check: |
+          IF shape == "full-portable-plugin":
+            Verify Codex tool mapping content is reachable — either via
+            shared references/codex-tools.md, lib/references/codex-tools.md,
+            or documented in AGENTS.md directly. Must contain "spawn_agent"
+            and "apply_patch" mappings.
+          ELSE:
+            SKIP
 
       - id: codex.5_toolmap.sidecar.spawn_agent_mapped
         type: checkable
@@ -214,9 +234,12 @@ categories:
         critical: true
         points: 1
         check: |
-          content = read("references/codex-tools.md")
-          assert "spawn_agent" in content, \
-            "codex-tools.md must document Task/Agent → spawn_agent mapping (Table 2)"
+          sidecars = glob("**/codex-tools.md")
+          assert len(sidecars) > 0, "No codex-tools.md found"
+          found = false
+          for sidecar in sidecars:
+            if "spawn_agent" in read(sidecar): found = true
+          assert found, "No codex-tools.md documents Task/Agent → spawn_agent"
 
       - id: codex.5_toolmap.sidecar.update_plan_mapped
         type: checkable
@@ -224,9 +247,12 @@ categories:
         critical: false
         points: 1
         check: |
-          content = read("references/codex-tools.md")
-          assert "update_plan" in content, \
-            "codex-tools.md must document TodoWrite → update_plan mapping (Table 2)"
+          sidecars = glob("**/codex-tools.md")
+          if len(sidecars) > 0:
+            found = false
+            for sidecar in sidecars:
+              if "update_plan" in read(sidecar): found = true
+            assert found, "No codex-tools.md documents TodoWrite → update_plan"
 
       - id: codex.5_toolmap.model_mapping.no_claude_models
         type: checkable
