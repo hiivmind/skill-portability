@@ -244,6 +244,7 @@ Last updated: 2026-04-26
 - https://github.com/rmyndharis/antigravity-skills -- 300+ ported skills
 - https://github.com/xenitV1/Antigravity-Workflows -- Workflows, agents, and skills
 - https://github.com/rominirani/antigravity-skills -- Official codelab examples
+- https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools/blob/main/Google/Antigravity/Fast%20Prompt.txt -- Leaked system prompt with complete tool list
 
 ### Forum
 

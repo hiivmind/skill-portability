@@ -188,16 +188,36 @@ Skills that depend on Claude Code hooks (`hooks` frontmatter field, `settings.js
 
 ## 6. Tool Mapping
 
-Antigravity agents operate across three surfaces: **editor**, **terminal**, and **browser**. The tool names differ from Claude Code.
+Antigravity agents operate across three surfaces: **editor**, **terminal**, and **browser**. The tool names are completely different from Claude Code. [source](https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools/blob/main/Google/Antigravity/Fast%20Prompt.txt)
 
 ### Available tools
 
 | Antigravity tool | Claude Code equivalent | Description |
 |-----------------|----------------------|-------------|
-| File read/write | `Read`, `Write`, `Edit` | Agent can read and edit files in the editor |
-| Terminal execution | `Bash` | Agent executes commands in the built-in terminal |
-| Browser control | `WebSearch`, `WebFetch` (partial) | Click, scroll, type, read DOM, take screenshots, record video |
-| `run_command` | `Bash` | Referenced in skill instructions for script execution |
+| `view_file` | `Read` | Read file contents (supports line ranges) |
+| `write_to_file` | `Write` | Create new files |
+| `replace_file_content` | `Edit` | Edit files with single replacement |
+| `multi_replace_file_content` | `Edit` | Edit files with multiple replacements |
+| `run_command` | `Bash` | Execute terminal commands (PowerShell on Windows) |
+| `grep_search` | `Grep` | Search exact pattern matches using ripgrep |
+| `find_by_name` | `Glob` | Locate files/directories using fd with glob patterns |
+| `search_web` | `WebSearch` | Web search with citations |
+| `read_url_content` | `WebFetch` | Fetch HTTP content from URLs |
+| `codebase_search` | — | Semantic code search (not pattern-based) |
+| `search_in_file` | — | Semantic search within a specific file |
+| `view_code_item` | — | View specific code node/function by name |
+| `view_file_outline` | — | Show file structure/outline |
+| `view_content_chunk` | — | View document chunks by position |
+| `list_dir` | — | List directory contents |
+| `command_status` | — | Check status of background terminal commands |
+| `read_terminal` | — | Read terminal output by process ID |
+| `send_command_input` | — | Send stdin to running processes |
+| `generate_image` | — | Create or edit images from text prompts |
+| `list_resources` | — | Show available MCP server resources |
+| `read_resource` | — | Retrieve MCP resource contents |
+| `browser_subagent` | — | Browser automation (click, scroll, type, screenshots, recording) |
+
+Antigravity has no equivalents for Claude Code's `Task`/`Agent` (subagent dispatch), `TodoWrite` (task tracking), `Skill` (skill invocation -- skills auto-activate via semantic matching), or `AskUserQuestion` (structured user input). [source](https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools/blob/main/Google/Antigravity/Fast%20Prompt.txt)
 
 ### Tool permission model
 
