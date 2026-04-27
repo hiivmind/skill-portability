@@ -1,26 +1,46 @@
 # Antigravity Tool Mapping
 
-Skills use Claude Code tool names. Antigravity uses the **same tool names** for all operations.
+Skills use Claude Code tool names. When you encounter these in a skill, use your platform equivalent:
 
 | Skill references | Antigravity equivalent |
 | ---------------- | ---------------------- |
-| `Read` (file reading) | `Read` |
-| `Write` (file creation) | `Write` |
-| `Edit` (file editing) | `Edit` |
-| `Bash` (run commands) | `Bash` |
-| `Grep` (search file content) | `Grep` |
-| `Glob` (search files by name) | `Glob` |
-| `Task` (dispatch subagent) | `Task` |
-| `Agent` (dispatch subagent) | `Agent` |
-| `TodoWrite` (task tracking) | `TodoWrite` |
-| `Skill` tool (invoke a skill) | `Skill` |
-| `WebSearch` (web search) | `WebSearch` |
-| `WebFetch` (fetch URL) | `WebFetch` |
-| `AskUserQuestion` (structured input) | `AskUserQuestion` |
+| `Read` (file reading) | `view_file` |
+| `Write` (file creation) | `write_to_file` |
+| `Edit` (file editing) | `replace_file_content` or `multi_replace_file_content` |
+| `Bash` (run commands) | `run_command` |
+| `Grep` (search file content) | `grep_search` |
+| `Glob` (search files by name) | `find_by_name` |
+| `Task` (dispatch subagent) | No general equivalent — `browser_subagent` for browser tasks only |
+| `Agent` (dispatch subagent) | No general equivalent |
+| `TodoWrite` (task tracking) | No equivalent |
+| `Skill` tool (invoke a skill) | Skills auto-activate via semantic matching — no explicit tool |
+| `WebSearch` (web search) | `search_web` |
+| `WebFetch` (fetch URL) | `read_url_content` |
+| `AskUserQuestion` (structured input) | No equivalent |
+
+## Additional Antigravity tools
+
+These tools are available in Antigravity but have no Claude Code equivalent:
+
+| Tool | Purpose |
+| ---- | ------- |
+| `codebase_search` | Semantic code search (not pattern-based like grep) |
+| `search_in_file` | Semantic search within a specific file |
+| `view_code_item` | View specific code node/function by name |
+| `view_file_outline` | Show file structure/outline |
+| `view_content_chunk` | View document chunks by position |
+| `list_dir` | List directory contents |
+| `command_status` | Check status of background terminal commands |
+| `read_terminal` | Read terminal output by process ID |
+| `send_command_input` | Send stdin to running processes |
+| `generate_image` | Create or edit images from text prompts |
+| `list_resources` | Show available MCP server resources |
+| `read_resource` | Retrieve MCP resource contents |
+| `browser_subagent` | Browser automation (click, scroll, type, screenshots, recording) |
 
 ## Key Differences from Claude Code
 
-Antigravity shares all of Claude Code's tool names but diverges in these areas:
+Antigravity uses completely different tool names from Claude Code and also diverges in these areas:
 
 ### Frontmatter stripping
 

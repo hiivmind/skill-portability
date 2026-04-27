@@ -34,6 +34,24 @@ Cursor hooks go in `hooks/hooks-cursor.json` (not `hooks/hooks.json`):
 - Output key is `additional_context` (snake_case), not `hookSpecificOutput.additionalContext`
 - No async hook support — strip `async: true` if present
 
+### Subagent support
+
+Cursor has full subagent support via the `Task` and `Agent` tools (same names as Claude Code).
+
+**Custom agents:** Markdown files with YAML frontmatter in `.cursor/agents/` (project) or `~/.cursor/agents/` (global). Also reads `.claude/agents/` and `.codex/agents/` for compatibility.
+
+| Field | Type | Default | Description |
+| ----- | ---- | ------- | ----------- |
+| `name` | string | from filename | Display name and identifier |
+| `description` | string | — | Shown in Task tool hints for delegation decisions |
+| `model` | string | `inherit` | `fast`, `inherit`, or specific model ID |
+| `readonly` | boolean | `false` | Restricts write permissions |
+| `is_background` | boolean | `false` | Runs without blocking parent |
+
+**Built-in subagents:** `explore` (codebase search), `bash` (shell commands), `browser` (MCP browser control).
+
+**Async subagents (Cursor 2.5+):** Background mode, parallel execution (multiple Task calls in one message), nested subagents. State written to `~/.cursor/subagents/`.
+
 ### Context files
 
 - Primary: `AGENTS.md` (not `CLAUDE.md`)

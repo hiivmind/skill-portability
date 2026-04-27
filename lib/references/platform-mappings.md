@@ -33,24 +33,26 @@ Maps Claude Code model shortnames to platform equivalents.
 
 | Claude Tool | Gemini | Codex | Cursor | Antigravity | OpenClaw |
 |---|---|---|---|---|---|
-| Read | read_file | Read | Read | Read | Read |
-| Write | write_file | Write | Write | Write | Write |
-| Edit | replace | apply_patch | Edit | Edit | Edit |
-| Bash | run_shell_command | Bash | Bash | Bash | Bash |
-| Grep | grep_search | Grep | Grep | Grep | Grep |
-| Glob | glob | Glob | Glob | Glob | Glob |
-| Task | @agent-name | spawn_agent | Task | Task | agents.list[] |
-| Agent | @agent-name | spawn_agent | Agent | Agent | agents.list[] |
-| TodoWrite | write_todos | update_plan | TodoWrite | TodoWrite | (N/A) |
-| Skill | activate_skill | (N/A) | Skill | Skill | (N/A) |
-| WebSearch | google_web_search | WebSearch | WebSearch | WebSearch | WebSearch |
-| WebFetch | web_fetch | (N/A — use MCP) | WebFetch | WebFetch | WebFetch |
-| AskUserQuestion | ask_user | AskUserQuestion | AskUserQuestion | AskUserQuestion | AskUserQuestion |
+| Read | read_file | Read | Read | view_file | Read |
+| Write | write_file | Write | Write | write_to_file | Write |
+| Edit | replace | apply_patch | Edit | replace_file_content | Edit |
+| Bash | run_shell_command | Bash | Bash | run_command | Bash |
+| Grep | grep_search | Grep | Grep | grep_search | Grep |
+| Glob | glob | Glob | Glob | find_by_name | Glob |
+| Task | @agent-name | spawn_agent | Task | (N/A) | agents.list[] |
+| Agent | @agent-name | spawn_agent | Agent | (N/A) | agents.list[] |
+| TodoWrite | write_todos | update_plan | TodoWrite | (N/A) | (N/A) |
+| Skill | activate_skill | (N/A) | Skill | (N/A — auto-activate) | (N/A) |
+| WebSearch | google_web_search | WebSearch | WebSearch | search_web | WebSearch |
+| WebFetch | web_fetch | (N/A — use MCP) | WebFetch | read_url_content | WebFetch |
+| AskUserQuestion | ask_user | AskUserQuestion | AskUserQuestion | (N/A) | AskUserQuestion |
 
 **Rules**:
 - Gemini renames most tools — see `lib/references/gemini-tools.md` for full details.
 - Codex replaces Task/Agent with `spawn_agent` and TodoWrite with `update_plan`.
   Codex has no Skill tool — skills load natively.
+- Antigravity renames ALL tools — see `lib/references/antigravity-tools.md`.
+  Antigravity has no Task/Agent, TodoWrite, Skill, or AskUserQuestion equivalents.
 - OpenClaw manages agents via `agents.list[]` in runtime config, not a tool.
   OpenClaw has no TodoWrite or Skill tool equivalents.
 

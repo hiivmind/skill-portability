@@ -24,7 +24,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Gemini / Task | `@agent-name` | `@agent-name` or automatic routing | Correct |
 | Gemini / all others | Various | All 11 mappings verified against research | Correct |
 | OpenClaw / all | Various | All mappings verified against research | Correct |
-| Antigravity / all | Same as Claude | 6 of 13 tools confirmed (Read, Write, Edit, Bash, WebSearch, WebFetch); rest unverifiable from research | Correct (partial) |
+| Antigravity / all | Same as Claude | ALL tools have different names — view_file, run_command, grep_search, etc. | Fixed |
 
 ### platform-mappings.md — Table 3: Hook Event Mapping
 
@@ -93,13 +93,13 @@ Track every platform-specific claim in the plugin against researched facts in
 |-------|---------|---------------|--------|
 | All tool names | Same as Claude Code | Confirmed same | Correct |
 | Hook format | Documented | camelCase, flat structure, output key all verified | Correct |
-| Subagent support | Not documented | Has full subagent support with model/readonly/background config | Missing |
+| Subagent support | Not documented | Has full subagent support with model/readonly/background config | Fixed |
 
 ### antigravity-tools.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
-| All tool names | Same as Claude Code | 6 of 13 confirmed (Read, Write, Edit, Bash, WebSearch, WebFetch); rest unverifiable | Correct (partial) |
+| All tool names | Same as Claude Code | ALL tools have different names (view_file, write_to_file, run_command, etc.) | Fixed |
 | No hooks | Documented | Confirmed no hooks | Correct |
 | Frontmatter stripping | model, tools, disable-model-invocation, allowed-tools | Missing `user-invocable` | Fixed |
 
@@ -320,8 +320,11 @@ These are tracked under GitHub issues #11 and #12, not this matrix.
 - All 18 install docs: commands and paths verified against research
 - Phase 5 ALLOWED_CATEGORIES: matches rubric framework
 
+### Final gap fixes
+
+24. ~~**cursor-tools.md**: Subagent support not documented~~ Fixed — added full subagent section
+25. ~~**antigravity-tools.md + Table 2**: Tool names claimed "same as Claude"~~ Fixed — all 13 tools have different names (view_file, run_command, grep_search, etc.)
+
 ### All verification complete
 
-Zero "Needs review" items remain. Remaining known gaps:
-- **cursor-tools.md**: Subagent support not documented (Missing — needs separate fix)
-- **Table 2 Antigravity**: 7 of 13 tool names unverifiable from current research
+Zero "Needs review", "Missing", or known gap items remain.
