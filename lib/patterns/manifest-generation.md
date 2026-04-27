@@ -70,35 +70,29 @@ resolve a rubric `condition.template` value to its registry entry.
 
 ---
 
+Each section below documents schema-specific rendering notes. Target paths
+and template file locations are in the registry — use
+`template_for_schema("schema-name")` to look them up.
+
 ## claude-plugin
 
-**Target:** `.claude-plugin/plugin.json`
-
 Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array literal (e.g. `["ai", "skills"]`).
-
-> **Template:** `lib/templates/manifests/claude-plugin/plugin.json.tmpl`
 
 ---
 
 ## claude-marketplace
 
-**Target:** `.claude-plugin/marketplace.json`
-
-> **Template:** `lib/templates/manifests/claude-plugin/marketplace.json.tmpl`
+No special rendering notes.
 
 ---
 
 ## claude-context
 
-**Target:** `CLAUDE.md`
-
-> **Template:** `lib/templates/context-files/CLAUDE.md.tmpl`
+No special rendering notes.
 
 ---
 
 ## cursor-plugin
-
-**Target:** `.cursor-plugin/plugin.json`
 
 Create `.cursor-plugin/` directory if needed.
 
@@ -108,23 +102,15 @@ Cursor auto-discovers components from default directories (`skills/`, `rules/`, 
 
 **Note:** `displayName` is not part of the official Cursor manifest schema. Use `name` (kebab-case identifier) and `description` for display purposes.
 
-> **Template:** `lib/templates/manifests/cursor-plugin/plugin.json.tmpl`
+---
 
 ## cursor-marketplace
 
-**Target:** `.cursor-plugin/marketplace.json`
-
 Only generated for multi-plugin repositories. Lists all plugins with their source paths, descriptions, and optional metadata (category, tags, logo).
-
-> **Template:** `lib/templates/manifests/cursor-plugin/marketplace.json.tmpl`
 
 ---
 
 ## gemini-extension
-
-**Target:** `gemini-extension.json`
-
-> **Template:** `lib/templates/manifests/gemini-extension.json.tmpl`
 
 ### Required fields
 
@@ -151,40 +137,36 @@ Use `${extensionPath}` for absolute paths, `${workspacePath}` for workspace-rela
 
 ## gemini-context
 
-**Target:** `GEMINI.md`
-
 Build the include blocks from the skills/agents/commands lists inventoried during discovery. The file contains only `@` include directives and no other prose.
-
-> **Template:** `lib/templates/context-files/GEMINI.md.tmpl`
 
 ---
 
 ## agents-context
 
-**Target:** `AGENTS.md`
-
 Build skill bullet list for `{{skillIncludes}}` and command bullet list for `{{commandIncludes}}` (omit the entire Commands section if no commands exist).
-
-> **Template:** `lib/templates/context-files/AGENTS.md.tmpl`
 
 ---
 
 ## codex-plugin
 
-**Target:** `.codex-plugin/plugin.json`
-
 Create `.codex-plugin/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
-
-> **Template:** `lib/templates/manifests/codex-plugin/plugin.json.tmpl`
 
 ---
 
 ## codex-marketplace
 
-**Target:** `.agents/plugins/marketplace.json`
-
 Create `.agents/plugins/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
 
 For single-plugin upstream repos, this manifest points to the repo root with `source.path: "./"`.
 
-> **Template:** `lib/templates/manifests/codex-plugin/marketplace.json.tmpl`
+---
+
+## antigravity-package
+
+No special rendering notes.
+
+---
+
+## openclaw-plugin
+
+No special rendering notes.
