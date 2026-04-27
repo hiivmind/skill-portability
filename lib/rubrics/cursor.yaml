@@ -223,6 +223,17 @@ categories:
 
   5_toolmap:
     conditions:
+      - id: cursor.5_toolmap.tool_refs.reachable
+        type: judgement
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          Cursor uses the same tool names as Claude Code — no tool mapping
+          sidecar is strictly required. However, verify that AGENTS.md or
+          a cursor-tools.md reference documents any Cursor-specific
+          differences (hook format, model handling, MCP path).
+
       - id: cursor.5_toolmap.model_mapping.no_claude_models
         type: checkable
         component: model_mapping

@@ -175,6 +175,17 @@ categories:
 
   5_toolmap:
     conditions:
+      - id: openclaw.5_toolmap.tool_refs.reachable
+        type: judgement
+        component: sidecar
+        critical: false
+        points: 1
+        check: |
+          OpenClaw shares most tool names with Claude Code but has no
+          Task/Agent or TodoWrite tools. Verify that AGENTS.md or an
+          openclaw-tools.md reference documents these differences and
+          the agents.list[] manifest-based agent dispatch pattern.
+
       - id: openclaw.5_toolmap.model_mapping.no_claude_models
         type: checkable
         component: model_mapping
