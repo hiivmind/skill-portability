@@ -206,43 +206,43 @@ Track every platform-specific claim in the plugin against researched facts in
 
 | Template | Current | Research says | Status |
 |----------|---------|---------------|--------|
-| `gemini-extension.json.tmpl` | Has fields | May need hooksDir, skillsDir, settings | Needs review |
-| `codex-plugin/plugin.json.tmpl` | Has fields | Verify against research schema | Needs review |
-| `openclaw/openclaw.plugin.json.tmpl` | Has fields | Verify against research schema | Needs review |
-| `antigravity/package.json.tmpl` | Has fields | Verify against research schema | Needs review |
-| `claude-plugin/plugin.json.tmpl` | Has fields | Verify against research schema | Needs review |
-| `cursor-plugin/plugin.json.tmpl` | Has fields | Verify against research schema | Needs review |
+| `gemini-extension.json.tmpl` | Has fields | Required fields present; optional fields handled by generation pattern | Correct |
+| `codex-plugin/plugin.json.tmpl` | Has fields | Required fields (name, version, description) present + skills, hooks | Correct |
+| `openclaw/openclaw.plugin.json.tmpl` | Has fields | Required fields (id, configSchema) present | Correct |
+| `antigravity/package.json.tmpl` | Has fields | Required fields (name, displayName, publisher) present | Correct |
+| `claude-plugin/plugin.json.tmpl` | Has fields | All fields verified | Correct |
+| `cursor-plugin/plugin.json.tmpl` | Has fields | All fields + conditional path removal verified | Correct |
 
 ### templates/hooks/
 
 | Template | Current | Research says | Status |
 |----------|---------|---------------|--------|
 | `hooks.json.tmpl` | Claude Code format | Correct | Correct |
-| `hooks-cursor.json.tmpl` | Cursor format | Verify camelCase, flat structure | Needs review |
+| `hooks-cursor.json.tmpl` | Cursor format | Was missing `version: 1` required by Cursor | Fixed |
 | Codex hooks template | Not needed (same format as Claude Code) | Codex has hooks — shares hooks.json | Fixed |
-| Gemini hooks template | Does not exist | May need extension-manifest hooks template | Needs review |
+| Gemini hooks template | Does not exist | Not needed — Gemini hooks are settings-based, no file to generate | Correct |
 
 ### templates/context-files/
 
 | Template | Current | Research says | Status |
 |----------|---------|---------------|--------|
 | `CLAUDE.md.tmpl` | Exists | Correct | Correct |
-| `GEMINI.md.tmpl` | Exists | Verify `@` include syntax | Needs review |
-| `AGENTS.md.tmpl` | Exists | Verify universal fallback content | Needs review |
-| OpenClaw context templates | None | OpenClaw has 7+ context files (SOUL.md, TOOLS.md, etc.) | Missing |
+| `GEMINI.md.tmpl` | Exists | `@` includes rendered by builder (Mode 3) — correct | Correct |
+| `AGENTS.md.tmpl` | Exists | Universal fallback with tool mapping table — correct | Correct |
+| OpenClaw context templates | None | SOUL.md, TOOLS.md etc. are user workspace files, not plugin output | Correct (not needed) |
 
 ### templates/install-docs/
 
 | Platform | Exists | Research says | Status |
 |----------|--------|---------------|--------|
-| claude-code.md | Yes | Verify commands | Needs review |
-| cursor.md | Yes | Verify commands | Needs review |
-| gemini-cli.md | Yes | Verify commands | Needs review |
-| codex.md | Yes | Verify commands | Needs review |
-| antigravity.md | Yes | Verify commands | Needs review |
-| openclaw.md | Yes | Verify commands | Needs review |
-| adding-platform/* | Yes (6) | Verify per-platform | Needs review |
-| publishing/* | Yes (6) | Verify per-platform | Needs review |
+| claude-code.md | Yes | Commands verified (plugin install, --plugin-dir, plugin list) | Correct |
+| cursor.md | Yes | Commands verified (/add-plugin, ~/.cursor/plugins/local/, reload) | Correct |
+| gemini-cli.md | Yes | Commands verified (extensions install, extensions list) | Correct |
+| codex.md | Yes | Commands verified (marketplace add, symlink, feature flags) | Correct |
+| antigravity.md | Yes | Commands verified (copy to .agents/skills/, --install-extension) | Correct |
+| openclaw.md | Yes | Commands verified (plugins install, npm, bundle detection) | Correct |
+| adding-platform/* | Yes (6) | All 6 per-platform guides verified | Correct |
+| publishing/* | Yes (6) | All 6 per-platform publishing guides verified | Correct |
 
 ---
 
@@ -253,7 +253,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Phase 0a | Platform list (6) | Correct set | Correct |
 | Phase 0b | Shape detection → uplift target | No platform-specific claims | Correct |
 | Phase 3 | Loads rubric YAMLs per platform | Correct mechanism | Correct |
-| Phase 5 | ALLOWED_CATEGORIES by shape | Verify category names match rubrics | Needs review |
+| Phase 5 | ALLOWED_CATEGORIES by shape | Category names match rubric-framework.md (verified Tier 2) | Correct |
 | Phase 6 | Hook porting (skips if 4_hooks not allowed) | Codex now has hooks — hook-merging.md updated | Fixed |
 | Phase 6 | References hook-merging.md | hook-merging.md now covers Codex | Fixed |
 
@@ -307,8 +307,21 @@ These are tracked under GitHub issues #11 and #12, not this matrix.
 21. ~~**hook-merging.md**: Cursor hook generation dropped matchers~~ Fixed — matchers and timeout now carried over
 22. ~~**detection-algorithm.md**: Missing openclaw.plugin.json~~ Fixed — added to sources, tie-break, and shape classification
 
-### Needs Systematic Verification (Tier 3)
+### Fixed (Tier 3 — templates/install docs verification)
 
-23. All manifest template schemas against researched schemas (Tier 3)
-24. All install doc commands against researched install methods (Tier 3)
-25. All context file templates against researched context file formats (Tier 3)
+23. ~~**hooks-cursor.json.tmpl**: Missing `version: 1`~~ Fixed
+
+### Verified Correct (Tier 3)
+
+- All 6 manifest templates: required fields present
+- Gemini hooks template: not needed (settings-based)
+- OpenClaw context templates: not needed (user workspace files)
+- GEMINI.md.tmpl and AGENTS.md.tmpl: correct syntax and content
+- All 18 install docs: commands and paths verified against research
+- Phase 5 ALLOWED_CATEGORIES: matches rubric framework
+
+### All verification complete
+
+Zero "Needs review" items remain. Remaining known gaps:
+- **cursor-tools.md**: Subagent support not documented (Missing — needs separate fix)
+- **Table 2 Antigravity**: 7 of 13 tool names unverifiable from current research
