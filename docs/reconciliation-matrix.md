@@ -389,13 +389,12 @@ in `docs/research/per-platform-context-loading.md` (#12).
 
 ### Rubric Check Alignment
 
-35. **Rubric YAMLs**: `tool_name()` called with tool names instead of canonical Operations (4 instances) — Needs fix
-36. **claude-code.yaml**: `supported_tools()` comment lists tool names not canonical ops — Needs fix
-37. **claude-code.yaml**: 7 opaque utility functions should be inlined as prose pseudocode — Needs fix
-38. **All rubrics**: Synonym duplication (`find_file`/`find_first`, `count`/`len`, `field_present`/`in`) — Needs fix
-39. **lib/patterns/pseudocode-principles.md**: Decision boundary doc missing — Needs creation
+35. ~~**Rubric YAMLs**: `tool_name()` called with tool names instead of canonical Operations (4 instances)~~ Fixed — all use canonical Operation enum values
+36. ~~**claude-code.yaml**: `supported_tools()` comment lists tool names not canonical ops~~ Fixed — lists canonical operations
+37. ~~**claude-code.yaml**: 7 opaque utility functions should be inlined as prose pseudocode~~ Fixed — all inlined
+38. ~~**All rubrics**: Synonym duplication (`find_file`/`find_first`, `count`/`len`, `field_present`/`in`)~~ Fixed — unified to canonical names
+39. ~~**lib/patterns/pseudocode-principles.md**: Decision boundary doc missing~~ Fixed — created with three-tier framework
 
 ### Verification status
 
-Tiers 1-4 and platform API restructure: complete, zero gaps.
-Rubric check alignment (items 35-39): open, spec written, implementation pending.
+All tiers, platform API restructure, and rubric check alignment: complete, zero gaps.
