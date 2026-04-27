@@ -70,103 +70,171 @@ resolve a rubric `condition.template` value to its registry entry.
 
 ---
 
-Each section below documents schema-specific rendering notes. Target paths
-and template file locations are in the registry — use
-`template_for_schema("schema-name")` to look them up.
+## Per-Schema Generation
 
-## claude-plugin
+Each section below is a generation function. Paths come from the Template
+Registry via `template_for_schema()`. Rendering mode is dispatched per the
+entry's `mode` field.
 
-Create `.claude-plugin/` directory if needed. `{{keywords}}` is a JSON array literal (e.g. `["ai", "skills"]`).
+### claude-plugin
 
----
+```pseudocode
+GENERATE(schema="claude-plugin", metadata, computed):
+  entry = template_for_schema("claude-plugin")
+  mkdir_p(dirname(entry.target_path))
 
-## claude-marketplace
+  # {{keywords}} must be a JSON array literal (e.g. ["ai", "skills"])
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
 
-No special rendering notes.
+### claude-marketplace
 
----
+```pseudocode
+GENERATE(schema="claude-marketplace", metadata, computed):
+  entry = template_for_schema("claude-marketplace")
+  mkdir_p(dirname(entry.target_path))
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
 
-## claude-context
+### claude-context
 
-No special rendering notes.
+```pseudocode
+GENERATE(schema="claude-context", metadata, computed):
+  entry = template_for_schema("claude-context")
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
 
----
+### cursor-plugin
 
-## cursor-plugin
+```pseudocode
+GENERATE(schema="cursor-plugin", metadata, computed):
+  entry = template_for_schema("cursor-plugin")
+  mkdir_p(dirname(entry.target_path))
 
-Create `.cursor-plugin/` directory if needed.
+  content = RENDER_WITH_CONDITIONALS(entry.template_path, metadata, computed)
+  write(entry.target_path, content)
 
-**Conditional logic:** Omit the `"agents"` key if `agents/` doesn't exist. Omit the `"commands"` key if `commands/` doesn't exist. Omit `"hooks"` if no hooks config exists. Omit `"mcpServers"` if no `mcp.json` exists.
+  # Cursor auto-discovers components from default directories (skills/,
+  # rules/, agents/, commands/, hooks/hooks.json, mcp.json). Only specify
+  # explicit paths when overriding defaults.
+  #
+  # displayName is not part of the official Cursor manifest schema.
+  # Use name (kebab-case identifier) and description for display purposes.
+```
 
-Cursor auto-discovers components from default directories (`skills/`, `rules/`, `agents/`, `commands/`, `hooks/hooks.json`, `mcp.json`). Only specify explicit paths when overriding defaults.
+### cursor-marketplace
 
-**Note:** `displayName` is not part of the official Cursor manifest schema. Use `name` (kebab-case identifier) and `description` for display purposes.
+```pseudocode
+GENERATE(schema="cursor-marketplace", metadata, computed):
+  # Only for multi-plugin repositories
+  IF len(computed.skills) <= 1 AND NOT dir_exists(".cursor-plugin/plugins/"): SKIP
 
----
+  entry = template_for_schema("cursor-marketplace")
+  mkdir_p(dirname(entry.target_path))
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
 
-## cursor-marketplace
+  # Each entry lists source path, description, and optional metadata
+  # (category, tags, logo).
+```
 
-Only generated for multi-plugin repositories. Lists all plugins with their source paths, descriptions, and optional metadata (category, tags, logo).
+### gemini-extension
 
----
+```pseudocode
+GENERATE(schema="gemini-extension", metadata, computed):
+  entry = template_for_schema("gemini-extension")
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
 
-## gemini-extension
+  # Required fields: name (kebab-case), version (semver).
+  #
+  # Optional fields (include conditionally):
+  #   description       — always, from computed metadata
+  #   contextFileName   — always "GEMINI.md"
+  #   mcpServers        — when source has .mcp.json; use ${extensionPath} vars
+  #   hooksDir          — when hooks exist in non-default path
+  #   skillsDir         — when skills exist in non-default path
+  #   settings          — when plugin requires user config
+  #                       Array of { name, description, envVar, sensitive? }
+  #   plan              — when plugin uses planning artifacts
+  #                       { "directory": "<path>" }
+  #   excludeTools      — when plugin restricts dangerous operations
+  #
+  # Variable substitution:
+  #   ${extensionPath}  — absolute path to extension
+  #   ${workspacePath}  — workspace-relative path
+  #   ${/}              — OS path separator
+```
 
-### Required fields
+### gemini-context
 
-`name` (kebab-case, matches npm conventions), `version` (semver).
+```pseudocode
+GENERATE(schema="gemini-context", metadata, computed):
+  entry = template_for_schema("gemini-context")
+  content = RENDER_WITH_BUILDER(entry.template_path, metadata, computed)
+  write(entry.target_path, content)
 
-### Optional fields (conditional generation)
+  # Output contains only @ include directives and no other prose.
+```
 
-| Field | Include when | Value |
-|-------|-------------|-------|
-| `description` | Always | From computed metadata |
-| `contextFileName` | Always | `"GEMINI.md"` |
-| `mcpServers` | Source plugin has `.mcp.json` | Map of server configs with `${extensionPath}` variables |
-| `hooksDir` | Hooks exist in non-default path | Relative path (default `hooks/` is auto-discovered) |
-| `skillsDir` | Skills exist in non-default path | Relative path (default `skills/` is auto-discovered) |
-| `settings` | Plugin requires user configuration | Array of `{ name, description, envVar, sensitive? }` |
-| `plan` | Plugin uses planning artifacts | `{ "directory": "<path>" }` |
-| `excludeTools` | Plugin restricts dangerous operations | Array of tool exclusion strings |
+### agents-context
 
-### Variable substitution
+```pseudocode
+GENERATE(schema="agents-context", metadata, computed):
+  entry = template_for_schema("agents-context")
+  content = RENDER_WITH_BUILDER(entry.template_path, metadata, computed)
+  write(entry.target_path, content)
 
-Use `${extensionPath}` for absolute paths, `${workspacePath}` for workspace-relative, `${/}` for OS path separator.
+  # {{skillIncludes}} — bullet list of skills
+  # {{commandIncludes}} — bullet list of commands (omit section if none)
+```
 
----
+### codex-plugin
 
-## gemini-context
+```pseudocode
+GENERATE(schema="codex-plugin", metadata, computed):
+  # Only for native-plugin-packaging recommendation
+  IF computed.codex_rec != "native-plugin-packaging": SKIP
 
-Build the include blocks from the skills/agents/commands lists inventoried during discovery. The file contains only `@` include directives and no other prose.
+  entry = template_for_schema("codex-plugin")
+  mkdir_p(dirname(entry.target_path))
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
 
----
+### codex-marketplace
 
-## agents-context
+```pseudocode
+GENERATE(schema="codex-marketplace", metadata, computed):
+  # Only for native-plugin-packaging recommendation
+  IF computed.codex_rec != "native-plugin-packaging": SKIP
 
-Build skill bullet list for `{{skillIncludes}}` and command bullet list for `{{commandIncludes}}` (omit the entire Commands section if no commands exist).
+  entry = template_for_schema("codex-marketplace")
+  mkdir_p(dirname(entry.target_path))
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
 
----
+  # For single-plugin upstream repos, this manifest points to the repo
+  # root with source.path: "./"
+```
 
-## codex-plugin
+### antigravity-package
 
-Create `.codex-plugin/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
+```pseudocode
+GENERATE(schema="antigravity-package", metadata, computed):
+  entry = template_for_schema("antigravity-package")
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
 
----
+### openclaw-plugin
 
-## codex-marketplace
-
-Create `.agents/plugins/` directory if needed. Only generated when Codex recommendation is `native-plugin-packaging`.
-
-For single-plugin upstream repos, this manifest points to the repo root with `source.path: "./"`.
-
----
-
-## antigravity-package
-
-No special rendering notes.
-
----
-
-## openclaw-plugin
-
-No special rendering notes.
+```pseudocode
+GENERATE(schema="openclaw-plugin", metadata, computed):
+  entry = template_for_schema("openclaw-plugin")
+  content = RENDER_PLAIN(entry.template_path, metadata)
+  write(entry.target_path, content)
+```
