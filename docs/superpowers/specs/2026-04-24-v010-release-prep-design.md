@@ -1,7 +1,7 @@
 # v0.1.0 Marketplace Release Prep — Design Spec
 
 **Date:** 2026-04-24
-**Goal:** Bring skill-portability from working plugin to marketplace-ready v0.1.0 release with all standard open-source artifacts, CI, and community files.
+**Goal:** Bring plugin-portability from working plugin to marketplace-ready v0.1.0 release with all standard open-source artifacts, CI, and community files.
 
 ## Context
 
@@ -74,7 +74,7 @@ Single release branch (`release/v0.1.0`) off main (after PR #4 merges), containi
   - **Claude Code:** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` exist and are valid JSON
   - **Cursor:** `.cursor-plugin/plugin.json` exists and is valid JSON
   - **Gemini CLI:** `GEMINI.md` exists at repo root
-  - **OpenCode:** `.opencode/plugins/skill-portability.js` exists
+  - **OpenCode:** `.opencode/plugins/plugin-portability.js` exists
   - **Copilot CLI:** `.github/copilot-instructions.md` exists
   - **Codex:** `AGENTS.md` exists at repo root
   - **Skills:** every `skills/*/SKILL.md` has `name:` and `description:` in frontmatter
@@ -96,7 +96,7 @@ Single release branch (`release/v0.1.0`) off main (after PR #4 merges), containi
 Add to top of README.md (before first heading):
 - License badge: `![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)`
 - Version badge: `![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)`
-- CI badge: `![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)`
+- CI badge: `![CI](https://github.com/hiivmind/plugin-portability/actions/workflows/ci.yml/badge.svg)`
 
 ### 10. Git Tag & GitHub Release
 

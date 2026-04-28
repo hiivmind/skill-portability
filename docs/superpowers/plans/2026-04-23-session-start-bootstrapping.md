@@ -604,19 +604,19 @@ git commit -m "docs(auditing): add session-start injection to report"
 
 ---
 
-### Task 13: Validation — Run auditing skill on skill-portability itself
+### Task 13: Validation — Run auditing skill on plugin-portability itself
 
 **Files:**
-- Test target: `/home/nathanielramm/git/github/skill-portability`
+- Test target: `/home/nathanielramm/git/github/plugin-portability`
 
 - [ ] **Step 1: Run the auditing skill**
 
-Invoke: "Use the auditing-plugin-portability skill on /home/nathanielramm/git/github/skill-portability"
+Invoke: "Use the auditing-plugin-portability skill on /home/nathanielramm/git/github/plugin-portability"
 
 - [ ] **Step 2: Verify output**
 
 Expected:
-- Should report `skills/using-skill-portability/SKILL.md` as MISSING (bootstrapping not configured)
+- Should report `skills/using-plugin-portability/SKILL.md` as MISSING (bootstrapping not configured)
 - Should skip the session-start injection section entirely
 - All other platform manifests should show PRESENT
 

@@ -1,15 +1,14 @@
 {
-  "name": "skill-portability-marketplace",
+  "name": "plugin-portability-marketplace",
   "interface": {
-    "displayName": "Skill Portability Marketplace"
+    "displayName": "Plugin Portability Marketplace"
   },
   "plugins": [
     {
-      "name": "skill-portability",
+      "name": "plugin-portability",
       "source": {
         "source": "local",
         "path": "./.codex-plugin"
-        
       },
       "policy": {
         "installation": "AVAILABLE",

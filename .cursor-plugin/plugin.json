@@ -1,13 +1,18 @@
 {
-  "name": "skill-portability",
+  "name": "plugin-portability",
   "description": "Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare SKILL.md repos as input. Emits every missing platform artifact.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": {
     "name": "Nathaniel Ramm",
     "email": "nathaniel.ramm@discretedatascience.com"
   },
-  "homepage": "https://github.com/hiivmind/skill-portability",
-  "repository": "https://github.com/hiivmind/skill-portability",
+  "homepage": "https://github.com/hiivmind/plugin-portability",
+  "repository": "https://github.com/hiivmind/plugin-portability",
   "license": "MIT",
-  "keywords": ["skills", "portability", "multi-platform", "plugin-uplift"]
+  "keywords": [    "cross-platform",
+  "multi-platform",
+  "plugin-portability",
+  "plugins",
+  "skills",
+  "portability"
 }

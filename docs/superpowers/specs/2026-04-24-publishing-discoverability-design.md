@@ -111,4 +111,4 @@ Include a quick-reference table at the top of the doc:
 
 - `docs/platforms/` — existing platform docs stay as-is; this new file lives in `lib/patterns/platforms/` where skills read from
 - Skills — no changes to skill logic in this spec (skill wiring is a follow-up)
-- INSTALL.md, README.md — these document skill-portability's own install, not target plugin publishing
+- INSTALL.md, README.md — these document plugin-portability's own install, not target plugin publishing

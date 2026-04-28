@@ -12,7 +12,7 @@ This document maps both sides: what works today, and where cross-platform plugin
 |------|-------------------------------|------------------------------|
 | Distribution | ✅ One-command install via `npx skills`, `gh skill`, platform CLIs | ⚠️ `npx skills` loses shared resources; whole-repo install required |
 | Discovery | ✅ Multiple registries, CLI search, gallery browsing | ⚠️ No cross-platform registry; must publish to each separately |
-| Manifests | ✅ Invisible to consumers; one file per platform for authors | ⚠️ Six parallel formats; skill-portability generates all from one canonical source |
+| Manifests | ✅ Invisible to consumers; one file per platform for authors | ⚠️ Six parallel formats; plugin-portability generates all from one canonical source |
 | Context files | ✅ One file per platform, reliable delivery | ⚠️ Parallel adapters needed for cross-platform delivery |
 | Hooks | ✅ Rich event systems on 4 platforms | ⚠️ Event names, schemas, env vars all differ |
 | Tool names | ✅ Each platform's names work natively | ⚠️ Static sidecars + model-time translation; no runtime rewriter |
@@ -48,7 +48,7 @@ For a single-skill author, the publish-and-install flow works today. Write a SKI
 
 Each platform's native install tool (`gh skill install`, `gemini extensions install`, Codex `$skill-installer`) also installs at skill granularity, not plugin granularity. Only Cursor's marketplace and Claude Code's plugin system install the full repo.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Whole-repo install on every platform. The uplift skill generates per-platform manifests and install docs that give each platform a full-repo install path:
 - Claude Code: plugin marketplace or `--plugin-dir` — full repo under `${CLAUDE_PLUGIN_ROOT}`
@@ -87,7 +87,7 @@ For consumers, discovery is solved. Multiple registries with different curation 
 
 Each registry is platform-native. There is no cross-platform registry. A plugin author who wants to be discoverable on Cursor, Gemini, Codex, and Copilot must publish to each platform's registry separately — or rely on consumers finding their GitHub repo directly.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 The `plugin-portability` skill generates per-platform install docs (in `INSTALL.md`) that document how to install the plugin on each platform. It also generates the manifests each platform requires for installation — so for platforms that install directly from GitHub (Claude Code, Copilot CLI, Gemini CLI, Codex), the plugin is installable without additional setup by the author.
 
@@ -122,7 +122,7 @@ Six coexisting manifest files for the same metadata. Every metadata change — n
 
 Cursor requires explicit `skills`, `agents`, `commands`, and `hooks` fields that Claude Code auto-discovers. Gemini requires skill declarations with `description` and `executionInstructions`. OpenCode uses npm's `package.json` conventions. The formats overlap enough to be frustrating but differ enough that no simple transform covers all cases.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 The detection algorithm (D1–D4) scans all existing manifests, elects the most complete one as canonical, and builds a unified metadata model. The uplift skill then generates every missing manifest from that canonical source — so authors maintain one, and the tool generates the rest.
 
@@ -159,7 +159,7 @@ Each platform reads a different file with different semantics:
 
 Cross-platform plugins need parallel adapters delivering the same payload through each platform's mechanism. The context files become thin wrappers or stubs — the real payload lives in the skill directory and is pulled at runtime.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 The uplift skill generates a `using-<plugin>` bootstrapping skill that contains the shared payload. Per-platform injection mechanisms deliver this skill body + the relevant tool-mapping sidecar at session start. The context files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) are generated as platform-appropriate wrappers.
 
@@ -193,7 +193,7 @@ Specific divergences:
 - **Gemini CLI:** No hook system. `GEMINI.md` `@`-includes substitute for session-start injection (different mechanism, same effect).
 - **Codex:** No hook system, no context file mechanism. Relies on passive skill auto-discovery — the weakest guarantee in the ecosystem.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Polyglot `session-start` script with env-var branching outputs the correct JSON format for whichever platform is running. Two parallel hook config files (`hooks.json` for Claude Code, `hooks-cursor.json` for Cursor) handle different event name schemas. Windows support via a polyglot `.cmd`/bash wrapper that tries `Git\bin\bash.exe`, falls through to `where bash`, and exits 0 silently if no bash is found.
 
@@ -240,7 +240,7 @@ Subagent dispatch — the ability to spawn isolated agents for parallel work —
 | Cursor | ⚠️ Unclear | Not documented in sidecars |
 | Gemini CLI | ❌ None | Skills using subagents degrade to single-session `executing-plans` |
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Static sidecars (`references/{copilot,codex,gemini}-tools.md`) are delivered alongside skills via session-start injection. Each sidecar maps Claude Code tool names to the platform's equivalents and documents capability gaps. The model does the translation at read time.
 
@@ -252,7 +252,7 @@ Standardised tool names across platforms, or a platform-level adapter that trans
 
 ---
 
-## How skill-portability Addresses All of the Above
+## How plugin-portability Addresses All of the Above
 
 The self-bootstrapping pattern at the core of cross-platform plugins is **six parallel delivery mechanisms for one payload** (the `using-<plugin>` skill body + the platform's tool-mapping sidecar), plus six parallel manifest formats for platform discovery. Each platform gets its own adapter because there is no shared standard:
 

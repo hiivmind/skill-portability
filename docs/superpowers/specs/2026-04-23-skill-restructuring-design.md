@@ -26,7 +26,7 @@ Restructure both skills to match the bp-assess pattern. Extract shared content t
 ## Directory Structure
 
 ```
-skill-portability/
+plugin-portability/
   lib/
     references/
       copilot-tools.md

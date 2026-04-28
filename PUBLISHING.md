@@ -14,8 +14,8 @@ Create a `.claude-plugin/marketplace.json` in your repo. No submission or review
 
 ### How users find and install Skill Portability
 
-1. Register the marketplace: `/plugin marketplace add hiivmind/skill-portability`
-2. Install: `/plugin install skill-portability@skill-portability-marketplace`
+1. Register the marketplace: `/plugin marketplace add hiivmind/plugin-portability`
+2. Install: `/plugin install plugin-portability@plugin-portability-marketplace`
 
 ### Team distribution
 
@@ -24,10 +24,10 @@ Teams can auto-register the marketplace by adding to their project `.claude/sett
 ```json
 {
   "extraKnownMarketplaces": {
-    "skill-portability-marketplace": {
+    "plugin-portability-marketplace": {
       "source": {
         "source": "github",
-        "repo": "hiivmind/skill-portability"
+        "repo": "hiivmind/plugin-portability"
       }
     }
   }
@@ -48,7 +48,7 @@ Public marketplace at `cursor.com/marketplace` (curated, manually reviewed).
 ### How users find and install Skill Portability
 
 - Browse the marketplace at `cursor.com/marketplace`
-- In Agent chat: `/add-plugin hiivmind/skill-portability`
+- In Agent chat: `/add-plugin hiivmind/plugin-portability`
 
 ### Team distribution
 
@@ -65,7 +65,7 @@ Publish as a GitHub repository with a `gemini-extension.json` manifest (requires
 ### How users find and install Skill Portability
 
 ```bash
-gemini extensions install hiivmind/skill-portability
+gemini extensions install hiivmind/plugin-portability
 ```
 
 Users can browse the gallery or install directly from the GitHub URL.
@@ -87,7 +87,7 @@ Extensions are reviewed by the OpenVSX team before listing.
 ### How users find and install Skill Portability
 
 ```bash
-antigravity --install-extension hiivmind.skill-portability
+antigravity --install-extension hiivmind.plugin-portability
 ```
 
 Users can also browse and install from the OpenVSX web registry.
@@ -111,7 +111,7 @@ Then submit to ClawHub for listing. No formal review process.
 **npm:**
 
 ```bash
-npm install -g @hiivmind/skill-portability
+npm install -g @hiivmind/plugin-portability
 ```
 
 **ClawHub:**
@@ -128,7 +128,7 @@ For repos that are mostly instructions with no plugin UI metadata:
 
 - Submit a PR to `github.com/openai/skills` for inclusion in the curated catalog
 - Or publish as a standalone GitHub repo — users install through Codex skill discovery
-- Only recommend `$skill-installer install hiivmind/skill-portability` when the distributed artifact is truly a skill-only repo and does not depend on root-level plugin manifests, hooks, or shared context files
+- Only recommend `$skill-installer install hiivmind/plugin-portability` when the distributed artifact is truly a skill-only repo and does not depend on root-level plugin manifests, hooks, or shared context files
 
 ### Plugin packaging (full)
 
@@ -136,7 +136,7 @@ For first-class plugin packages with marketplace metadata:
 
 - Create `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`
 - For a single-plugin GitHub repo, the marketplace entry should point at the repo root with `source.path: "./"`
-- Users register via `codex marketplace add hiivmind/skill-portability`
+- Users register via `codex marketplace add hiivmind/plugin-portability`
 - Users then enable the plugin from `/plugins`
 - Public self-serve plugin publishing is coming soon per OpenAI docs
 
@@ -145,14 +145,14 @@ For first-class plugin packages with marketplace metadata:
 **Skill-only repo:**
 
 ```bash
-git clone hiivmind/skill-portability
-ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+git clone hiivmind/plugin-portability
+ln -s $(pwd)/plugin-portability/skills ~/.agents/skills/plugin-portability
 ```
 
 **Plugin repo:**
 
 ```bash
-codex marketplace add hiivmind/skill-portability
+codex marketplace add hiivmind/plugin-portability
 ```
 
-Then enable `skill-portability` from `/plugins`.
+Then enable `plugin-portability` from `/plugins`.

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rewrite both skill-portability skills so they detect and infer plugin metadata from any platform's manifest (or bare SKILL.md files), treating Claude Code as an equally valid target rather than a required prerequisite.
+**Goal:** Rewrite both plugin-portability skills so they detect and infer plugin metadata from any platform's manifest (or bare SKILL.md files), treating Claude Code as an equally valid target rather than a required prerequisite.
 
 **Architecture:** Both `uplifting-a-plugin` and `auditing-plugin-portability` SKILL.md files are rewritten in place. Each gains a shared **Detection Algorithm** section (D1–D4) that replaces the old hard-coded "read .claude-plugin/plugin.json" Step 1. The uplift skill adds Claude Code manifests to its write targets. The audit skill adds Claude Code manifests to its check list and gains an "Inferred metadata warnings" section in its report template. No new files; no code — these are pure markdown skill files.
 
@@ -28,7 +28,7 @@ No other files change. Templates already cover Claude Code (`lib/templates/claud
 
 - [ ] **Step 1: Write the new SKILL.md**
 
-Write `~/git/github/skill-portability/skills/uplifting-a-plugin/SKILL.md` with exactly this content:
+Write `~/git/github/plugin-portability/skills/uplifting-a-plugin/SKILL.md` with exactly this content:
 
 ```markdown
 ---
@@ -173,7 +173,7 @@ Also check each `skills/<skillname>/references/copilot-tools.md`, `codex-tools.m
 
 - [ ] **Step 4: Render and write `.claude-plugin/plugin.json`** (if missing)
 
-Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
+Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/plugin-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
 
 - [ ] **Step 5: Render and write `.claude-plugin/marketplace.json`** (if missing)
 
@@ -317,7 +317,7 @@ The skill is idempotent: running it twice on the same repo produces no diff on t
 
 ## Locating this plugin's assets
 
-Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/` to find the install root.
+Use Glob with pattern `~/.claude/plugins/cache/**/plugin-portability/*/lib/templates/` to find the install root.
 ```
 
 - [ ] **Step 2: Verify frontmatter updated**
@@ -325,7 +325,7 @@ Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/lib/templa
 Read the first 5 lines of the written file. Confirm `description:` now says "Accepts any starting state" rather than "Takes a plugin repo with only .claude-plugin/ manifests".
 
 ```bash
-head -5 ~/git/github/skill-portability/skills/uplifting-a-plugin/SKILL.md
+head -5 ~/git/github/plugin-portability/skills/uplifting-a-plugin/SKILL.md
 ```
 
 Expected: frontmatter description mentions "any starting state" and lists multiple platforms as inputs.
@@ -333,7 +333,7 @@ Expected: frontmatter description mentions "any starting state" and lists multip
 - [ ] **Step 3: Verify Prerequisites block is gone**
 
 ```bash
-grep -c "Prerequisites" ~/git/github/skill-portability/skills/uplifting-a-plugin/SKILL.md
+grep -c "Prerequisites" ~/git/github/plugin-portability/skills/uplifting-a-plugin/SKILL.md
 ```
 
 Expected: `0`
@@ -341,7 +341,7 @@ Expected: `0`
 - [ ] **Step 4: Verify Claude Code write targets present**
 
 ```bash
-grep -c "claude-plugin" ~/git/github/skill-portability/skills/uplifting-a-plugin/SKILL.md
+grep -c "claude-plugin" ~/git/github/plugin-portability/skills/uplifting-a-plugin/SKILL.md
 ```
 
 Expected: `4` or more (plugin.json, marketplace.json, template paths, conflict check list).
@@ -349,7 +349,7 @@ Expected: `4` or more (plugin.json, marketplace.json, template paths, conflict c
 - [ ] **Step 5: Commit**
 
 ```bash
-cd ~/git/github/skill-portability
+cd ~/git/github/plugin-portability
 git add skills/uplifting-a-plugin/SKILL.md
 git commit -m "feat: rewrite uplifting-a-plugin with platform-neutral detection"
 ```
@@ -363,7 +363,7 @@ git commit -m "feat: rewrite uplifting-a-plugin with platform-neutral detection"
 
 - [ ] **Step 1: Write the new SKILL.md**
 
-Write `~/git/github/skill-portability/skills/auditing-plugin-portability/SKILL.md` with exactly this content:
+Write `~/git/github/plugin-portability/skills/auditing-plugin-portability/SKILL.md` with exactly this content:
 
 ```markdown
 ---
@@ -533,7 +533,7 @@ Add missing SKILL.md frontmatter manually before publishing via npx skills.
 - [ ] **Step 2: Verify hard-fail on missing Claude manifest is gone**
 
 ```bash
-grep -c "Verify source is a Claude plugin" ~/git/github/skill-portability/skills/auditing-plugin-portability/SKILL.md
+grep -c "Verify source is a Claude plugin" ~/git/github/plugin-portability/skills/auditing-plugin-portability/SKILL.md
 ```
 
 Expected: `0`
@@ -541,7 +541,7 @@ Expected: `0`
 - [ ] **Step 3: Verify Claude Code appears in the manifest checklist**
 
 ```bash
-grep -c "claude-plugin" ~/git/github/skill-portability/skills/auditing-plugin-portability/SKILL.md
+grep -c "claude-plugin" ~/git/github/plugin-portability/skills/auditing-plugin-portability/SKILL.md
 ```
 
 Expected: `3` or more (plugin.json, marketplace.json, report example).
@@ -549,7 +549,7 @@ Expected: `3` or more (plugin.json, marketplace.json, report example).
 - [ ] **Step 4: Verify Detection Algorithm section present**
 
 ```bash
-grep -c "Detection Algorithm" ~/git/github/skill-portability/skills/auditing-plugin-portability/SKILL.md
+grep -c "Detection Algorithm" ~/git/github/plugin-portability/skills/auditing-plugin-portability/SKILL.md
 ```
 
 Expected: `1` or more.
@@ -557,7 +557,7 @@ Expected: `1` or more.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd ~/git/github/skill-portability
+cd ~/git/github/plugin-portability
 git add skills/auditing-plugin-portability/SKILL.md
 git commit -m "feat: rewrite auditing-plugin-portability with platform-neutral detection"
 ```
@@ -578,7 +578,7 @@ The plugin's own manifests still say "Claude-only plugin" in their descriptions.
 
 - [ ] **Step 1: Update `.claude-plugin/plugin.json` description**
 
-In `~/git/github/skill-portability/.claude-plugin/plugin.json`, change:
+In `~/git/github/plugin-portability/.claude-plugin/plugin.json`, change:
 ```json
 "description": "Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support"
 ```
@@ -589,15 +589,15 @@ to:
 
 - [ ] **Step 2: Update `.cursor-plugin/plugin.json` description**
 
-Same description change as Step 1 in `~/git/github/skill-portability/.cursor-plugin/plugin.json`.
+Same description change as Step 1 in `~/git/github/plugin-portability/.cursor-plugin/plugin.json`.
 
 - [ ] **Step 3: Update `gemini-extension.json` description**
 
-Same description change in `~/git/github/skill-portability/gemini-extension.json`.
+Same description change in `~/git/github/plugin-portability/gemini-extension.json`.
 
 - [ ] **Step 4: Update `AGENTS.md`**
 
-In `~/git/github/skill-portability/AGENTS.md`, change the description paragraph under the `# Skill Portability` heading from:
+In `~/git/github/plugin-portability/AGENTS.md`, change the description paragraph under the `# Skill Portability` heading from:
 ```
 Uplift any Claude plugin to full multi-platform portability: Cursor, Gemini CLI, OpenCode, and AGENTS.md support.
 ```
@@ -608,11 +608,11 @@ Make any plugin fully portable across all platforms. Accepts Claude, Cursor, Gem
 
 - [ ] **Step 5: Update `CLAUDE.md`**
 
-Same description change in `~/git/github/skill-portability/CLAUDE.md`.
+Same description change in `~/git/github/plugin-portability/CLAUDE.md`.
 
 - [ ] **Step 6: Update `README.md` — intro and "What it does" section**
 
-In `~/git/github/skill-portability/README.md`:
+In `~/git/github/plugin-portability/README.md`:
 
 Change the intro paragraph from:
 ```
@@ -641,12 +641,12 @@ Add to the bullet list:
 - [ ] **Step 7: Verify no remaining "Claude-only" references in manifests**
 
 ```bash
-grep -ri "claude-only\|claude only" ~/git/github/skill-portability/.claude-plugin/ \
-  ~/git/github/skill-portability/.cursor-plugin/ \
-  ~/git/github/skill-portability/gemini-extension.json \
-  ~/git/github/skill-portability/AGENTS.md \
-  ~/git/github/skill-portability/CLAUDE.md \
-  ~/git/github/skill-portability/README.md 2>/dev/null
+grep -ri "claude-only\|claude only" ~/git/github/plugin-portability/.claude-plugin/ \
+  ~/git/github/plugin-portability/.cursor-plugin/ \
+  ~/git/github/plugin-portability/gemini-extension.json \
+  ~/git/github/plugin-portability/AGENTS.md \
+  ~/git/github/plugin-portability/CLAUDE.md \
+  ~/git/github/plugin-portability/README.md 2>/dev/null
 ```
 
 Expected: no output.
@@ -654,7 +654,7 @@ Expected: no output.
 - [ ] **Step 8: Commit**
 
 ```bash
-cd ~/git/github/skill-portability
+cd ~/git/github/plugin-portability
 git add .claude-plugin/ .cursor-plugin/ gemini-extension.json AGENTS.md CLAUDE.md README.md
 git commit -m "chore: update manifest descriptions to reflect platform-neutral capability"
 ```

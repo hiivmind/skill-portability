@@ -31,7 +31,7 @@
 | `lib/patterns/platforms/codex.yaml` | Add `template` field to fixable conditions |
 | `lib/patterns/platforms/antigravity.yaml` | Add `template` field to fixable conditions |
 | `lib/patterns/platforms/openclaw.yaml` | Add `template` field to fixable conditions |
-| `skills/using-skill-portability/SKILL.md` | Reference `plugin-portability` |
+| `skills/using-plugin-portability/SKILL.md` | Reference `plugin-portability` |
 
 ### Removed Files
 | File | Reason |
@@ -642,10 +642,10 @@ git commit -m "feat: add reference pointers for merged skill"
 
 ---
 
-## Task 5: Update `using-skill-portability`
+## Task 5: Update `using-plugin-portability`
 
 **Files:**
-- Modify: `skills/using-skill-portability/SKILL.md`
+- Modify: `skills/using-plugin-portability/SKILL.md`
 
 - [ ] **Step 1: Rewrite the skill table and descriptions**
 
@@ -653,8 +653,8 @@ Replace the current content (which lists two separate skills) with:
 
 ```markdown
 ---
-name: using-skill-portability
-description: Use when starting a session with the skill-portability plugin. Session-start bootstrapping that lists available skills and platform-specific invocation instructions.
+name: using-plugin-portability
+description: Use when starting a session with the plugin-portability plugin. Session-start bootstrapping that lists available skills and platform-specific invocation instructions.
 ---
 
 # Using Skill Portability
@@ -681,8 +681,8 @@ Skills use Claude Code tool names. See `lib/references/` for platform-specific e
 - [ ] **Step 2: Commit**
 
 ```bash
-git add skills/using-skill-portability/SKILL.md
-git commit -m "chore: update using-skill-portability for merged skill name"
+git add skills/using-plugin-portability/SKILL.md
+git commit -m "chore: update using-plugin-portability for merged skill name"
 ```
 
 ---
@@ -740,7 +740,7 @@ Expected: All OK
 - [ ] **Step 4: Verify skill structure**
 
 ```bash
-ls skills/plugin-portability/SKILL.md skills/plugin-portability/references/codex-tools.md skills/plugin-portability/references/gemini-tools.md skills/using-skill-portability/SKILL.md
+ls skills/plugin-portability/SKILL.md skills/plugin-portability/references/codex-tools.md skills/plugin-portability/references/gemini-tools.md skills/using-plugin-portability/SKILL.md
 ```
 Expected: All 4 files exist
 

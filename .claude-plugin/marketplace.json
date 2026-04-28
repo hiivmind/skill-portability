@@ -1,15 +1,15 @@
 {
-  "name": "skill-portability-marketplace",
-  "description": "Development marketplace for skill-portability",
+  "name": "plugin-portability-marketplace",
+  "description": "Development marketplace for plugin-portability",
   "owner": {
     "name": "Nathaniel Ramm",
     "email": "nathaniel.ramm@discretedatascience.com"
   },
   "plugins": [
     {
-      "name": "skill-portability",
+      "name": "plugin-portability",
       "description": "Assess or uplift any plugin for multi-platform portability: Claude Code, Cursor, Gemini CLI, Codex, Antigravity, and OpenClaw",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "source": "./",
       "author": {
         "name": "Nathaniel Ramm",

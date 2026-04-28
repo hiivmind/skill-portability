@@ -1,6 +1,6 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)
-![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/hiivmind/plugin-portability/actions/workflows/ci.yml/badge.svg)
 
 # Skill Portability
 
@@ -14,7 +14,7 @@ The cross-platform skill portability space is full of [CLI tools, sync daemons, 
 They are separate programs you install and run alongside your plugin. Most target consumers (people installing others' skills), not authors.
 The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance, no choice of target platforms.
 
-skill-portability takes a different approach:
+plugin-portability takes a different approach:
 
 - **It works where authors already work.** It's a plugin you install into the same agent you're already using to build your skill. No context switch, no separate CLI — assessment and uplift happen inside the authoring workflow.
 - **Analysis first.** Examines what platform artifacts exist and reports gaps before touching anything.
@@ -51,13 +51,13 @@ For the full picture — what works, what doesn't, and what needs platform-level
 
 This plugin owes a direct debt to [obra/superpowers](https://github.com/obra/superpowers) by Jesse Vincent.
 Superpowers pioneered the multi-platform plugin pattern for Claude Code — the manifest structures, context file conventions,
-tool-mapping references, and hook portability approach that skill-portability now automates all originate there.
+tool-mapping references, and hook portability approach that plugin-portability now automates all originate there.
 Templates in this repo are seeded from superpowers v5.0.7 (see [`lib/templates/UPSTREAM.md`](lib/templates/UPSTREAM.md) for re-seeding instructions).
-Beyond patterns, superpowers was used directly to build this plugin — the skills that wrote skill-portability were themselves superpowers skills.
+Beyond patterns, superpowers was used directly to build this plugin — the skills that wrote plugin-portability were themselves superpowers skills.
 
 ## This repo is itself an example
 
-`skill-portability` is structured using the exact pattern it produces. Check the root-level manifests as a reference.
+`plugin-portability` is structured using the exact pattern it produces. Check the root-level manifests as a reference.
 
 ## Installation
 
@@ -66,40 +66,40 @@ Full details for all platforms in [INSTALL.md](INSTALL.md).
 **Claude Code** — register the marketplace, then install:
 
 ```text
-/plugin marketplace add hiivmind/skill-portability
-/plugin install skill-portability@skill-portability-marketplace
+/plugin marketplace add hiivmind/plugin-portability
+/plugin install plugin-portability@plugin-portability-marketplace
 ```
 
 **Cursor** — in Agent chat:
 
 ```text
-/add-plugin hiivmind/skill-portability
+/add-plugin hiivmind/plugin-portability
 ```
 
 **Gemini CLI:**
 
 ```bash
-gemini extensions install https://github.com/hiivmind/skill-portability
+gemini extensions install https://github.com/hiivmind/plugin-portability
 ```
 
 **Codex:**
 
 ```bash
-codex marketplace add hiivmind/skill-portability
+codex marketplace add hiivmind/plugin-portability
 ```
 
-Then open `/plugins` in Codex and install `skill-portability`.
+Then open `/plugins` in Codex and install `plugin-portability`.
 
 **Antigravity:**
 
 ```bash
-antigravity --install-extension hiivmind/skill-portability
+antigravity --install-extension hiivmind/plugin-portability
 ```
 
 **OpenClaw:**
 
 ```bash
-openclaw plugins install skill-portability
+openclaw plugins install plugin-portability
 ```
 
 ## Usage

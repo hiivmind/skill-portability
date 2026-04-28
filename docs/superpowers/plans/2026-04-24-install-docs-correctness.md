@@ -19,14 +19,14 @@
 
 Replace:
 ```json
-  "homepage": "https://github.com/nathanielramm/skill-portability",
-  "repository": "https://github.com/nathanielramm/skill-portability",
+  "homepage": "https://github.com/nathanielramm/plugin-portability",
+  "repository": "https://github.com/nathanielramm/plugin-portability",
 ```
 
 With:
 ```json
-  "homepage": "https://github.com/hiivmind/skill-portability",
-  "repository": "https://github.com/hiivmind/skill-portability",
+  "homepage": "https://github.com/hiivmind/plugin-portability",
+  "repository": "https://github.com/hiivmind/plugin-portability",
 ```
 
 ---
@@ -40,8 +40,8 @@ With:
 
 Write the entire file with these corrections applied:
 
-1. Claude Code section: `skill-portability@skill-portability-dev` → `skill-portability@skill-portability-marketplace`. Replace `extraKnownMarketplaces` array format with object format. Add "Using the skills" subsection.
-2. Cursor section: Remove false marketplace claim. Replace with `/add-plugin hiivmind/skill-portability`. Add "Using the skills" subsection.
+1. Claude Code section: `plugin-portability@plugin-portability-dev` → `plugin-portability@plugin-portability-marketplace`. Replace `extraKnownMarketplaces` array format with object format. Add "Using the skills" subsection.
+2. Cursor section: Remove false marketplace claim. Replace with `/add-plugin hiivmind/plugin-portability`. Add "Using the skills" subsection.
 3. Gemini CLI section: Fix URL `nathanielramm` → `hiivmind`. Add "Using the skills" subsection.
 4. OpenCode section: Add "Using the skills" subsection.
 5. Copilot CLI section: Fix URLs `nathanielramm` → `hiivmind`. Add "Using the skills" subsection.
@@ -70,13 +70,13 @@ necessary across today's agent platforms.
 #### Marketplace install
 
 ```bash
-claude plugin install skill-portability@skill-portability-marketplace
+claude plugin install plugin-portability@plugin-portability-marketplace
 ```
 
 #### Local development
 
 ```bash
-claude --plugin-dir ./path-to-skill-portability
+claude --plugin-dir ./path-to-plugin-portability
 ```
 
 #### Project install
@@ -86,10 +86,10 @@ Add to `.claude/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "skill-portability-marketplace": {
+    "plugin-portability-marketplace": {
       "source": {
         "source": "github",
-        "repo": "hiivmind/skill-portability"
+        "repo": "hiivmind/plugin-portability"
       }
     }
   }
@@ -102,7 +102,7 @@ Add to `.claude/settings.json`:
 claude plugin list
 ```
 
-Look for `skill-portability` in the output.
+Look for `plugin-portability` in the output.
 
 #### Using the skills
 
@@ -123,12 +123,12 @@ Use the uplifting-a-plugin skill on /path/to/my-plugin
 In Cursor's Agent chat:
 
 ```
-/add-plugin hiivmind/skill-portability
+/add-plugin hiivmind/plugin-portability
 ```
 
 #### Local development
 
-Symlink or copy the plugin directory to `~/.cursor/plugins/local/skill-portability/` and restart Cursor (Developer: Reload Window).
+Symlink or copy the plugin directory to `~/.cursor/plugins/local/plugin-portability/` and restart Cursor (Developer: Reload Window).
 
 #### Verify
 
@@ -148,13 +148,13 @@ In Cursor's chat, invoke skills with the `/` prefix:
 #### Install from GitHub
 
 ```bash
-gemini extensions install https://github.com/hiivmind/skill-portability
+gemini extensions install https://github.com/hiivmind/plugin-portability
 ```
 
 #### Install from local path
 
 ```bash
-gemini extensions link /path/to/skill-portability
+gemini extensions link /path/to/plugin-portability
 ```
 
 #### Verify
@@ -163,7 +163,7 @@ gemini extensions link /path/to/skill-portability
 gemini extensions list
 ```
 
-Look for `skill-portability` in the output. Restart Gemini CLI if it was running during install.
+Look for `plugin-portability` in the output. Restart Gemini CLI if it was running during install.
 
 #### Using the skills
 
@@ -179,7 +179,7 @@ List available skills with `/skills list`.
 
 #### Local plugin install
 
-Copy `.opencode/plugins/skill-portability.js` to your project's `.opencode/plugins/` directory, or to `~/.config/opencode/plugins/` for global install.
+Copy `.opencode/plugins/plugin-portability.js` to your project's `.opencode/plugins/` directory, or to `~/.config/opencode/plugins/` for global install.
 
 #### npm install (if published)
 
@@ -187,7 +187,7 @@ Add to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["skill-portability"]
+  "plugin": ["plugin-portability"]
 }
 ```
 
@@ -218,13 +218,13 @@ Run assessing-plugin-portability on /path/to/my-plugin
 Install skills via GitHub CLI:
 
 ```bash
-gh skill install hiivmind/skill-portability
+gh skill install hiivmind/plugin-portability
 ```
 
 Or clone the repo — skills are auto-discovered from the `skills/` directory:
 
 ```bash
-git clone https://github.com/hiivmind/skill-portability
+git clone https://github.com/hiivmind/plugin-portability
 ```
 
 #### Context
@@ -257,8 +257,8 @@ In Copilot CLI, invoke skills with the `/` prefix:
 Clone the repo and expose the skills directory:
 
 ```bash
-git clone https://github.com/hiivmind/skill-portability
-ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+git clone https://github.com/hiivmind/plugin-portability
+ln -s $(pwd)/plugin-portability/skills ~/.agents/skills/plugin-portability
 ```
 
 Restart Codex. Skills will be discoverable through native skill discovery.
@@ -289,7 +289,7 @@ Already have the repo cloned for one platform? Add others by pointing them at th
 Point Claude Code at your existing checkout:
 
 ```bash
-claude --plugin-dir /path/to/existing/skill-portability
+claude --plugin-dir /path/to/existing/plugin-portability
 ```
 
 Or add to `.claude/settings.json` for persistent access:
@@ -297,10 +297,10 @@ Or add to `.claude/settings.json` for persistent access:
 ```json
 {
   "extraKnownMarketplaces": {
-    "skill-portability-marketplace": {
+    "plugin-portability-marketplace": {
       "source": {
         "source": "github",
-        "repo": "hiivmind/skill-portability"
+        "repo": "hiivmind/plugin-portability"
       }
     }
   }
@@ -312,7 +312,7 @@ Or add to `.claude/settings.json` for persistent access:
 Symlink your existing checkout into Cursor's plugin directory:
 
 ```bash
-ln -s /path/to/existing/skill-portability ~/.cursor/plugins/local/skill-portability
+ln -s /path/to/existing/plugin-portability ~/.cursor/plugins/local/plugin-portability
 ```
 
 Restart Cursor (Developer: Reload Window).
@@ -322,7 +322,7 @@ Restart Cursor (Developer: Reload Window).
 Link Gemini to your existing checkout:
 
 ```bash
-gemini extensions link /path/to/existing/skill-portability
+gemini extensions link /path/to/existing/plugin-portability
 ```
 
 ### OpenCode
@@ -330,14 +330,14 @@ gemini extensions link /path/to/existing/skill-portability
 Symlink the plugin entrypoint from your existing checkout (do not copy — it resolves paths relative to the repo root):
 
 ```bash
-ln -s /path/to/existing/skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/skill-portability.js
+ln -s /path/to/existing/plugin-portability/.opencode/plugins/plugin-portability.js .opencode/plugins/plugin-portability.js
 ```
 
 Or add the checkout path to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["/path/to/existing/skill-portability"]
+  "plugin": ["/path/to/existing/plugin-portability"]
 }
 ```
 
@@ -348,7 +348,7 @@ Requires [Bun](https://bun.sh).
 Work from the cloned directory — skills are auto-discovered from `skills/`. Or symlink into your project:
 
 ```bash
-ln -s /path/to/existing/skill-portability/skills skills/skill-portability
+ln -s /path/to/existing/plugin-portability/skills skills/plugin-portability
 ```
 
 ### Codex
@@ -356,7 +356,7 @@ ln -s /path/to/existing/skill-portability/skills skills/skill-portability
 Symlink the skills directory from your existing checkout:
 
 ```bash
-ln -s /path/to/existing/skill-portability/skills ~/.agents/skills/skill-portability
+ln -s /path/to/existing/plugin-portability/skills ~/.agents/skills/plugin-portability
 ```
 
 Restart Codex.
@@ -367,9 +367,9 @@ Restart Codex.
 Run: `grep -n "nathanielramm" INSTALL.md`
 Expected: no output
 
-- [ ] **Step 3: Verify no `skill-portability-dev` references remain**
+- [ ] **Step 3: Verify no `plugin-portability-dev` references remain**
 
-Run: `grep -n "skill-portability-dev" INSTALL.md`
+Run: `grep -n "plugin-portability-dev" INSTALL.md`
 Expected: no output
 
 ---
@@ -386,7 +386,7 @@ Replace:
 **Quick start (Claude Code):**
 
 ```bash
-claude plugin install skill-portability@skill-portability-dev
+claude plugin install plugin-portability@plugin-portability-dev
 ```
 ```
 
@@ -395,7 +395,7 @@ With:
 **Quick start (Claude Code):**
 
 ```bash
-claude plugin install skill-portability@skill-portability-marketplace
+claude plugin install plugin-portability@plugin-portability-marketplace
 ```
 ```
 
@@ -434,9 +434,9 @@ With:
 See [INSTALL.md](INSTALL.md) for full install and usage details per platform.
 ```
 
-- [ ] **Step 3: Verify no `skill-portability-dev` references remain**
+- [ ] **Step 3: Verify no `plugin-portability-dev` references remain**
 
-Run: `grep -n "skill-portability-dev" README.md`
+Run: `grep -n "plugin-portability-dev" README.md`
 Expected: no output
 
 ---
@@ -452,7 +452,7 @@ Expected: no output
 git add .cursor-plugin/plugin.json INSTALL.md README.md
 git commit -m "fix: correct install docs — marketplace name, GitHub URLs, platform invocation examples
 
-- Fix marketplace name: skill-portability-dev → skill-portability-marketplace
+- Fix marketplace name: plugin-portability-dev → plugin-portability-marketplace
 - Fix all GitHub URLs: nathanielramm → hiivmind
 - Fix extraKnownMarketplaces to use correct object format
 - Replace false Cursor marketplace claim with /add-plugin
@@ -463,5 +463,5 @@ git commit -m "fix: correct install docs — marketplace name, GitHub URLs, plat
 
 - [ ] **Step 2: Verify consistency**
 
-Run: `grep -rn "nathanielramm/skill-portability\|skill-portability-dev" README.md INSTALL.md .cursor-plugin/plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json`
-Expected: no output (all references now use `hiivmind` and `skill-portability-marketplace`)
+Run: `grep -rn "nathanielramm/plugin-portability\|plugin-portability-dev" README.md INSTALL.md .cursor-plugin/plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json`
+Expected: no output (all references now use `hiivmind` and `plugin-portability-marketplace`)

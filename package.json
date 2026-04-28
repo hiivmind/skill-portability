@@ -1,5 +1,5 @@
 {
-  "name": "skill-portability",
-  "version": "0.1.2",
+  "name": "plugin-portability",
+  "version": "0.2.0",
   "type": "module"
 }

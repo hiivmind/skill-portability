@@ -5,7 +5,7 @@
 
 ## Overview
 
-A growing ecosystem of projects aims to solve cross-platform skill and plugin portability for AI coding agents. This document catalogues the known projects, their approaches, and where skill-portability fits.
+A growing ecosystem of projects aims to solve cross-platform skill and plugin portability for AI coding agents. This document catalogues the known projects, their approaches, and where plugin-portability fits.
 
 ### The Two Audiences
 
@@ -238,7 +238,7 @@ Different angle on the same problem space.
 | 6 | acplugin | Author | Claude Code only | No | Yes (convert) | No |
 | 7 | claude-to-codex | Author | Claude Code only | No | Yes (convert) | No |
 | 8-11 | Frameworks | Consumer+ | Varies | No | Varies | No |
-| — | **skill-portability** | **Author** | **Yes (any platform)** | **Yes** | **Yes** | **Yes** |
+| — | **plugin-portability** | **Author** | **Yes (any platform)** | **Yes** | **Yes** | **Yes** |
 
 ---
 
@@ -273,7 +273,7 @@ Each agent expects skills in a specific location and format:
 | Devin | Markdown | `.devin/skills/` |
 | Antigravity | Flattened rules in `.agent/` | `.agent/` |
 
-## Where skill-portability Sits
+## Where plugin-portability Sits
 
 The landscape splits into three categories:
 
@@ -283,7 +283,7 @@ The landscape splits into three categories:
 
 3. **Broad frameworks** (ECC, AI DevKit, AgentSys, agent-plugins-skills) — skill portability is a secondary concern within a larger system. Portability comes along for the ride but is not the core value proposition.
 
-**skill-portability is the only project that:**
+**plugin-portability is the only project that:**
 
 - **Targets authors specifically.** Every other tool either helps consumers sync/install, or converts blindly from one platform.
 - **Accepts any platform as input.** Not locked to Claude Code as the starting point. A Cursor plugin, a Codex skill, a bare SKILL.md — all valid inputs.
@@ -292,9 +292,9 @@ The landscape splits into three categories:
 - **Includes publishing guidance.** Generates PUBLISHING.md with per-platform publishing steps. No other project addresses the "how do I get this discovered and installed" question.
 - **Runs as a skill, not a CLI.** No install step, no binary, no sync daemon. The agent itself is the portability engine.
 
-### Failure modes skill-portability avoids
+### Failure modes plugin-portability avoids
 
-| Failure mode | Examples | How skill-portability avoids it |
+| Failure mode | Examples | How plugin-portability avoids it |
 |-------------|----------|-------------------------------|
 | Scope creep into full dev workflow | AI DevKit, ECC, AgentSys | Stays focused on portability analysis + emission |
 | CLI installation friction | SkillKit, Agentloom, @agents-dev/cli | Runs as a skill inside the agent — nothing to install |

@@ -20,9 +20,9 @@ No changes to skills, templates, lib, or docs/superpowers plans/specs (historica
 
 ### 1. Fix marketplace name (README.md, INSTALL.md)
 
-`skill-portability@skill-portability-dev` → `skill-portability@skill-portability-marketplace`
+`plugin-portability@plugin-portability-dev` → `plugin-portability@plugin-portability-marketplace`
 
-The marketplace.json `name` field is `skill-portability-marketplace`. The `@` syntax is `plugin-name@marketplace-name`.
+The marketplace.json `name` field is `plugin-portability-marketplace`. The `@` syntax is `plugin-name@marketplace-name`.
 
 ### 2. Fix `extraKnownMarketplaces` format (INSTALL.md)
 
@@ -37,10 +37,10 @@ New (correct object format):
 ```json
 {
   "extraKnownMarketplaces": {
-    "skill-portability-marketplace": {
+    "plugin-portability-marketplace": {
       "source": {
         "source": "github",
-        "repo": "hiivmind/skill-portability"
+        "repo": "hiivmind/plugin-portability"
       }
     }
   }
@@ -50,12 +50,12 @@ New (correct object format):
 ### 3. Fix Cursor install (INSTALL.md)
 
 Remove false marketplace claim. Replace with:
-- `/add-plugin hiivmind/skill-portability` in Agent chat
+- `/add-plugin hiivmind/plugin-portability` in Agent chat
 - Local development via symlink (keep existing)
 
 ### 4. Fix all GitHub URLs
 
-All instances of `github.com/nathanielramm/skill-portability` → `github.com/hiivmind/skill-portability`
+All instances of `github.com/nathanielramm/plugin-portability` → `github.com/hiivmind/plugin-portability`
 
 Files affected:
 - INSTALL.md lines 66, 118, 124, 148

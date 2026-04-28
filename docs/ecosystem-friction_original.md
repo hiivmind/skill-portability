@@ -41,7 +41,7 @@ Neither is acceptable for a rich plugin. This is the core structural gap in the 
 
 Every metadata change (new version, updated description, author email fix) must be made in four places. There is no canonical source of truth.
 
-**What would fix it:** A single `plugin.json` standard that all platforms read, with each platform treating unknown fields as no-ops. The skill-portability Detection Algorithm (D1–D4) is a workaround that tries to elect the most complete existing manifest as canonical — it should not need to exist.
+**What would fix it:** A single `plugin.json` standard that all platforms read, with each platform treating unknown fields as no-ops. The plugin-portability Detection Algorithm (D1–D4) is a workaround that tries to elect the most complete existing manifest as canonical — it should not need to exist.
 
 ---
 

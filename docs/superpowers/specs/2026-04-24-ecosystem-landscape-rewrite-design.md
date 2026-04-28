@@ -42,7 +42,7 @@ For a user who has a single SKILL.md with name/description frontmatter and wants
 
 **Where it breaks down:** `npx skills add` copies only the `skills/` directory — it doesn't install the repo. Plugins with shared hooks, context files, platform manifests, and cross-skill references lose those assets. This is the fundamental install-granularity mismatch: skills are files, plugins are repos.
 
-**How skill-portability solves this:** Whole-repo install on every platform. `npx skills` is explicitly not used for plugins with shared resources.
+**How plugin-portability solves this:** Whole-repo install on every platform. `npx skills` is explicitly not used for plugins with shared resources.
 
 **What would fix it:** `npx skills` (or a successor) needs a plugin-level install mode that installs the full repo, writes shared context, and wires hooks per-platform.
 
@@ -78,7 +78,7 @@ For consumers, discovery is solved. Multiple registries, one-command installs, p
 
 Every metadata change must be made in all files. No single source of truth.
 
-**How skill-portability solves this:** The detection algorithm (D1–D4) elects the most complete existing manifest as canonical. The uplift skill generates all missing formats from that canonical source.
+**How plugin-portability solves this:** The detection algorithm (D1–D4) elects the most complete existing manifest as canonical. The uplift skill generates all missing formats from that canonical source.
 
 **What would fix it:** A single `plugin.json` standard that all platforms read, treating unknown fields as no-ops.
 
@@ -96,7 +96,7 @@ For single-platform authors, context delivery is straightforward — write one f
 
 **Where it breaks down:** Each platform reads a different file (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) with different include semantics. Cross-platform plugins need parallel adapters delivering the same payload through each platform's mechanism.
 
-**How skill-portability solves this:** Per-platform injection delivers the `using-<plugin>` skill body + the relevant tool-mapping sidecar. Context files are thin wrappers; the real payload lives in the skill directory and is pulled at runtime.
+**How plugin-portability solves this:** Per-platform injection delivers the `using-<plugin>` skill body + the relevant tool-mapping sidecar. Context files are thin wrappers; the real payload lives in the skill directory and is pulled at runtime.
 
 **What would fix it:** A single context file standard with include/import semantics that all platforms support.
 
@@ -110,7 +110,7 @@ For single-platform authors, context delivery is straightforward — write one f
 
 **Where it breaks down:** Event names differ (`SessionStart` vs `sessionStart`), output JSON schemas differ, env vars differ (`CLAUDE_PLUGIN_ROOT` vs `CURSOR_PLUGIN_ROOT`). Hook scripts that reference one platform's env var silently break on another.
 
-**How skill-portability solves this:** Polyglot `session-start` script with env-var branching. Two parallel hook config files (`hooks.json`, `hooks-cursor.json`). Windows support via polyglot `.cmd`/bash wrapper.
+**How plugin-portability solves this:** Polyglot `session-start` script with env-var branching. Two parallel hook config files (`hooks.json`, `hooks-cursor.json`). Windows support via polyglot `.cmd`/bash wrapper.
 
 **Platforms without hooks:**
 - Gemini CLI: No hook system — `GEMINI.md` `@`-includes substitute (different mechanism, same effect)
@@ -131,7 +131,7 @@ For single-platform authors, context delivery is straightforward — write one f
 - Codex: `spawn_agent`/`wait`/`close_agent` gated behind config flag ⚠️
 - Gemini CLI: No equivalent ❌ — skills degrade to single-session execution
 
-**How skill-portability solves this:** Static sidecars (`references/{copilot,codex,gemini}-tools.md`) delivered alongside skills. Model does the translation at read time.
+**How plugin-portability solves this:** Static sidecars (`references/{copilot,codex,gemini}-tools.md`) delivered alongside skills. Model does the translation at read time.
 
 **What would fix it:** Standardised tool names across platforms, or a platform-level adapter.
 
@@ -151,7 +151,7 @@ Expand the current summary table to two columns per area:
 
 ### Session-start injection section
 
-Retain the current "Core Mechanism: Session-Start Injection" section (with the injection mechanism table) but move it from the top of the doc to after the 6 areas — it's the "how skill-portability addresses all of the above" synthesis, not a standalone gap.
+Retain the current "Core Mechanism: Session-Start Injection" section (with the injection mechanism table) but move it from the top of the doc to after the 6 areas — it's the "how plugin-portability addresses all of the above" synthesis, not a standalone gap.
 
 ## References to update
 

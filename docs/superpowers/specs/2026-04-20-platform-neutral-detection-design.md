@@ -81,7 +81,7 @@ Before proceeding, print a brief inference summary:
 
 ```
 ## Metadata inferred from: <canonical source name>
-  name:        skill-portability       (from .claude-plugin/plugin.json)
+  name:        plugin-portability       (from .claude-plugin/plugin.json)
   version:     0.1.0                   (from .cursor-plugin/plugin.json)
   author.name: [missing — not found in any source]
   ...

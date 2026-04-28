@@ -49,5 +49,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ecosystem landscape documentation and competitive analysis
 - Install documentation for all 6 platforms
 
-[0.1.1]: https://github.com/hiivmind/skill-portability/releases/tag/v0.1.1
-[0.1.0]: https://github.com/hiivmind/skill-portability/releases/tag/v0.1.0
+[0.1.1]: https://github.com/hiivmind/plugin-portability/releases/tag/v0.1.1
+[0.1.0]: https://github.com/hiivmind/plugin-portability/releases/tag/v0.1.0

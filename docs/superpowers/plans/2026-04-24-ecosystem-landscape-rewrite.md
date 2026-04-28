@@ -4,7 +4,7 @@
 
 **Goal:** Rewrite `docs/ecosystem-friction.md` as `docs/ecosystem-landscape.md` with balanced two-perspective coverage (consumer/single-skill author vs. cross-platform plugin author), and update all references.
 
-**Architecture:** Git-rename the old file to preserve history, then rewrite its content with 6 ecosystem areas (each covering what works, where it breaks down, and how skill-portability solves it). Update live references in README.md, INSTALL.md, and the whole-repo-note template.
+**Architecture:** Git-rename the old file to preserve history, then rewrite its content with 6 ecosystem areas (each covering what works, where it breaks down, and how plugin-portability solves it). Update live references in README.md, INSTALL.md, and the whole-repo-note template.
 
 **Tech Stack:** Markdown
 
@@ -90,7 +90,7 @@ For a single-skill author, the publish-and-install flow works today. Write a SKI
 
 Each platform's native install tool (`gh skill install`, `gemini extensions install`, Codex `$skill-installer`) also installs at skill granularity, not plugin granularity. Only Cursor's marketplace and Claude Code's plugin system install the full repo.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Whole-repo install on every platform. The uplift skill generates per-platform manifests and install docs that give each platform a full-repo install path:
 - Claude Code: plugin marketplace or `--plugin-dir` — full repo under `${CLAUDE_PLUGIN_ROOT}`
@@ -154,7 +154,7 @@ Six coexisting manifest files for the same metadata. Every metadata change — n
 
 Cursor requires explicit `skills`, `agents`, `commands`, and `hooks` fields that Claude Code auto-discovers. Gemini requires skill declarations with `description` and `executionInstructions`. OpenCode uses npm's `package.json` conventions. The formats overlap enough to be frustrating but differ enough that no simple transform covers all cases.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 The detection algorithm (D1–D4) scans all existing manifests, elects the most complete one as canonical, and builds a unified metadata model. The uplift skill then generates every missing manifest from that canonical source — so authors maintain one, and the tool generates the rest.
 
@@ -191,7 +191,7 @@ Each platform reads a different file with different semantics:
 
 Cross-platform plugins need parallel adapters delivering the same payload through each platform's mechanism. The context files become thin wrappers or stubs — the real payload lives in the skill directory and is pulled at runtime.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 The uplift skill generates a `using-<plugin>` bootstrapping skill that contains the shared payload. Per-platform injection mechanisms deliver this skill body + the relevant tool-mapping sidecar at session start. The context files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) are generated as platform-appropriate wrappers.
 
@@ -225,7 +225,7 @@ Specific divergences:
 - **Gemini CLI:** No hook system. `GEMINI.md` `@`-includes substitute for session-start injection (different mechanism, same effect).
 - **Codex:** No hook system, no context file mechanism. Relies on passive skill auto-discovery — the weakest guarantee in the ecosystem.
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Polyglot `session-start` script with env-var branching outputs the correct JSON format for whichever platform is running. Two parallel hook config files (`hooks.json` for Claude Code, `hooks-cursor.json` for Cursor) handle different event name schemas. Windows support via a polyglot `.cmd`/bash wrapper that tries `Git\bin\bash.exe`, falls through to `where bash`, and exits 0 silently if no bash is found.
 
@@ -272,7 +272,7 @@ Subagent dispatch — the ability to spawn isolated agents for parallel work —
 | Cursor | ⚠️ Unclear | Not documented in sidecars |
 | Gemini CLI | ❌ None | Skills using subagents degrade to single-session `executing-plans` |
 
-### How skill-portability solves this
+### How plugin-portability solves this
 
 Static sidecars (`references/{copilot,codex,gemini}-tools.md`) are delivered alongside skills via session-start injection. Each sidecar maps Claude Code tool names to the platform's equivalents and documents capability gaps. The model does the translation at read time.
 
@@ -284,7 +284,7 @@ Standardised tool names across platforms, or a platform-level adapter that trans
 
 ---
 
-## How skill-portability Addresses All of the Above
+## How plugin-portability Addresses All of the Above
 
 The self-bootstrapping pattern at the core of cross-platform plugins is **six parallel delivery mechanisms for one payload** (the `using-<plugin>` skill body + the platform's tool-mapping sidecar), plus six parallel manifest formats for platform discovery. Each platform gets its own adapter because there is no shared standard:
 
@@ -334,7 +334,7 @@ git commit -m "docs: rewrite ecosystem-landscape.md with balanced two-perspectiv
 
 Restructured from 7 friction-focused 'Gap' sections into 6 ecosystem areas,
 each covering what works for consumers/single-skill authors alongside where
-cross-platform plugin delivery hits limits and how skill-portability solves it."
+cross-platform plugin delivery hits limits and how plugin-portability solves it."
 ```
 
 ---

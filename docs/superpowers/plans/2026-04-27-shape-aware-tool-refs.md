@@ -483,11 +483,11 @@ git commit -m "fix: inventory pattern — shape-aware sidecar discovery (per-ski
 - [ ] **Step 1: Delete all 10 pointer files**
 
 ```bash
-rm skills/using-skill-portability/references/gemini-tools.md
-rm skills/using-skill-portability/references/codex-tools.md
-rm skills/using-skill-portability/references/cursor-tools.md
-rm skills/using-skill-portability/references/antigravity-tools.md
-rm skills/using-skill-portability/references/openclaw-tools.md
+rm skills/using-plugin-portability/references/gemini-tools.md
+rm skills/using-plugin-portability/references/codex-tools.md
+rm skills/using-plugin-portability/references/cursor-tools.md
+rm skills/using-plugin-portability/references/antigravity-tools.md
+rm skills/using-plugin-portability/references/openclaw-tools.md
 rm skills/plugin-portability/references/gemini-tools.md
 rm skills/plugin-portability/references/codex-tools.md
 rm skills/plugin-portability/references/cursor-tools.md
@@ -498,7 +498,7 @@ rm skills/plugin-portability/references/openclaw-tools.md
 If the `references/` directories are now empty, remove them too:
 
 ```bash
-rmdir skills/using-skill-portability/references/ 2>/dev/null
+rmdir skills/using-plugin-portability/references/ 2>/dev/null
 rmdir skills/plugin-portability/references/ 2>/dev/null
 ```
 
@@ -515,7 +515,7 @@ Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor
 
 ## Skills
 
-@./skills/using-skill-portability/SKILL.md
+@./skills/using-plugin-portability/SKILL.md
 @./skills/plugin-portability/SKILL.md
 
 ## Tool References
@@ -554,7 +554,7 @@ Expected: all 5 files listed.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add -A skills/using-skill-portability/references/ skills/plugin-portability/references/ GEMINI.md
+git add -A skills/using-plugin-portability/references/ skills/plugin-portability/references/ GEMINI.md
 git commit -m "fix: remove per-skill pointer files, use shared lib/references/ via GEMINI.md (closes #11)"
 ```
 

@@ -203,13 +203,13 @@ necessary across today's agent platforms.
 #### Marketplace install
 
 ```bash
-claude plugin install skill-portability@skill-portability-dev
+claude plugin install plugin-portability@plugin-portability-dev
 ```
 
 #### Local development
 
 ```bash
-claude --plugin-dir ./path-to-skill-portability
+claude --plugin-dir ./path-to-plugin-portability
 ```
 
 #### Project install
@@ -228,7 +228,7 @@ Add to `.claude/settings.json`:
 claude plugin list
 ```
 
-Look for `skill-portability` in the output.
+Look for `plugin-portability` in the output.
 
 ### Cursor
 
@@ -238,7 +238,7 @@ Search for **Skill Portability** in the Cursor marketplace panel or visit `curso
 
 #### Local development
 
-Copy the plugin directory to `~/.cursor/plugins/local/skill-portability/` and restart Cursor (Developer: Reload Window).
+Copy the plugin directory to `~/.cursor/plugins/local/plugin-portability/` and restart Cursor (Developer: Reload Window).
 
 #### Verify
 
@@ -249,13 +249,13 @@ Open Cursor and check that skills from Skill Portability appear when typing `/` 
 #### Install from GitHub
 
 ```bash
-gemini extensions install https://github.com/nathanielramm/skill-portability
+gemini extensions install https://github.com/nathanielramm/plugin-portability
 ```
 
 #### Install from local path
 
 ```bash
-gemini extensions install /path/to/skill-portability
+gemini extensions install /path/to/plugin-portability
 ```
 
 #### Verify
@@ -264,13 +264,13 @@ gemini extensions install /path/to/skill-portability
 gemini extensions list
 ```
 
-Look for `skill-portability` in the output. Restart Gemini CLI if it was running during install.
+Look for `plugin-portability` in the output. Restart Gemini CLI if it was running during install.
 
 ### OpenCode
 
 #### Local plugin install
 
-Copy `.opencode/plugins/skill-portability.js` to your project's `.opencode/plugins/` directory, or to `~/.config/opencode/plugins/` for global install.
+Copy `.opencode/plugins/plugin-portability.js` to your project's `.opencode/plugins/` directory, or to `~/.config/opencode/plugins/` for global install.
 
 #### npm install (if published)
 
@@ -278,7 +278,7 @@ Add to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["skill-portability"]
+  "plugin": ["plugin-portability"]
 }
 ```
 
@@ -301,13 +301,13 @@ OpenCode requires [Bun](https://bun.sh) for plugin loading.
 Skills are auto-discovered from the `skills/` directory. Clone the repo and skills will be available:
 
 ```bash
-git clone https://github.com/nathanielramm/skill-portability
+git clone https://github.com/nathanielramm/plugin-portability
 ```
 
 Alternatively, install individual skills:
 
 ```bash
-gh skill install https://github.com/nathanielramm/skill-portability
+gh skill install https://github.com/nathanielramm/plugin-portability
 ```
 
 #### Context
@@ -331,8 +331,8 @@ Type `/` to see available skills.
 Clone the repo and expose the skills directory:
 
 ```bash
-git clone https://github.com/nathanielramm/skill-portability
-ln -s $(pwd)/skill-portability/skills ~/.agents/skills/skill-portability
+git clone https://github.com/nathanielramm/plugin-portability
+ln -s $(pwd)/plugin-portability/skills ~/.agents/skills/plugin-portability
 ```
 
 Restart Codex. Skills will be discoverable through native skill discovery.
@@ -354,14 +354,14 @@ Already have the repo cloned for one platform? Add others by pointing them at th
 Point Claude Code at your existing checkout:
 
 ```bash
-claude --plugin-dir /path/to/existing/skill-portability
+claude --plugin-dir /path/to/existing/plugin-portability
 ```
 
 Or add to `.claude/settings.json` for persistent access:
 
 ```json
 {
-  "extraKnownMarketplaces": ["/path/to/existing/skill-portability"]
+  "extraKnownMarketplaces": ["/path/to/existing/plugin-portability"]
 }
 ```
 
@@ -370,7 +370,7 @@ Or add to `.claude/settings.json` for persistent access:
 Symlink your existing checkout into Cursor's plugin directory:
 
 ```bash
-ln -s /path/to/existing/skill-portability ~/.cursor/plugins/local/skill-portability
+ln -s /path/to/existing/plugin-portability ~/.cursor/plugins/local/plugin-portability
 ```
 
 Restart Cursor (Developer: Reload Window).
@@ -380,7 +380,7 @@ Restart Cursor (Developer: Reload Window).
 Point Gemini at your existing checkout:
 
 ```bash
-gemini extensions install /path/to/existing/skill-portability
+gemini extensions install /path/to/existing/plugin-portability
 ```
 
 ### OpenCode
@@ -388,14 +388,14 @@ gemini extensions install /path/to/existing/skill-portability
 Symlink the plugin entrypoint from your existing checkout (do not copy — it resolves paths relative to the repo root):
 
 ```bash
-ln -s /path/to/existing/skill-portability/.opencode/plugins/skill-portability.js .opencode/plugins/skill-portability.js
+ln -s /path/to/existing/plugin-portability/.opencode/plugins/plugin-portability.js .opencode/plugins/plugin-portability.js
 ```
 
 Or add the checkout path to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["/path/to/existing/skill-portability"]
+  "plugin": ["/path/to/existing/plugin-portability"]
 }
 ```
 
@@ -406,7 +406,7 @@ Requires [Bun](https://bun.sh).
 Work from the cloned directory — skills are auto-discovered from `skills/`. Or symlink into your project:
 
 ```bash
-ln -s /path/to/existing/skill-portability/skills skills/skill-portability
+ln -s /path/to/existing/plugin-portability/skills skills/plugin-portability
 ```
 
 ### Codex
@@ -414,7 +414,7 @@ ln -s /path/to/existing/skill-portability/skills skills/skill-portability
 Symlink the skills directory from your existing checkout:
 
 ```bash
-ln -s /path/to/existing/skill-portability/skills ~/.agents/skills/skill-portability
+ln -s /path/to/existing/plugin-portability/skills ~/.agents/skills/plugin-portability
 ```
 
 Restart Codex.

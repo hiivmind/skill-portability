@@ -115,11 +115,11 @@ This repo is a `full-portable-plugin`. Per-skill pointer files are unnecessary.
 ### Delete pointer files (10 files)
 
 ```
-skills/using-skill-portability/references/gemini-tools.md
-skills/using-skill-portability/references/codex-tools.md
-skills/using-skill-portability/references/cursor-tools.md
-skills/using-skill-portability/references/antigravity-tools.md
-skills/using-skill-portability/references/openclaw-tools.md
+skills/using-plugin-portability/references/gemini-tools.md
+skills/using-plugin-portability/references/codex-tools.md
+skills/using-plugin-portability/references/cursor-tools.md
+skills/using-plugin-portability/references/antigravity-tools.md
+skills/using-plugin-portability/references/openclaw-tools.md
 skills/plugin-portability/references/gemini-tools.md
 skills/plugin-portability/references/codex-tools.md
 skills/plugin-portability/references/cursor-tools.md
@@ -131,7 +131,7 @@ skills/plugin-portability/references/openclaw-tools.md
 
 Change `@` includes from per-skill paths:
 ```
-@./skills/using-skill-portability/references/gemini-tools.md
+@./skills/using-plugin-portability/references/gemini-tools.md
 @./skills/plugin-portability/references/gemini-tools.md
 ```
 

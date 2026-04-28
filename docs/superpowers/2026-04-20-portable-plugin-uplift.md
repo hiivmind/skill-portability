@@ -524,7 +524,7 @@ Also check each `skills/<name>/references/copilot-tools.md`, `codex-tools.md`, `
 
 - [ ] **Step 4: Render and write `.claude-plugin/plugin.json`** (if missing)
 
-Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
+Locate this plugin's install path via Glob: `~/.claude/plugins/cache/**/plugin-portability/*/lib/templates/manifests/claude-plugin/plugin.json.tmpl`. Read the template. Substitute all `{{fields}}` with inferred metadata values. Write to `<plugin-path>/.claude-plugin/plugin.json`. Create `.claude-plugin/` directory if needed.
 
 - [ ] **Step 5: Render and write `.claude-plugin/marketplace.json`** (if missing)
 
@@ -668,7 +668,7 @@ The skill is idempotent: running it twice on the same repo produces no diff on t
 
 ## Locating this plugin's assets
 
-Use Glob with pattern `~/.claude/plugins/cache/**/skill-portability/*/lib/templates/` to find the install root.
+Use Glob with pattern `~/.claude/plugins/cache/**/plugin-portability/*/lib/templates/` to find the install root.
 ```
 
 - [ ] **Step 3: Commit**

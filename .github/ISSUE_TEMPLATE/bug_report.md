@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug in skill-portability
+about: Report a bug in plugin-portability
 title: ''
 labels: bug
 assignees: ''

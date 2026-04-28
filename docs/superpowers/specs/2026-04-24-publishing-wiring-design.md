@@ -4,7 +4,7 @@
 
 ## Problem
 
-1. skill-portability's README doesn't state its target audience — plugin authors who have skills/plugins for one platform (often Claude Code) and want to go cross-platform.
+1. plugin-portability's README doesn't state its target audience — plugin authors who have skills/plugins for one platform (often Claude Code) and want to go cross-platform.
 2. The uplift skill generates INSTALL.md (consumer-facing) but no publishing guidance (author-facing). The publishing reference exists at `lib/patterns/platforms/publishing-and-discoverability.md` but nothing reads it.
 
 ## Scope
@@ -111,4 +111,4 @@ Update the existing README flag (lines 522-528) to also check for a PUBLISHING.m
 
 - `lib/patterns/platforms/publishing-and-discoverability.md` — stays as raw reference; templates distill it
 - `skills/assessing-plugin-portability/SKILL.md` — assessment doesn't generate docs
-- `INSTALL.md` — documents skill-portability's own install, unrelated
+- `INSTALL.md` — documents plugin-portability's own install, unrelated

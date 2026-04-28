@@ -640,7 +640,7 @@ git commit -m "docs: update overview table and state flow for Phase 3 redesign"
 
 - [ ] **Step 1: Run the assessment skill against this repo**
 
-Run: `/skill-portability:assessing-plugin-portability .`
+Run: `/plugin-portability:assessing-plugin-portability .`
 
 Verify:
 1. Shape is classified as `multi-platform-source` (not falling to ELSE)

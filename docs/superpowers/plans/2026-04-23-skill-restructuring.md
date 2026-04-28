@@ -39,7 +39,7 @@
 - [ ] **Step 1: Create lib/references/ directory**
 
 ```bash
-mkdir -p /home/nathanielramm/git/github/skill-portability/lib/references
+mkdir -p /home/nathanielramm/git/github/plugin-portability/lib/references
 ```
 
 - [ ] **Step 2: Write copilot-tools.md**
@@ -79,7 +79,7 @@ git commit -m "refactor: extract platform tool references to lib/references/"
 - [ ] **Step 1: Create lib/patterns/ directory**
 
 ```bash
-mkdir -p /home/nathanielramm/git/github/skill-portability/lib/patterns
+mkdir -p /home/nathanielramm/git/github/plugin-portability/lib/patterns
 ```
 
 - [ ] **Step 2: Write detection-algorithm.md**
@@ -273,7 +273,7 @@ git commit -m "refactor: extract detection algorithm to lib/patterns/"
 - [ ] **Step 1: Create lib/templates/hooks/ directory**
 
 ```bash
-mkdir -p /home/nathanielramm/git/github/skill-portability/lib/templates/hooks
+mkdir -p /home/nathanielramm/git/github/plugin-portability/lib/templates/hooks
 ```
 
 - [ ] **Step 2: Write session-start.sh**
@@ -301,7 +301,7 @@ git commit -m "refactor: extract hook templates to lib/templates/hooks/"
 - [ ] **Step 1: Create patterns directory**
 
 ```bash
-mkdir -p /home/nathanielramm/git/github/skill-portability/skills/uplifting-a-plugin/patterns
+mkdir -p /home/nathanielramm/git/github/plugin-portability/skills/uplifting-a-plugin/patterns
 ```
 
 - [ ] **Step 2: Write manifest-generation.md**
@@ -1202,7 +1202,7 @@ git commit -m "refactor: rewrite uplifting skill with phase hierarchy and pseudo
 - [ ] **Step 1: Create patterns directory**
 
 ```bash
-mkdir -p /home/nathanielramm/git/github/skill-portability/skills/auditing-plugin-portability/patterns
+mkdir -p /home/nathanielramm/git/github/plugin-portability/skills/auditing-plugin-portability/patterns
 ```
 
 - [ ] **Step 2: Write injection-checks.md**

@@ -4,7 +4,7 @@ Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor
 
 ## Skills
 
-@./skills/using-skill-portability/SKILL.md
+@./skills/using-plugin-portability/SKILL.md
 @./skills/plugin-portability/SKILL.md
 
 ## Platform API

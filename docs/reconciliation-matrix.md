@@ -293,7 +293,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Phase 7 | References lib/templates/install-docs/ | Correct path | Correct |
 | Phase 8 | References lib/patterns/bootstrapping.md | Correct path | Correct |
 
-### skills/using-skill-portability/SKILL.md
+### skills/using-plugin-portability/SKILL.md
 
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|

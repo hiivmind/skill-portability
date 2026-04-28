@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add all standard open-source release artifacts (license, changelog, CI, community files, templates) to prepare skill-portability for its v0.1.0 marketplace release.
+**Goal:** Add all standard open-source release artifacts (license, changelog, CI, community files, templates) to prepare plugin-portability for its v0.1.0 marketplace release.
 
 **Architecture:** All changes are additive new files — no modifications to existing plugin code or skills. One release branch (`release/v0.1.0`) off main (after PR #4 merges), containing all artifacts in a single PR. Tag `v0.1.0` after merge.
 
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ecosystem landscape documentation and competitive analysis
 - Install documentation for all 6 platforms
 
-[0.1.0]: https://github.com/hiivmind/skill-portability/releases/tag/v0.1.0
+[0.1.0]: https://github.com/hiivmind/plugin-portability/releases/tag/v0.1.0
 ```
 
 - [ ] **Step 2: Commit**
@@ -246,7 +246,7 @@ git commit -m "chore: add security policy"
 ```markdown
 ---
 name: Bug Report
-about: Report a bug in skill-portability
+about: Report a bug in plugin-portability
 title: ''
 labels: bug
 assignees: ''
@@ -480,7 +480,7 @@ jobs:
           check_json .claude-plugin/marketplace.json
           check_json .cursor-plugin/plugin.json
           check_file GEMINI.md
-          check_file .opencode/plugins/skill-portability.js
+          check_file .opencode/plugins/plugin-portability.js
           check_file .github/copilot-instructions.md
           check_file AGENTS.md
 
@@ -587,7 +587,7 @@ Insert these three lines at the very top of `README.md`, before `# Skill Portabi
 ```markdown
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
-![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/hiivmind/plugin-portability/actions/workflows/ci.yml/badge.svg)
 
 ```
 
@@ -596,7 +596,7 @@ The file should now start with:
 ```markdown
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
-![CI](https://github.com/hiivmind/skill-portability/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/hiivmind/plugin-portability/actions/workflows/ci.yml/badge.svg)
 
 # Skill Portability
 ```

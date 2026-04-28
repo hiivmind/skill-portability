@@ -39,7 +39,7 @@
 | `lib/patterns/rubric-framework.md` | New scoring formula, condition types, N/A handling, percentage bands, blocker updates |
 | `skills/assessing-plugin-portability/SKILL.md` | Reference condition IDs, JIT guidance, new platform set, new scoring |
 | `skills/uplifting-a-plugin/SKILL.md` | `# fixes:` annotations, incremental uplift, new platform set, rubric-informed decisions |
-| `skills/using-skill-portability/SKILL.md` | Updated platform list |
+| `skills/using-plugin-portability/SKILL.md` | Updated platform list |
 
 ### Updated Files
 | File | Nature of Change |
@@ -771,7 +771,7 @@ git commit -m "feat: add OpenClaw platform rubric (new platform)
 - Remove: `lib/templates/install-docs/publishing/copilot-cli.md`
 - Remove: `skills/assessing-plugin-portability/references/copilot-tools.md`
 - Remove: `skills/uplifting-a-plugin/references/copilot-tools.md`
-- Remove: `skills/using-skill-portability/references/copilot-tools.md`
+- Remove: `skills/using-plugin-portability/references/copilot-tools.md`
 
 - [ ] **Step 1: Remove all OpenCode and Copilot files**
 
@@ -790,7 +790,7 @@ git rm lib/patterns/platforms/opencode.md \
   lib/templates/install-docs/publishing/copilot-cli.md \
   skills/assessing-plugin-portability/references/copilot-tools.md \
   skills/uplifting-a-plugin/references/copilot-tools.md \
-  skills/using-skill-portability/references/copilot-tools.md
+  skills/using-plugin-portability/references/copilot-tools.md
 ```
 
 - [ ] **Step 2: Verify no remaining references to dropped platforms**
@@ -1139,11 +1139,11 @@ recommendation overrides."
 
 ---
 
-## Task 14: Update Using-Skill-Portability Skill
+## Task 14: Update Using-plugin-portability Skill
 
 **Files:**
-- Modify: `skills/using-skill-portability/SKILL.md`
-- Remove: `skills/using-skill-portability/references/copilot-tools.md`
+- Modify: `skills/using-plugin-portability/SKILL.md`
+- Remove: `skills/using-plugin-portability/references/copilot-tools.md`
 
 - [ ] **Step 1: Update SKILL.md with new platform list**
 
@@ -1152,14 +1152,14 @@ Replace the platform list in the skill table. Remove OpenCode and Copilot refere
 - [ ] **Step 2: Remove copilot-tools.md reference**
 
 ```bash
-git rm skills/using-skill-portability/references/copilot-tools.md
+git rm skills/using-plugin-portability/references/copilot-tools.md
 ```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add skills/using-skill-portability/
-git commit -m "chore: update using-skill-portability with new platform set"
+git add skills/using-plugin-portability/
+git commit -m "chore: update using-plugin-portability with new platform set"
 ```
 
 ---

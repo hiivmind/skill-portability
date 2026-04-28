@@ -29,7 +29,7 @@ cleaner flow: assess always runs, then optionally uplift.
 | Assessment depth | Always full | Scoring is read-only file checks, not expensive; ensures uplift decisions are fully informed |
 | Incremental vs full | Auto-derived from scores | Viable+ platforms get incremental; no need to ask user |
 | Pseudocode location | External files in `lib/patterns/` | Follows existing pattern; keeps SKILL.md as concise workflow orchestrator |
-| `using-skill-portability` | Keep separate, update references | Serves different purpose (session-start injection); part of bootstrapping pattern |
+| `using-plugin-portability` | Keep separate, update references | Serves different purpose (session-start injection); part of bootstrapping pattern |
 
 ## Design
 
@@ -463,7 +463,7 @@ Phases 0, 4, 9 are inline (short, skill-specific interaction).
 
 | File | Change |
 |------|--------|
-| `skills/using-skill-portability/SKILL.md` | Reference `plugin-portability` instead of two separate skills |
+| `skills/using-plugin-portability/SKILL.md` | Reference `plugin-portability` instead of two separate skills |
 
 ### Removed Files
 
@@ -482,7 +482,7 @@ Phases 0, 4, 9 are inline (short, skill-specific interaction).
 2. Create `lib/patterns/inventory.md` (consolidated pseudocode)
 3. Create `skills/plugin-portability/SKILL.md` (merged workflow)
 4. Move reference files to `skills/plugin-portability/references/`
-5. Update `skills/using-skill-portability/SKILL.md`
+5. Update `skills/using-plugin-portability/SKILL.md`
 6. Remove old skill directories
 7. Validate: no remaining references to old skill names, all fixable conditions have `template`
 

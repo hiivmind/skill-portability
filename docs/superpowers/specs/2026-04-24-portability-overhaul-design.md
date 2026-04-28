@@ -33,7 +33,7 @@ The assess skill replaces the current audit skill entirely. The uplift skill is 
 ## Directory Structure
 
 ```
-skill-portability/
+plugin-portability/
   lib/
     patterns/
       detection-algorithm.md        # D1-D5 (adds shape classification)

@@ -400,7 +400,7 @@ Section 3: "Per-Platform Differences."
 | `lib/patterns/rubric-framework.md` | New scoring formula, condition types, N/A handling, percentage bands |
 | `skills/assessing-plugin-portability/SKILL.md` | Reference condition IDs, JIT guidance, new scoring |
 | `skills/uplifting-a-plugin/SKILL.md` | `# fixes:` annotations, incremental uplift, rubric-informed decisions |
-| `skills/using-skill-portability/SKILL.md` | Updated platform list |
+| `skills/using-plugin-portability/SKILL.md` | Updated platform list |
 
 ### Updated Files
 
