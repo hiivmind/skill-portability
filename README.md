@@ -85,7 +85,7 @@ gemini extensions install https://github.com/hiivmind/plugin-portability
 **Codex:**
 
 ```bash
-codex marketplace add hiivmind/plugin-portability
+codex plugin marketplace add hiivmind/plugin-portability
 ```
 
 Then open `/plugins` in Codex and install `plugin-portability`.
@@ -93,7 +93,8 @@ Then open `/plugins` in Codex and install `plugin-portability`.
 **Antigravity:**
 
 ```bash
-antigravity --install-extension hiivmind/plugin-portability
+git clone https://github.com/hiivmind/plugin-portability
+cp -R plugin-portability/.agents/skills/plugin-portability .agents/skills/
 ```
 
 **OpenClaw:**
