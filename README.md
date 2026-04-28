@@ -73,7 +73,7 @@ Full details for all platforms in [INSTALL.md](INSTALL.md).
 **Cursor** — in Agent chat:
 
 ```text
-/add-plugin hiivmind/plugin-portability
+/add-plugin plugin-portability@https://github.com/hiivmind/plugin-portability
 ```
 
 **Gemini CLI:**

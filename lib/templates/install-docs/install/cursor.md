@@ -5,13 +5,13 @@
 Search for **{{name}}** in the Cursor marketplace panel, visit `cursor.com/marketplace`, or run in Agent chat:
 
 ```
-/add-plugin {{repository}}
+/add-plugin {{name}}@https://github.com/{{repository}}
 ```
 
 ### Install from GitHub
 
 ```
-/add-plugin {{repository}}
+/add-plugin {{name}}@https://github.com/{{repository}}
 ```
 
 ### Install from local clone

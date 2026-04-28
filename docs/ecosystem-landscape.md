@@ -36,7 +36,7 @@ The ecosystem has converged on a shared skill format (`SKILL.md` with YAML front
 
 - **OpenSkills** (`npm i -g openskills`) — Universal loader that brings Anthropic's skills system to every major agent. Installs from local paths or git repos.
 
-- **Cursor marketplace** — Browse and install plugins at `cursor.com/marketplace` or via `/add-plugin owner/repo` in chat.
+- **Cursor marketplace** — Browse and install plugins at `cursor.com/marketplace` or via `/add-plugin name@https://github.com/owner/repo` in chat.
 
 - **npm** — OpenCode's distribution channel. Add a package name to `opencode.json` and Bun auto-installs at startup.
 

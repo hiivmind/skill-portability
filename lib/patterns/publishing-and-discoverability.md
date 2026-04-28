@@ -7,7 +7,7 @@ How to get a plugin discovered and installed on each platform. Use this referenc
 | Platform | Registry | How to list | How to install |
 |----------|----------|-------------|----------------|
 | Claude Code | None (Git repos) | Share repo URL | `/plugin marketplace add owner/repo` then `/plugin install name@marketplace` |
-| Cursor | cursor.com/marketplace | Submit at cursor.com/marketplace/publish (manual review, open-source only) | `/add-plugin owner/repo` |
+| Cursor | cursor.com/marketplace | Submit at cursor.com/marketplace/publish (manual review, open-source only) | `/add-plugin name@https://github.com/owner/repo` |
 | Gemini CLI | geminicli.com/extensions (908+) | Add `gemini-cli-extension` topic to GitHub repo; auto-indexed daily | `gemini extensions install <github-url>` |
 | Codex (skills) | None | Publish as GitHub repo with `SKILL.md` | `$skill-installer <name>` or copy to `~/.codex/skills/` |
 | Codex (plugins) | Official directory (self-serve coming soon) | Browse via `/plugins` in Codex | `codex plugin marketplace add owner/repo` |
@@ -69,7 +69,7 @@ Public marketplace at `cursor.com/marketplace`. Every plugin and update is manua
 ### Install
 
 - Browse `cursor.com/marketplace`
-- In Agent chat: `/add-plugin owner/repo` (GitHub shorthand or full URL)
+- In Agent chat: `/add-plugin name@https://github.com/owner/repo`
 
 ### Team distribution
 

@@ -521,7 +521,7 @@ Cursor also has `TabRead` and `TabWrite` for inline completions (Tab), with sepa
 
 | Method | Scope | How |
 |--------|-------|-----|
-| Marketplace (IDE) | User or project | Browse `cursor.com/marketplace` or search in marketplace panel. Install with `/add-plugin` in chat. |
+| Marketplace (IDE) | User or project | Browse `cursor.com/marketplace` or search in marketplace panel. Install with `/add-plugin name@https://github.com/owner/repo` in chat. |
 | MCP deeplinks | User | `cursor://anysphere.cursor-deeplink/mcp/install?name=$NAME&config=$BASE64_ENCODED_CONFIG` |
 | Extension API | Programmatic | `vscode.cursor.plugins.registerPath()` registers plugin directories from VS Code extensions |
 | GitHub import (rules) | Project | Cursor Settings > Rules > Add Rule > Remote Rule (GitHub). Synced to `.cursor/rules/imported/`. |

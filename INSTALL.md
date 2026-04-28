@@ -59,13 +59,13 @@ Look for `plugin-portability` in the output.
 Search for **plugin-portability** in the Cursor marketplace panel, visit `cursor.com/marketplace`, or run in Agent chat:
 
 ```
-/add-plugin hiivmind/plugin-portability
+/add-plugin plugin-portability@https://github.com/hiivmind/plugin-portability
 ```
 
 ### Install from GitHub
 
 ```
-/add-plugin hiivmind/plugin-portability
+/add-plugin plugin-portability@https://github.com/hiivmind/plugin-portability
 ```
 
 ### Install from local clone

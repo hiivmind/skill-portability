@@ -476,7 +476,7 @@ Explicit paths in the manifest override auto-discovery for that component type. 
 
 Installation paths:
 
-- **Marketplace:** `/add-plugin <name>` in Cursor chat, or browse `cursor.com/marketplace`
+- **Marketplace:** `/add-plugin name@https://github.com/owner/repo` in Cursor chat, or browse `cursor.com/marketplace`
 - **Local dev:** copy or symlink to `~/.cursor/plugins/local/<name>/`
 - **Submit:** `cursor.com/marketplace/publish`
 
