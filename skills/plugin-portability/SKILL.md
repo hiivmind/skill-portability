@@ -104,7 +104,7 @@ INTENT_UPFRONT():
         { label: "Cursor",       description: "VS Code fork with rules, hooks, MCP" },
         { label: "Gemini CLI",   description: "Google CLI with @ includes and settings-based hooks" },
         { label: "Codex",        description: "OpenAI CLI with TOML agents and spawn_agent" },
-        { label: "Antigravity",  description: "Google VS Code fork, OpenVSX, .agents/skills/" },
+        { label: "Antigravity",  description: "Google VS Code fork, .agents/skills/ auto-discovery" },
         { label: "OpenClaw",     description: "TypeScript gateway with plugin SDK hooks" }
       ],
       multiSelect: true
