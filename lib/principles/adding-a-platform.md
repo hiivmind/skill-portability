@@ -258,6 +258,8 @@ Three locations in the skill's intent-gathering pseudocode:
 2. **The `ELSE` fallback list** — the `platforms = ["claude-code", "cursor", ...]` line that defines the "All platforms" default
 3. **The "All platforms" option description** — if it enumerates platform names, add the new one
 
+Note: hooks and the `using-<plugin>` skill are only generated for always-present plugins (archetype gate in Phase 8). If you are adding a platform that supports hooks, ensure `lib/patterns/hook-merging.md` documents the format, but do not assume every target plugin will use hooks.
+
 **Verification gate:**
 - [ ] Platform appears in the `options` array with `label` and `description`
 - [ ] `description` accurately summarizes the platform (no fabricated features)
