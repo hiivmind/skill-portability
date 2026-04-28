@@ -104,7 +104,7 @@ REGISTRY["codex"] = {
 }
 ```
 
-### Codex-specific notes
+## Codex-specific notes
 
 - Hooks require `codex_hooks = true` feature flag in `config.toml`.
 - Subagent dispatch requires `multi_agent = true` feature flag.

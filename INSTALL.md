@@ -1,5 +1,7 @@
 # Installation
 
+How to install **Plugin Portability** on each supported platform.
+
 ## Important: Whole-repo install required
 
 This plugin uses shared hooks, context files, and platform manifests that live outside
@@ -10,252 +12,21 @@ Every install path below clones or references the full repo. See
 [docs/ecosystem-landscape.md](docs/ecosystem-landscape.md) for background on why this is
 necessary across today's agent platforms.
 
-## Fresh Install
+## Claude Code
 
-### Claude Code
+### Install from GitHub
 
-#### Marketplace install
-
-```bash
-claude plugin install plugin-portability@plugin-portability-marketplace
-```
-
-#### Local development
+Register the plugin's marketplace, then install:
 
 ```bash
-claude --plugin-dir ./path-toplugin-portability
+/plugin marketplace add hiivmind/plugin-portability
+/plugin install plugin-portability@plugin-portability-marketplace
 ```
 
-#### Project install
-
-Add to `.claude/settings.json`:
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "plugin-portability-marketplace": {
-      "source": {
-        "source": "github",
-        "repo": "hiivmind/plugin-portability"
-      }
-    }
-  }
-}
-```
-
-#### Verify
+### Install from local clone
 
 ```bash
-claude plugin list
-```
-
-Look for `plugin-portability` in the output.
-
-#### Using the skills
-
-In Claude Code, invoke skills by describing what you want in natural language:
-
-```
-Assess the portability of /path/to/my-plugin
-```
-
-```
-Use the plugin-portability skill on /path/to/my-plugin
-```
-
-### Cursor
-
-#### Install from GitHub
-
-In Cursor's Agent chat:
-
-```
-/add-plugin hiivmind/plugin-portability
-```
-
-#### Local development
-
-Symlink or copy the plugin directory to `~/.cursor/plugins/local/plugin-portability/` and restart Cursor (Developer: Reload Window).
-
-#### Verify
-
-Open Cursor and check that skills from Plugin Portability appear when typing `/` in chat.
-
-#### Using the skills
-
-In Cursor's chat, invoke skills with the `/` prefix:
-
-```
-/plugin-portability
-```
-
-### Gemini CLI
-
-#### Install from GitHub
-
-```bash
-gemini extensions install https://github.com/hiivmind/plugin-portability
-```
-
-#### Install from local path
-
-```bash
-gemini extensions link /path/to/plugin-portability
-```
-
-#### Verify
-
-```bash
-gemini extensions list
-```
-
-Look for `plugin-portability` in the output. Restart Gemini CLI if it was running during install.
-
-#### Using the skills
-
-Gemini CLI activates skills automatically when it determines they are relevant. You can also mention a skill by name:
-
-```
-Assess the portability of /path/to/my-plugin using plugin-portability
-```
-
-List available skills with `/skills list`.
-
-### Antigravity
-
-#### Skill-only install
-
-Copy skills to the Antigravity skills directory:
-
-```bash
-cp -r skills/ .agents/skills/
-```
-
-Or for global install:
-
-```bash
-cp -r skills/ ~/.gemini/antigravity/skills/
-```
-
-#### Extension install
-
-```bash
-antigravity --install-extension hiivmind/plugin-portability
-```
-
-#### Using the skills
-
-Antigravity discovers skills automatically. Mention a skill by name and the agent will activate it:
-
-```
-Run plugin-portability on /path/to/my-plugin
-```
-
-### OpenClaw
-
-#### ClawHub install
-
-```bash
-openclaw plugins install plugin-portability
-```
-
-#### npm install
-
-```bash
-npm install plugin-portability
-```
-
-#### Local install
-
-Add the plugin path to `openclaw.json`:
-
-```json
-{
-  "plugins.load.paths": ["/path/to/plugin-portability"]
-}
-```
-
-#### Using the skills
-
-OpenClaw discovers skills automatically. Mention a skill by name and the agent will activate it:
-
-```
-Run plugin-portability on /path/to/my-plugin
-```
-
-### Codex
-
-#### GitHub marketplace install
-
-Register the repo as a Codex marketplace:
-
-```bash
-codex marketplace add hiivmind/plugin-portability
-```
-
-This adds a marketplace entry to `~/.codex/config.toml`.
-
-Then open `/plugins` in Codex and install `plugin-portability`.
-
-Codex persists the plugin enablement as a separate config entry:
-
-```toml
-[plugins."plugin-portability@plugin-portability-marketplace"]
-enabled = true
-```
-
-#### Local development install
-
-Use this only when you are intentionally testing a local checkout rather than installing from GitHub.
-
-```bash
-codex marketplace add /path/to/plugin-portability
-```
-
-Then open `/plugins` in Codex and install `plugin-portability`.
-
-#### Skill-discovery fallback
-
-If you only want the raw skills and do not need Codex plugin packaging, clone the repo and expose the skills directory:
-
-```bash
-git clone https://github.com/hiivmind/plugin-portability
-ln -s $(pwd)/plugin-portability/skills ~/.agents/skills/plugin-portability
-```
-
-Use this as a fallback path, not the default install story for this repo.
-
-#### Context file
-
-Codex uses `AGENTS.md` as its primary context file.
-
-#### Verify
-
-Start a new Codex session and check one of:
-
-- `/plugins` shows `plugin-portability` as installed
-- `~/.codex/config.toml` contains both the marketplace entry and the enabled plugin entry
-- `$plugin-portability` resolves in a fresh session
-
-#### Using the skills
-
-In Codex, invoke skills with the `$` prefix:
-
-```
-$plugin-portability
-$plugin-portability
-```
-
-## Adding Another Platform
-
-Already have the repo cloned for one platform? Add others by pointing them at the same checkout.
-
-### Claude Code
-
-Point Claude Code at your existing checkout:
-
-```bash
-claude --plugin-dir /path/to/existing/plugin-portability
+claude --plugin-dir /path/to/plugin-portability
 ```
 
 Or add to `.claude/settings.json` for persistent access:
@@ -273,60 +44,208 @@ Or add to `.claude/settings.json` for persistent access:
 }
 ```
 
-### Cursor
-
-Symlink your existing checkout into Cursor's plugin directory:
+### Verify
 
 ```bash
-ln -s /path/to/existing/plugin-portability ~/.cursor/plugins/local/plugin-portability
+claude plugin list
 ```
 
-Restart Cursor (Developer: Reload Window).
+Look for `plugin-portability` in the output.
 
-### Gemini CLI
+## Cursor
 
-Link Gemini to your existing checkout:
+### Install from registry
+
+Search for **plugin-portability** in the Cursor marketplace panel, visit `cursor.com/marketplace`, or run in Agent chat:
+
+```
+/add-plugin hiivmind/plugin-portability
+```
+
+### Install from GitHub
+
+```
+/add-plugin hiivmind/plugin-portability
+```
+
+### Install from local clone
+
+Symlink or copy the plugin directory and restart Cursor (Developer: Reload Window):
 
 ```bash
-gemini extensions link /path/to/existing/plugin-portability
+ln -s /path/to/plugin-portability ~/.cursor/plugins/local/plugin-portability
 ```
 
-### Antigravity
+### Verify
 
-Copy skills from your existing checkout:
+Open Cursor and check that skills from plugin-portability appear when typing `/` in chat. Rules should appear in Cursor Settings > Rules with the plugin name prefix.
+
+## Gemini CLI
+
+### Install from registry
+
+Browse the gallery at [geminicli.com/extensions](https://geminicli.com/extensions/) and search for **plugin-portability**, or install directly:
 
 ```bash
-cp -r /path/to/existing/plugin-portability/skills/ .agents/skills/
+gemini extensions install hiivmind/plugin-portability
 ```
 
-Or install as an extension:
+With version pin:
 
 ```bash
-antigravity --install-extension /path/to/existing/plugin-portability
+gemini extensions install hiivmind/plugin-portability --ref <tag>
 ```
 
-### OpenClaw
-
-Add the checkout path to `openclaw.json`:
-
-```json
-{
-  "plugins.load.paths": ["/path/to/existing/plugin-portability"]
-}
-```
-
-### Codex
-
-For local development against an existing checkout, register the checkout itself as a marketplace:
+### Install from GitHub
 
 ```bash
-codex marketplace add /path/to/existing/plugin-portability
+gemini extensions install hiivmind/plugin-portability
+```
+
+### Install from local clone
+
+```bash
+gemini extensions link /path/to/plugin-portability
+```
+
+Changes are reflected immediately without reinstalling.
+
+### Verify
+
+```bash
+gemini extensions list
+```
+
+Look for `plugin-portability` in the output.
+
+## Codex
+
+### Install from registry
+
+Open `/plugins` in Codex, search for **plugin-portability**, and install it.
+
+### Install from GitHub
+
+Register the repo as a marketplace source:
+
+```bash
+codex plugin marketplace add hiivmind/plugin-portability
 ```
 
 Then open `/plugins` in Codex and install `plugin-portability`.
 
-If you only want skill discovery, symlink the skills directory from your existing checkout:
+### Install from local clone
 
 ```bash
-ln -s /path/to/existing/plugin-portability/skills ~/.agents/skills/plugin-portability
+codex plugin marketplace add /path/to/plugin-portability
 ```
+
+Then open `/plugins` in Codex and install `plugin-portability`.
+
+### Platform notes
+
+**Context file:** Codex uses `AGENTS.md` as its primary context file.
+
+**Hooks:** If this plugin includes hooks, enable the Codex hooks feature flag:
+
+```toml
+# ~/.codex/config.toml
+[features]
+codex_hooks = true
+```
+
+Without this flag, hooks are silently ignored.
+
+**Multi-agent:** If this plugin's skills use subagent dispatch, confirm multi-agent mode is enabled:
+
+```toml
+# ~/.codex/config.toml
+[features]
+multi_agent = true
+```
+
+### Verify
+
+Start a new Codex session and check one of:
+
+- `/plugins` shows `plugin-portability` as installed
+- `~/.codex/config.toml` contains both the marketplace entry and the enabled plugin entry
+- the relevant `$` skill resolves in a fresh session
+
+## Antigravity
+
+### Install from GitHub
+
+```bash
+git clone hiivmind/plugin-portability
+cp -R plugin-portability/.agents/skills/plugin-portability .agents/skills/
+```
+
+Or for global scope:
+
+```bash
+cp -R plugin-portability/.agents/skills/plugin-portability ~/.gemini/antigravity/skills/
+```
+
+### Install from local clone
+
+```bash
+cp -R /path/to/plugin-portability/.agents/skills/plugin-portability .agents/skills/
+```
+
+Or for global scope:
+
+```bash
+cp -R /path/to/plugin-portability/.agents/skills/plugin-portability ~/.gemini/antigravity/skills/
+```
+
+### Verify
+
+Start a new Antigravity session and check that skills from Plugin Portability appear in the skill listing at conversation start.
+
+## OpenClaw
+
+### Install from registry
+
+Install from ClawHub:
+
+```bash
+openclaw plugins install clawhub:plugin-portability
+```
+
+Or from npm:
+
+```bash
+openclaw plugins install @org/plugin-portability
+```
+
+### Install from GitHub
+
+Clone the repo and install locally:
+
+```bash
+git clone hiivmind/plugin-portability
+openclaw plugins install -l ./plugin-portability
+```
+
+### Install from local clone
+
+Add to `plugins.load.paths` in `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "plugins": {
+    "load": {
+      "paths": ["/path/to/plugin-portability"]
+    }
+  }
+}
+```
+
+### Verify
+
+```bash
+openclaw plugins list
+```
+
+Skills from Plugin Portability should appear in the plugin listing.

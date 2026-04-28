@@ -204,14 +204,15 @@ Track every platform-specific claim in the plugin against researched facts in
 |-------|---------|---------------|--------|
 | Claude Code publishing | Git repos, marketplace, team distribution | Confirmed: marketplace add, extraKnownMarketplaces | Correct |
 | Cursor publishing | cursor.com/marketplace, /add-plugin | Confirmed: marketplace submission, /add-plugin install | Correct |
-| Gemini CLI publishing | geminicli.com/extensions, extensions install | Confirmed: gallery, extensions install command | Correct |
-| Codex skills publishing | $skill-installer, GitHub repos | Confirmed: $skill-installer, standard skill paths | Fixed (removed unverifiable .curated/.experimental claims) |
-| Codex plugins publishing | marketplace add, not yet public | Confirmed: codex plugin marketplace add | Correct |
-| Antigravity publishing | Claimed antigravity.dev/plugins marketplace | No official marketplace exists; distribution via git repos and npm installers | Fixed (rewrote section) |
-| Antigravity install commands | Claimed `antigravity plugin add` | No such CLI command; install by copying to .agents/skills/ | Fixed (rewrote section) |
-| OpenClaw registry | Claimed openclaw.dev/registry | Registry is ClawHub at clawhub.ai | Fixed (corrected URL and name) |
-| OpenClaw install commands | Claimed `openclaw install <name>` | Actual: `openclaw plugins install clawhub:<pkg>` or `openclaw skills install <slug>` | Fixed (corrected syntax) |
-| OpenClaw manifest requirement | Claimed "no manifest required" | `openclaw.plugin.json` with id and configSchema IS required for native plugins | Fixed (added requirement) |
+| Gemini CLI publishing | Auto-indexed via `gemini-cli-extension` GitHub topic, 908+ extensions | Confirmed: daily crawler, no manual submission | Fixed (added auto-discovery mechanism, updated count from 897) |
+| Gemini CLI local dev | `link` reflects changes immediately | Confirmed: no restart needed | Fixed (previously said restart required) |
+| Codex skills install | `$skill-installer <name>` or manual copy/symlink | Confirmed: no `install` subcommand or `search` subcommand verified | Fixed (removed fabricated `$skill-installer install <url>` and `search`) |
+| Codex plugins publishing | marketplace add, official directory coming soon | Confirmed: codex plugin marketplace add, /plugins browser | Correct |
+| Antigravity publishing | Git repos, manual copy to .agents/skills/ | No official marketplace; no npm installer recommended | Fixed (removed antigravity-awesome-skills prominence, VS Code extensions section) |
+| OpenClaw registry | ClawHub at clawhub.ai | Confirmed: clawhub CLI, npm secondary | Correct |
+| OpenClaw install commands | `openclaw plugins install clawhub:<pkg>` | Confirmed | Correct |
+| OpenClaw manifest requirement | `openclaw.plugin.json` with id and configSchema required | Confirmed for native plugins | Correct |
+| Template structure | Three overlapping sets (install, adding-platform, publishing) | Two audience-based sets (`install/`, `publish/`) with journey structure | Fixed (restructured per 2026-04-28 spec) |
 
 ### injection-checks.md
 

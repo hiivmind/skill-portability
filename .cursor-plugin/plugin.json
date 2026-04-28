@@ -9,10 +9,12 @@
   "homepage": "https://github.com/hiivmind/plugin-portability",
   "repository": "https://github.com/hiivmind/plugin-portability",
   "license": "MIT",
-  "keywords": [    "cross-platform",
-  "multi-platform",
-  "plugin-portability",
-  "plugins",
-  "skills",
-  "portability"
+  "keywords": [
+    "cross-platform",
+    "multi-platform",
+    "plugin-portability",
+    "plugins",
+    "skills",
+    "portability"
+  ]
 }

@@ -1,25 +1,18 @@
 # Publishing & Discoverability
 
-How to get **Plugin Portability** discovered and installed on each platform.
+How to get **Plugin Portability** listed and distributed on each platform.
 
 See [INSTALL.md](INSTALL.md) for end-user installation instructions.
 
 ## Claude Code
 
-No public marketplace — distribution is via Git repositories.
+### Prerequisites
 
-### Publishing
+Create `.claude-plugin/marketplace.json` listing the plugins the repo contains. No submission or review process — any Git repo with a valid marketplace manifest can be consumed.
 
-Create a `.claude-plugin/marketplace.json` in your repo. No submission or review process — any Git repo with a valid marketplace manifest can be consumed.
+### Team / org distribution
 
-### How users find and install Plugin Portability
-
-1. Register the marketplace: `/plugin marketplace add hiivmind/plugin-portability`
-2. Install: `/plugin install plugin-portability@plugin-portability-marketplace`
-
-### Team distribution
-
-Teams can auto-register the marketplace by adding to their project `.claude/settings.json`:
+Add to the team's project `.claude/settings.json` so teammates get the marketplace automatically:
 
 ```json
 {
@@ -34,125 +27,81 @@ Teams can auto-register the marketplace by adding to their project `.claude/sett
 }
 ```
 
+Auto-enable plugins via `"enabledPlugins"` in the same settings file.
+
 ## Cursor
 
-Public marketplace at `cursor.com/marketplace` (curated, manually reviewed).
+### Prerequisites
 
-### Publishing
+- Plugin must be open-source in a Git repository
+- `.cursor-plugin/plugin.json` manifest required (minimum: `name` field)
 
-1. Ensure the plugin is open-source in a Git repository
-2. `.cursor-plugin/plugin.json` manifest must be present
-3. Submit at `cursor.com/marketplace/publish`
-4. Every plugin and update is manually reviewed
+### Submit to registry
 
-### How users find and install Plugin Portability
+1. Go to `cursor.com/marketplace/publish`
+2. Submit the plugin for review
+3. Every plugin and update is manually reviewed before listing
 
-- Browse the marketplace at `cursor.com/marketplace`
-- In Agent chat: `/add-plugin hiivmind/plugin-portability`
+### Team / org distribution
 
-### Team distribution
-
-Cursor 2.6+ (Teams/Enterprise): admins import GitHub repos as team marketplaces via Dashboard Settings.
+Cursor 2.6+ (Teams/Enterprise): admins import GitHub repos as team marketplaces via Dashboard Settings. Admins set plugins as required or optional.
 
 ## Gemini CLI
 
-Extensions gallery at [geminicli.com/extensions](https://geminicli.com/extensions/).
+### Prerequisites
 
-### Publishing
+Include `gemini-extension.json` at the repo root with `name`, `version`, and `description` fields. The repo must be public on GitHub.
 
-Publish as a GitHub repository with a `gemini-extension.json` manifest (requires `name`, `version`, `description`). Extensions are not vetted by Google.
+### Submit to registry
 
-### How users find and install Plugin Portability
+No manual submission process. To get listed in the gallery:
 
-```bash
-gemini extensions install hiivmind/plugin-portability
-```
+1. Add the `gemini-cli-extension` topic to the repository's About section on GitHub
+2. The gallery crawler indexes tagged repos daily; listing appears within ~1 week
 
-Users can browse the gallery or install directly from the GitHub URL.
-
-## Antigravity
-
-Published to the [OpenVSX](https://open-vsx.org/) registry.
-
-### Publishing
-
-Package the plugin as a VSIX extension and publish to OpenVSX:
-
-```bash
-antigravity publish
-```
-
-Extensions are reviewed by the OpenVSX team before listing.
-
-### How users find and install Plugin Portability
-
-```bash
-antigravity --install-extension hiivmind.plugin-portability
-```
-
-Users can also browse and install from the OpenVSX web registry.
-
-## OpenClaw
-
-Published to [ClawHub](https://clawhub.dev/) and via npm.
-
-### Publishing
-
-Publish as an npm package and register on ClawHub:
-
-```bash
-npm publish
-```
-
-Then submit to ClawHub for listing. No formal review process.
-
-### How users find and install Plugin Portability
-
-**npm:**
-
-```bash
-npm install -g @hiivmind/plugin-portability
-```
-
-**ClawHub:**
-
-Browse [clawhub.dev](https://clawhub.dev/) and install directly from the listing.
+Browse existing extensions at [geminicli.com/extensions](https://geminicli.com/extensions/).
 
 ## Codex
 
-Two publishing paths — choose based on what you're distributing.
+### Prerequisites
 
-### Skill discovery (lightweight)
-
-For repos that are mostly instructions with no plugin UI metadata:
-
-- Submit a PR to `github.com/openai/skills` for inclusion in the curated catalog
-- Or publish as a standalone GitHub repo — users install through Codex skill discovery
-- Only recommend `$skill-installer install hiivmind/plugin-portability` when the distributed artifact is truly a skill-only repo and does not depend on root-level plugin manifests, hooks, or shared context files
-
-### Plugin packaging (full)
-
-For first-class plugin packages with marketplace metadata:
-
-- Create `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`
+- `.codex-plugin/plugin.json` manifest
+- `.agents/plugins/marketplace.json` listing the plugin with source path, description, version
 - For a single-plugin GitHub repo, the marketplace entry should point at the repo root with `source.path: "./"`
-- Users register via `codex marketplace add hiivmind/plugin-portability`
-- Users then enable the plugin from `/plugins`
-- Public self-serve plugin publishing is coming soon per OpenAI docs
 
-### How users find and install Plugin Portability
+Self-serve publishing to the official Plugin Directory is coming soon. In the meantime, plugins are distributed via Git repos with marketplace manifests.
 
-**Skill-only repo:**
+## Antigravity
+
+### Prerequisites
+
+- `.agents/skills/plugin-portability/SKILL.md` with standard frontmatter (`name`, `description`)
+- Optional: `AGENTS.md` context file
+
+Antigravity auto-discovers skills from `.agents/skills/` directories — no platform-specific manifest or registry submission required. Share the Git repository URL to distribute.
+
+## OpenClaw
+
+### Prerequisites
+
+- `openclaw/openclaw.plugin.json` manifest with `id` and `configSchema` (required for native plugins)
+- `package.json` with `openclaw.extensions` and `openclaw.compat` (required for npm distribution)
+- Optional: `AGENTS.md` context file, `skills/*/SKILL.md` for skill-bearing plugins
+
+### Submit to registry
+
+**ClawHub:**
 
 ```bash
-git clone hiivmind/plugin-portability
-ln -s $(pwd)/plugin-portability/skills ~/.agents/skills/plugin-portability
+npm i -g clawhub
+clawhub login
+clawhub package publish your-org/plugin-portability
 ```
 
-**Plugin repo:**
+**npm (alternative):**
 
 ```bash
-codex marketplace add hiivmind/plugin-portability
+npm publish --access public
 ```
 
-Then enable `plugin-portability` from `/plugins`.
+Users can install from either registry. Bare names check ClawHub first, then npm.

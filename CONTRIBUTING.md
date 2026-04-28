@@ -17,12 +17,7 @@ This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). Please read
 
 ## Adding a New Platform
 
-1. Create a platform documentation file in `docs/platforms/`
-2. Add a manifest template in `lib/templates/manifests/`
-3. Add install doc templates in `lib/templates/install-docs/`
-4. Add a platform rubric in `lib/rubrics/`
-5. Update the portability skill (`skills/plugin-portability/SKILL.md`) to handle the new platform
-6. Update the assessment rubric (`docs/assessment-rubric.md`) with scoring criteria
+See [lib/principles/adding-a-platform.md](lib/principles/adding-a-platform.md) for the full guide — architecture overview, phased checklist, and verification gates.
 
 ## Authoring Skills
 

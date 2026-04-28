@@ -114,7 +114,7 @@ REGISTRY["openclaw"] = {
 }
 ```
 
-### OpenClaw-specific notes
+## OpenClaw-specific notes
 
 - Hooks are TypeScript SDK-based: `api.registerHook(event, handler)` or
   `api.on(event, handler)`. No file-based hook config.
