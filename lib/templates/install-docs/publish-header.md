@@ -1,5 +1,5 @@
 # Publishing & Discoverability
 
-How to get **{{displayName}}** discovered and installed on each platform.
+How to get **{{displayName}}** listed and distributed on each platform.
 
 See [INSTALL.md](INSTALL.md) for end-user installation instructions.
