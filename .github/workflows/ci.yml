@@ -104,15 +104,6 @@ jobs:
           fi
 
           echo ""
-          echo "=== Session-Start Hook ==="
-          if [ ! -x hooks/session-start ]; then
-            echo "FAIL: hooks/session-start does not exist or is not executable"
-            errors=$((errors + 1))
-          else
-            echo "OK: hooks/session-start (executable)"
-          fi
-
-          echo ""
           if [ "$errors" -gt 0 ]; then
             echo "FAILED: $errors error(s) found"
             exit 1

@@ -1,6 +1,9 @@
 # Injection Checks
 
 8-component verification for session-start bootstrapping infrastructure.
+Only applies to **always-present** plugins (archetype gate). On-demand plugins
+skip injection checks entirely — they have no using-skill or hooks.
+
 Only runs when `skills/using-<name>/SKILL.md` exists.
 
 ---

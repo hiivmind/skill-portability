@@ -1,12 +1,24 @@
 # Bootstrapping
 
-Session-start injection logic for generating the `using-<plugin>` skill and associated hooks that force-inject plugin context at session start across all platforms.
+Session-start injection logic for **always-present** plugins. Generates the `using-<plugin>` skill and associated hooks that force-inject plugin context at session start across all platforms.
+
+**On-demand plugins skip this entirely.** The archetype gate in Phase 8 prevents bootstrapping from running for on-demand plugins. Hooks and using-skills are context injection — they are NOT required for plugin discovery on any platform. All 6 platforms discover plugins/skills via directory scanning.
+
+**When bootstrapping is valuable:** Plugins that govern workflows and must intercept every interaction (e.g., superpowers, single-purpose OpenClaw agents). The using-skill ensures the agent treats the plugin's skills as mandatory workflow gates.
+
+**When bootstrapping is unnecessary:** Plugins invoked explicitly when needed (e.g., portability assessment, code generation tools). These rely on directory auto-discovery and save context budget by not injecting on every session.
 
 ---
 
 ## Step 4.1: Prompt for Bootstrapping (Step 17)
 
 ```
+IF intent.archetype == "on-demand" THEN
+  skip_bootstrapping = true
+  reason = "on-demand archetype — hooks and using-skill not applicable"
+  skip to Step 4.8 (final report note)
+END
+
 IF skills/using-{{name}}/SKILL.md exists THEN
   skip_bootstrapping = true
   reason = "already configured"
@@ -38,37 +50,11 @@ Build skillTable:
     END
   END
 
-Write <plugin-path>/skills/using-{{name}}/SKILL.md with template below,
-substituting {{name}}, {{displayName}}, {{skillTable}}.
-```
-
-### using-skill Template
-
-```markdown
----
-name: using-{{name}}
-description: Session-start bootstrapping for {{name}}. Lists available skills and platform-specific invocation instructions.
----
-
-# Using {{displayName}}
-
-This plugin provides the following skills:
-
-| Skill | Description |
-|-------|-------------|
-{{skillTable}}
-
-## How to Invoke Skills
-
-**Claude Code / Cursor:** Use the `Skill` tool with the skill name.
-
-**Gemini CLI:** Use the `activate_skill` tool with the skill name.
-
-**Antigravity / OpenClaw / Codex:** Skills are auto-discovered. Follow the SKILL.md instructions directly.
-
-## Tool Name Mapping
-
-Skills use Claude Code tool names. See each skill's `references/` directory for platform-specific equivalents.
+Write <plugin-path>/skills/using-{{name}}/SKILL.md using the template at
+lib/templates/context-files/using-skill.md.tmpl, substituting:
+  - {{name}} = plugin name
+  - {{usingSkillDescription}} = generated from plugin purpose
+  - {{skillTable}} = markdown table built from discovered skills
 ```
 
 ---

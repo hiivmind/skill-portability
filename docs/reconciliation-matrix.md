@@ -190,6 +190,7 @@ Track every platform-specific claim in the plugin against researched facts in
 | Claim | Current | Research says | Status |
 |-------|---------|---------------|--------|
 | Session-start per platform | Documented | Cursor and Claude Code output verified; Codex falls to else branch (unverifiable) | Correct |
+| Archetype gating | Bootstrapping runs unconditionally | On-demand plugins skip Phase 8 entirely; hooks/using-skill only for always-present | Fixed (archetype gate added) |
 
 ### inventory.md
 

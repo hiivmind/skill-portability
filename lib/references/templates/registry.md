@@ -70,6 +70,10 @@ TEMPLATE_REGISTRY: List[TemplateEntry] = [
   { schema: "openclaw-plugin",     platform: "openclaw",     mode: "plain",
     template_path: "lib/templates/manifests/openclaw/openclaw.plugin.json.tmpl",
     target_path:   "openclaw.plugin.json" },
+
+  { schema: "using-skill",          platform: "all",          mode: "builder",
+    template_path: "lib/templates/context-files/using-skill.md.tmpl",
+    target_path:   "skills/using-{{name}}/SKILL.md" },
 ]
 ```
 
