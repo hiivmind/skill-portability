@@ -1,6 +1,6 @@
 # Publishing & Discoverability
 
-How to get **Skill Portability** discovered and installed on each platform.
+How to get **Plugin Portability** discovered and installed on each platform.
 
 See [INSTALL.md](INSTALL.md) for end-user installation instructions.
 
@@ -12,7 +12,7 @@ No public marketplace — distribution is via Git repositories.
 
 Create a `.claude-plugin/marketplace.json` in your repo. No submission or review process — any Git repo with a valid marketplace manifest can be consumed.
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 1. Register the marketplace: `/plugin marketplace add hiivmind/plugin-portability`
 2. Install: `/plugin install plugin-portability@plugin-portability-marketplace`
@@ -45,7 +45,7 @@ Public marketplace at `cursor.com/marketplace` (curated, manually reviewed).
 3. Submit at `cursor.com/marketplace/publish`
 4. Every plugin and update is manually reviewed
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 - Browse the marketplace at `cursor.com/marketplace`
 - In Agent chat: `/add-plugin hiivmind/plugin-portability`
@@ -62,7 +62,7 @@ Extensions gallery at [geminicli.com/extensions](https://geminicli.com/extension
 
 Publish as a GitHub repository with a `gemini-extension.json` manifest (requires `name`, `version`, `description`). Extensions are not vetted by Google.
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 ```bash
 gemini extensions install hiivmind/plugin-portability
@@ -84,7 +84,7 @@ antigravity publish
 
 Extensions are reviewed by the OpenVSX team before listing.
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 ```bash
 antigravity --install-extension hiivmind.plugin-portability
@@ -106,7 +106,7 @@ npm publish
 
 Then submit to ClawHub for listing. No formal review process.
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 **npm:**
 
@@ -140,7 +140,7 @@ For first-class plugin packages with marketplace metadata:
 - Users then enable the plugin from `/plugins`
 - Public self-serve plugin publishing is coming soon per OpenAI docs
 
-### How users find and install Skill Portability
+### How users find and install Plugin Portability
 
 **Skill-only repo:**
 

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Skill Portability runs locally as a plugin within your AI coding assistant. It does not operate remote services or store data externally.
+Plugin Portability runs locally as a plugin within your AI coding assistant. It does not operate remote services or store data externally.
 
 However, skill content could be injected if a malicious source repository is used as input. The uplift and assessment skills read arbitrary plugin repositories — a crafted repository could contain skill files with prompt injection attempts.
 

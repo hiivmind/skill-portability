@@ -3,7 +3,7 @@ name: using-plugin-portability
 description: Use when starting a session with the plugin-portability plugin. Session-start bootstrapping that lists available skills and platform-specific invocation instructions.
 ---
 
-# Using Skill Portability
+# Using Plugin Portability
 
 This plugin provides the following skills:
 

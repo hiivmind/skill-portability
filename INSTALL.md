@@ -79,7 +79,7 @@ Symlink or copy the plugin directory to `~/.cursor/plugins/local/plugin-portabil
 
 #### Verify
 
-Open Cursor and check that skills from Skill Portability appear when typing `/` in chat.
+Open Cursor and check that skills from Plugin Portability appear when typing `/` in chat.
 
 #### Using the skills
 

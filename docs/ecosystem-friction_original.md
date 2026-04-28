@@ -1,4 +1,4 @@
-# Cross-Platform Skill Portability: Ecosystem Friction Points
+# Cross-Platform Plugin Portability: Ecosystem Friction Points
 
 This document names the structural gaps that make true plugin portability hard across today's agent platforms. The `uplifting-a-plugin` skill works around these gaps as best it can, but many of them are platform-level problems that cannot be fully solved at the plugin layer.
 

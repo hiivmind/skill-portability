@@ -1,4 +1,4 @@
-# Contributing to Skill Portability
+# Contributing to Plugin Portability
 
 Thank you for your interest in contributing! This guide covers the basics.
 

@@ -1,10 +1,10 @@
-# Skill Portability
+# Plugin Portability
 
 Make any plugin fully portable across all platforms. Accepts Claude Code, Cursor, Gemini, Codex, Antigravity, OpenClaw, or bare SKILL.md repos as input. Emits every missing platform artifact.
 
 ## Project Context
 
-Skill Portability is a Claude Code plugin that provides skills and commands for use across multiple AI coding platforms. Skills are defined using the open SKILL.md standard and can be invoked via each platform's native skill mechanism.
+Plugin Portability is a Claude Code plugin that provides skills and commands for use across multiple AI coding platforms. Skills are defined using the open SKILL.md standard and can be invoked via each platform's native skill mechanism.
 
 ## Skills
 

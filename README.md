@@ -2,7 +2,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)
 ![CI](https://github.com/hiivmind/plugin-portability/actions/workflows/ci.yml/badge.svg)
 
-# Skill Portability
+# Plugin Portability
 
 A plugin for agent skill and plugin authors who have built for one platform — often Claude Code — and need to go cross-platform.
 
@@ -10,7 +10,7 @@ Point it at a plugin repo and it tells you what's missing. Say the word and it e
 
 ## How it's different
 
-The cross-platform skill portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md).
+The cross-platform plugin portability space is full of [CLI tools, sync daemons, and broad frameworks](docs/competitive-landscape.md).
 They are separate programs you install and run alongside your plugin. Most target consumers (people installing others' skills), not authors.
 The few that do target authors only convert from Claude Code, and do so blindly — no gap analysis, no publishing guidance, no choice of target platforms.
 
