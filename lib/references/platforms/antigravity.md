@@ -114,7 +114,7 @@ REGISTRY["antigravity"] = {
 }
 ```
 
-### Antigravity-specific notes
+## Antigravity-specific notes
 
 - ALL tool names differ from Claude Code (every single one is renamed).
 - No hook system at all.

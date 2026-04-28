@@ -112,7 +112,7 @@ REGISTRY["cursor"] = {
 }
 ```
 
-### Cursor-specific notes
+## Cursor-specific notes
 
 - Cursor hooks use `"version": 1` at top level of hooks-cursor.json.
 - Flat hook structure: no nested `hooks[]` array; each entry has `event`,
