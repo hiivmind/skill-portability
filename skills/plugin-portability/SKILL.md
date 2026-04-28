@@ -112,7 +112,18 @@ INTENT_UPFRONT():
   ELSE:
     platforms = ["claude-code", "cursor", "gemini-cli", "codex", "antigravity", "openclaw"]
 
-  RETURN { mode, platforms }
+  # Q3: Archetype
+  archetype = AskUserQuestion(
+    question: "What is this plugin's invocation pattern?",
+    header: "Archetype",
+    options: [
+      { label: "On-demand",      description: "Called explicitly when the user needs it (e.g., portability tools, code generators)" },
+      { label: "Always-present", description: "Governs workflows on every session — needs context injection (e.g., superpowers, single-purpose agents)" }
+    ],
+    multiSelect: false
+  )
+
+  RETURN { mode, platforms, archetype }
 ```
 
 ---
@@ -344,6 +355,9 @@ Always runs (`"6_install"` is in all allowed sets).
 ```pseudocode
 BOOTSTRAP(computed, intent):
   IF computed.uplift_target == "curated-note-only": SKIP
+  IF intent.archetype == "on-demand":
+    REPORT "Bootstrapping: skipped (on-demand plugin — hooks and using-skill not applicable)"
+    SKIP
 
   LOAD_AND_VERIFY("lib/patterns/bootstrapping.md",
     proof: content contains steps 4.1 through 4.8)
